@@ -3901,7 +3901,7 @@ function SubmitButton({ loading, children }: { loading: boolean; children: React
       disabled={loading}
       className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-60 transition-colors"
     >
-      {loading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
+      {loading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <ArrowUp size={14} aria-hidden="true" />}
       {children}
     </button>
   )
