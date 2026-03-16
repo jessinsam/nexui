@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Terminal, Package, List, Zap } from "lucide-react"
+import { Check, Copy, Package, List, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PackageManagerBlock } from "@/components/nexui/package-manager-block"
 
 function CopyButton({ value, className }: { value: string; className?: string }) {
   const [copied, setCopied] = useState(false)
@@ -25,35 +26,6 @@ function CopyButton({ value, className }: { value: string; className?: string })
       {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
       {copied ? "Copied" : "Copy"}
     </button>
-  )
-}
-
-function TerminalBlock({ command, output }: { command: string; output?: string[] }) {
-  return (
-    <div className="rounded-lg border border-border overflow-hidden font-mono text-sm">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/60">
-        <div className="flex items-center gap-2">
-          <Terminal size={12} className="text-muted-foreground" aria-hidden="true" />
-          <span className="text-xs text-muted-foreground">terminal</span>
-        </div>
-        <CopyButton value={command} />
-      </div>
-      <div className="p-4 bg-[var(--code-bg)] leading-relaxed">
-        <div className="flex items-start gap-3">
-          <span className="text-primary select-none mt-px">$</span>
-          <span className="text-foreground">{command}</span>
-        </div>
-        {output && output.length > 0 && (
-          <div className="mt-2 flex flex-col gap-0.5">
-            {output.map((line, i) => (
-              <span key={i} className="text-muted-foreground pl-6 block">
-                {line}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
   )
 }
 
@@ -223,7 +195,7 @@ export function CLI() {
               </p>
             </div>
 
-            <TerminalBlock
+            <PackageManagerBlock
               command={commands[active].command}
               output={commands[active].output}
             />

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Check, Copy } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PackageManagerBlock } from "@/components/nexui/package-manager-block"
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false)
@@ -44,21 +45,23 @@ const steps = [
     step: "01",
     title: "Initialize your project",
     description: "Start with a new Next.js or Vite project, or use an existing one.",
-    code: "npx create-next-app@latest my-app --typescript --tailwind",
+    command: "npx create-next-app@latest my-app --typescript --tailwind",
     language: "bash",
+    usePackageManager: true,
   },
   {
     step: "02",
     title: "Add a component",
     description: "Use the CLI to pull any component straight into your project — or copy the file manually. Either way, the code is yours.",
-    code: "npx nexui@latest add button",
+    command: "npx nexui@latest add button",
     language: "bash",
+    usePackageManager: true,
   },
   {
     step: "03",
     title: "Use it",
     description: "Import the component and use it anywhere in your application.",
-    code: `import { Button } from "@/components/ui/button"
+    command: `import { Button } from "@/components/ui/button"
 
 export default function Page() {
   return (
@@ -70,6 +73,7 @@ export default function Page() {
   )
 }`,
     language: "tsx",
+    usePackageManager: false,
   },
 ]
 
@@ -125,10 +129,15 @@ export function Installation() {
               <h3 className="text-lg font-semibold text-foreground">{steps[active].title}</h3>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{steps[active].description}</p>
             </div>
-            <CodeBlock code={steps[active].code} language={steps[active].language} />
+            {steps[active].usePackageManager ? (
+              <PackageManagerBlock command={steps[active].command} />
+            ) : (
+              <CodeBlock code={steps[active].command} language={steps[active].language} />
+            )}
           </div>
         </div>
       </div>
     </section>
   )
 }
+
