@@ -2204,7 +2204,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -3976,7 +3976,7 @@ function ContactForm() {
   )
 }
 
-// ── Feedback Form ────────────────────��────────────────────────────────────────
+// ── Feedback Form ────────────────────���────────────────────────────────────────
 function FeedbackForm() {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
@@ -5549,4 +5549,400 @@ const CHAT_REGISTRY: ComponentEntry[] = [
 ]
 
 COMPONENTS.push(...CHAT_REGISTRY)
+
+// ─── Loading / Skeleton components ───────────────────────────────────────────
+
+// Shared shimmer base — a single pill/rect that animates
+function Bone({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-full bg-secondary before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/[0.06] before:to-transparent",
+        className
+      )}
+      aria-hidden="true"
+    />
+  )
+}
+
+// Rect variant (for cards / images)
+function BoneRect({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl bg-secondary before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.6s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/[0.06] before:to-transparent",
+        className
+      )}
+      aria-hidden="true"
+    />
+  )
+}
+
+// ── 1. Text List Skeleton (matches the screenshot exactly) ────────────────────
+function TextListSkeleton() {
+  return (
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-3" role="status" aria-label="Loading content">
+      <Bone className="h-5 w-44" />
+      <Bone className="h-4 w-full" />
+      <Bone className="h-4 w-72" />
+      <div className="pt-1" />
+      <div className="grid grid-cols-3 gap-4">
+        <BoneRect className="h-36" />
+        <BoneRect className="h-36" />
+        <BoneRect className="h-36" />
+      </div>
+      <div className="pt-1" />
+      <Bone className="h-4 w-80" />
+      <Bone className="h-4 w-52" />
+      <span className="sr-only">Loading…</span>
+    </div>
+  )
+}
+
+// ── 2. Article / Blog Post Skeleton ──────────────────────────────────────────
+function ArticleSkeleton() {
+  return (
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-4" role="status" aria-label="Loading article">
+      <BoneRect className="h-48 w-full rounded-2xl" />
+      <div className="flex items-center gap-2">
+        <Bone className="size-8 shrink-0 rounded-full" />
+        <div className="flex flex-col gap-1.5 flex-1">
+          <Bone className="h-3 w-28" />
+          <Bone className="h-3 w-16" />
+        </div>
+        <Bone className="h-5 w-16 rounded-full" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Bone className="h-6 w-4/5" />
+        <Bone className="h-6 w-2/3" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Bone className="h-4 w-full" />
+        <Bone className="h-4 w-full" />
+        <Bone className="h-4 w-3/4" />
+      </div>
+      <div className="flex gap-2 pt-1">
+        <Bone className="h-7 w-20 rounded-full" />
+        <Bone className="h-7 w-16 rounded-full" />
+        <Bone className="h-7 w-24 rounded-full" />
+      </div>
+      <span className="sr-only">Loading…</span>
+    </div>
+  )
+}
+
+// ── 3. Profile / User Card Skeleton ──────────────────────────────────────────
+function ProfileSkeleton() {
+  return (
+    <div className="w-full max-w-sm mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col items-center gap-4" role="status" aria-label="Loading profile">
+      <Bone className="size-20 rounded-full" />
+      <div className="w-full flex flex-col items-center gap-2">
+        <Bone className="h-5 w-36" />
+        <Bone className="h-4 w-24" />
+      </div>
+      <div className="w-full grid grid-cols-3 gap-3 pt-1">
+        {[0,1,2].map(i => (
+          <div key={i} className="flex flex-col items-center gap-1.5">
+            <Bone className="h-6 w-12" />
+            <Bone className="h-3 w-10" />
+          </div>
+        ))}
+      </div>
+      <Bone className="h-10 w-full rounded-xl" />
+      <div className="w-full flex flex-col gap-2">
+        {[0,1,2].map(i => (
+          <div key={i} className="flex items-center gap-3">
+            <Bone className="size-5 rounded-lg shrink-0" />
+            <Bone className="h-4 flex-1" />
+          </div>
+        ))}
+      </div>
+      <span className="sr-only">Loading…</span>
+    </div>
+  )
+}
+
+// ── 4. Dashboard Stats Skeleton ───────────────────────────────────────────────
+function DashboardSkeleton() {
+  return (
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-5" role="status" aria-label="Loading dashboard">
+      {/* Stat cards */}
+      <div className="grid grid-cols-4 gap-3">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <Bone className="h-3 w-16" />
+              <Bone className="size-6 rounded-lg" />
+            </div>
+            <Bone className="h-7 w-20" />
+            <Bone className="h-3 w-14" />
+          </div>
+        ))}
+      </div>
+      {/* Chart area */}
+      <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1.5">
+            <Bone className="h-4 w-28" />
+            <Bone className="h-3 w-20" />
+          </div>
+          <div className="flex gap-2">
+            <Bone className="h-7 w-16 rounded-lg" />
+            <Bone className="h-7 w-16 rounded-lg" />
+          </div>
+        </div>
+        <BoneRect className="h-40 w-full rounded-xl" />
+      </div>
+      {/* Table */}
+      <div className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3">
+        <div className="flex items-center justify-between mb-1">
+          <Bone className="h-4 w-24" />
+          <Bone className="h-7 w-20 rounded-lg" />
+        </div>
+        {[0,1,2,3,4].map(i => (
+          <div key={i} className="flex items-center gap-4 py-1">
+            <Bone className="size-7 rounded-full shrink-0" />
+            <Bone className="h-3.5 w-28" />
+            <Bone className="h-3.5 flex-1" />
+            <Bone className="h-3.5 w-14" />
+            <Bone className="h-5 w-14 rounded-full" />
+          </div>
+        ))}
+      </div>
+      <span className="sr-only">Loading…</span>
+    </div>
+  )
+}
+
+// ── 5. Product Card Grid Skeleton ─────────────────────────────────────────────
+function ProductGridSkeleton() {
+  return (
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-5" role="status" aria-label="Loading products">
+      <div className="flex items-center justify-between">
+        <Bone className="h-5 w-32" />
+        <div className="flex gap-2">
+          <Bone className="h-8 w-24 rounded-xl" />
+          <Bone className="h-8 w-8 rounded-xl" />
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
+            <BoneRect className="h-36 rounded-none" />
+            <div className="p-3 flex flex-col gap-2">
+              <Bone className="h-3.5 w-3/4" />
+              <Bone className="h-3 w-1/2" />
+              <div className="flex items-center justify-between mt-1">
+                <Bone className="h-5 w-16" />
+                <Bone className="h-7 w-7 rounded-xl" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <span className="sr-only">Loading…</span>
+    </div>
+  )
+}
+
+// ── 6. Chat / Message Skeleton ────────────────────────────────────────────────
+function ChatSkeleton() {
+  const rows: Array<{ isUser: boolean; lines: number[]; hasAvatar: boolean }> = [
+    { isUser: false, lines: [220, 160, 180], hasAvatar: true },
+    { isUser: true,  lines: [140],           hasAvatar: false },
+    { isUser: false, lines: [200, 110],      hasAvatar: true },
+    { isUser: true,  lines: [170, 130],      hasAvatar: false },
+  ]
+  return (
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-4 p-4 rounded-2xl border border-border bg-card" role="status" aria-label="Loading messages">
+      {rows.map((row, ri) => (
+        <div key={ri} className={cn("flex gap-3 items-end", row.isUser ? "flex-row-reverse" : "flex-row")}>
+          {!row.isUser && <Bone className="size-8 rounded-full shrink-0" />}
+          <div className={cn("flex flex-col gap-1.5 max-w-[72%]", row.isUser ? "items-end" : "items-start")}>
+            {row.lines.map((w, li) => (
+              <BoneRect key={li} className="h-9 rounded-2xl" style={{ width: w }} />
+            ))}
+          </div>
+        </div>
+      ))}
+      {/* Input bar */}
+      <div className="flex items-center gap-2 mt-2 border-t border-border pt-3">
+        <BoneRect className="h-9 flex-1 rounded-xl" />
+        <Bone className="size-9 rounded-xl" />
+      </div>
+      <span className="sr-only">Loading…</span>
+    </div>
+  )
+}
+
+// ── 7. Spinner & Progress bar collection ──────────────────────────────────────
+function SpinnerCollection() {
+  return (
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
+      {/* Spinners row */}
+      <div className="flex flex-wrap items-center gap-8">
+        {/* Classic ring */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="size-10 rounded-full border-[3px] border-border border-t-primary animate-spin" role="status" aria-label="Loading" />
+          <span className="text-[10px] text-muted-foreground">Ring</span>
+        </div>
+        {/* Dots pulse */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-1.5 items-center h-10" role="status" aria-label="Loading">
+            {[0,150,300].map(d => (
+              <span key={d} className="size-2.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: `${d}ms` }} />
+            ))}
+          </div>
+          <span className="text-[10px] text-muted-foreground">Dots</span>
+        </div>
+        {/* Bars */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-1 items-end h-10" role="status" aria-label="Loading">
+            {[0,100,200,300,400].map((d, i) => (
+              <span key={i} className="w-1.5 rounded-sm bg-primary animate-pulse" style={{ height: `${14 + (i % 3) * 8}px`, animationDelay: `${d}ms` }} />
+            ))}
+          </div>
+          <span className="text-[10px] text-muted-foreground">Bars</span>
+        </div>
+        {/* Dual ring */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="relative size-10" role="status" aria-label="Loading">
+            <div className="absolute inset-0 rounded-full border-[3px] border-primary/20" />
+            <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-primary animate-spin" />
+            <div className="absolute inset-[6px] rounded-full border-[2px] border-transparent border-b-primary/60 animate-spin" style={{ animationDirection: "reverse", animationDuration: "0.8s" }} />
+          </div>
+          <span className="text-[10px] text-muted-foreground">Dual ring</span>
+        </div>
+        {/* Ripple */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="relative size-10 flex items-center justify-center" role="status" aria-label="Loading">
+            <span className="absolute size-10 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: "1.2s" }} />
+            <span className="absolute size-6 rounded-full bg-primary/30 animate-ping" style={{ animationDuration: "1.2s", animationDelay: "0.3s" }} />
+            <span className="size-3 rounded-full bg-primary" />
+          </div>
+          <span className="text-[10px] text-muted-foreground">Ripple</span>
+        </div>
+        {/* NexUI logo spinner */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="size-10 flex items-center justify-center animate-pulse text-primary" role="status" aria-label="Loading">
+            <NexLogo size={36} />
+          </div>
+          <span className="text-[10px] text-muted-foreground">Logo pulse</span>
+        </div>
+      </div>
+
+      {/* Progress bars */}
+      <div className="flex flex-col gap-4">
+        {/* Indeterminate */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs text-muted-foreground font-medium">Indeterminate</p>
+          <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden" role="progressbar" aria-label="Loading">
+            <div className="h-full w-1/3 bg-primary rounded-full animate-[indeterminate_1.5s_ease-in-out_infinite]" />
+          </div>
+        </div>
+        {/* Determinate 60% */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>Uploading…</span><span>60%</span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-secondary overflow-hidden" role="progressbar" aria-valuenow={60} aria-valuemin={0} aria-valuemax={100}>
+            <div className="h-full w-[60%] bg-primary rounded-full transition-all" />
+          </div>
+        </div>
+        {/* Segmented */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs text-muted-foreground font-medium">Steps (3/5)</p>
+          <div className="flex gap-1.5" role="progressbar" aria-valuenow={3} aria-valuemin={0} aria-valuemax={5}>
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-all", s <= 3 ? "bg-primary" : "bg-secondary")} />
+            ))}
+          </div>
+        </div>
+        {/* Circular progress */}
+        <div className="flex items-center gap-4">
+          {[25, 60, 85].map(pct => {
+            const r = 18, c = 2 * Math.PI * r
+            return (
+              <div key={pct} className="flex flex-col items-center gap-1.5">
+                <svg width="48" height="48" viewBox="0 0 48 48" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${pct}%`}>
+                  <circle cx="24" cy="24" r={r} fill="none" stroke="currentColor" strokeWidth="3" className="text-secondary" />
+                  <circle cx="24" cy="24" r={r} fill="none" stroke="currentColor" strokeWidth="3" className="text-primary" strokeLinecap="round"
+                    strokeDasharray={c} strokeDashoffset={c - (c * pct / 100)} transform="rotate(-90 24 24)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
+                  <text x="24" y="28" textAnchor="middle" fontSize="9" fill="currentColor" className="text-foreground font-semibold" fontFamily="inherit">{pct}%</text>
+                </svg>
+                <span className="text-[10px] text-muted-foreground">{pct}%</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Loading registry ─────────────────────────────────────────────────────────
+const LOADING_REGISTRY: ComponentEntry[] = [
+  {
+    name: "Page Content Skeleton",
+    description: "Matches the screenshot exactly: title line, two body lines, a 3-column card grid, then two footer lines — all with a smooth left-to-right shimmer sweep.",
+    category: "Loading",
+    tags: ["skeleton", "loading", "shimmer", "placeholder", "content"],
+    fullWidth: true,
+    preview: <TextListSkeleton />,
+    code: `// Bone + BoneRect + TextListSkeleton — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Article Skeleton",
+    description: "Full blog-post skeleton: hero image, author avatar with meta, two heading lines, three body lines, and tag pill row with a shimmer sweep.",
+    category: "Loading",
+    tags: ["skeleton", "article", "blog", "card", "shimmer"],
+    preview: <ArticleSkeleton />,
+    code: `// ArticleSkeleton — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Profile Card Skeleton",
+    description: "User profile skeleton with circular avatar, name/handle lines, three stat columns, a CTA button bone, and a list of info rows.",
+    category: "Loading",
+    tags: ["skeleton", "profile", "user", "card", "avatar"],
+    preview: <ProfileSkeleton />,
+    code: `// ProfileSkeleton — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Dashboard Skeleton",
+    description: "Full dashboard placeholder: four stat cards, a large chart area, and a five-row data table — all shimmering simultaneously.",
+    category: "Loading",
+    tags: ["skeleton", "dashboard", "stats", "table", "chart"],
+    fullWidth: true,
+    preview: <DashboardSkeleton />,
+    code: `// DashboardSkeleton — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Product Grid Skeleton",
+    description: "E-commerce 3-column product grid skeleton with image, title, price, and add-to-cart button bones inside each card.",
+    category: "Loading",
+    tags: ["skeleton", "product", "grid", "ecommerce", "cards"],
+    fullWidth: true,
+    preview: <ProductGridSkeleton />,
+    code: `// ProductGridSkeleton — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Chat Skeleton",
+    description: "Chat interface skeleton with alternating user/assistant bubble rows (varying widths), avatar bone, and an input bar placeholder.",
+    category: "Loading",
+    tags: ["skeleton", "chat", "messages", "bubbles", "loading"],
+    preview: <ChatSkeleton />,
+    code: `// ChatSkeleton — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Spinners & Progress",
+    description: "Complete loading indicator collection: ring, bouncing dots, vertical bars, dual counter-rotating rings, ripple ping, NexUI logo pulse, indeterminate and determinate progress bars, segmented steps, and circular progress SVGs.",
+    category: "Loading",
+    tags: ["spinner", "progress", "loading", "animation", "indicator"],
+    fullWidth: true,
+    preview: <SpinnerCollection />,
+    code: `// SpinnerCollection — see lib/components-registry.tsx`,
+  },
+]
+
+COMPONENTS.push(...LOADING_REGISTRY)
 
