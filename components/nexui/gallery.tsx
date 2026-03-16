@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { ArrowUpRight, Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // ---- Mini component previews ----
@@ -182,16 +183,182 @@ function TabPreview() {
   )
 }
 
+// ---- Auth previews ----
+
+function SignInPreview() {
+  const [showPw, setShowPw] = useState(false)
+  return (
+    <div className="w-full max-w-xs flex flex-col gap-3 text-left">
+      <div className="flex flex-col gap-0.5 mb-1">
+        <p className="text-sm font-semibold text-foreground">Welcome back</p>
+        <p className="text-xs text-muted-foreground">Sign in to your account</p>
+      </div>
+      <button className="flex items-center justify-center gap-2 w-full h-9 rounded-lg border border-border bg-secondary text-xs font-medium text-foreground hover:bg-secondary/80 transition-colors">
+        <Github size={13} aria-hidden="true" />
+        Continue with GitHub
+      </button>
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-[10px] text-muted-foreground">or</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <input
+          type="email"
+          placeholder="you@example.com"
+          readOnly
+          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+        />
+        <div className="relative">
+          <input
+            type={showPw ? "text" : "password"}
+            placeholder="••••••••"
+            readOnly
+            className="h-9 w-full rounded-lg border border-border bg-secondary px-3 pr-9 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw((v) => !v)}
+            aria-label="Toggle password"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          >
+            {showPw ? <EyeOff size={12} aria-hidden="true" /> : <Eye size={12} aria-hidden="true" />}
+          </button>
+        </div>
+      </div>
+      <button className="flex items-center justify-center gap-1.5 h-9 w-full rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all">
+        Sign in <ArrowRight size={12} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
+function SignUpPreview() {
+  const [password, setPassword] = useState("")
+  const rules = [
+    { label: "8+ chars", ok: password.length >= 8 },
+    { label: "Uppercase", ok: /[A-Z]/.test(password) },
+    { label: "Number", ok: /[0-9]/.test(password) },
+  ]
+  return (
+    <div className="w-full max-w-xs flex flex-col gap-3 text-left">
+      <div className="flex flex-col gap-0.5 mb-1">
+        <p className="text-sm font-semibold text-foreground">Create an account</p>
+        <p className="text-xs text-muted-foreground">Join NexUI today</p>
+      </div>
+      <button className="flex items-center justify-center gap-2 w-full h-9 rounded-lg border border-border bg-secondary text-xs font-medium text-foreground hover:bg-secondary/80 transition-colors">
+        <Github size={13} aria-hidden="true" />
+        Sign up with GitHub
+      </button>
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-[10px] text-muted-foreground">or</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input placeholder="First" readOnly className="h-9 rounded-lg border border-border bg-secondary px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none" />
+        <input placeholder="Last" readOnly className="h-9 rounded-lg border border-border bg-secondary px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none" />
+      </div>
+      <input type="email" placeholder="you@example.com" readOnly className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none" />
+      <input
+        type="text"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+      />
+      {password.length > 0 && (
+        <div className="flex gap-3">
+          {rules.map((r) => (
+            <span key={r.label} className={cn("flex items-center gap-1 text-[10px]", r.ok ? "text-emerald-400" : "text-muted-foreground")}>
+              <Check size={9} aria-hidden="true" className={r.ok ? "opacity-100" : "opacity-30"} />
+              {r.label}
+            </span>
+          ))}
+        </div>
+      )}
+      <button className="flex items-center justify-center gap-1.5 h-9 w-full rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all">
+        Sign up <ArrowRight size={12} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
+function CreateAccountPreview() {
+  const [selected, setSelected] = useState("personal")
+  const types = [
+    { id: "personal", label: "Personal", icon: User },
+    { id: "team", label: "Team", icon: Building2 },
+    { id: "enterprise", label: "Enterprise", icon: Code2 },
+  ]
+  return (
+    <div className="w-full max-w-xs flex flex-col gap-3 text-left">
+      <div className="flex flex-col gap-0.5 mb-1">
+        <div className="flex gap-1.5 mb-2">
+          <div className="h-1 rounded-full flex-1 bg-primary" />
+          <div className="h-1 rounded-full flex-1 bg-border" />
+        </div>
+        <p className="text-sm font-semibold text-foreground">Choose account type</p>
+        <p className="text-xs text-muted-foreground">Select the plan that fits you</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        {types.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setSelected(id)}
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-xl border text-left transition-all w-full",
+              selected === id ? "border-primary/60 bg-primary/10" : "border-border bg-secondary hover:border-border/80"
+            )}
+          >
+            <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0", selected === id ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>
+              <Icon size={14} aria-hidden="true" />
+            </div>
+            <span className="text-xs font-medium text-foreground">{label}</span>
+            <div className={cn("ml-auto size-3.5 rounded-full border-2 shrink-0", selected === id ? "border-primary bg-primary" : "border-border")} />
+          </button>
+        ))}
+      </div>
+      <button className="flex items-center justify-center gap-1.5 h-9 w-full rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all mt-1">
+        Continue <ArrowRight size={12} aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
 // ---- Category filter ----
 
-const categories = ["All", "Inputs", "Display", "Feedback", "Navigation"]
+const categories = ["All", "Auth", "Inputs", "Display", "Feedback", "Navigation"]
 
 const components: {
   name: string
   description: string
   category: string
+  href?: string
   preview: React.ReactNode
 }[] = [
+  {
+    name: "Sign In",
+    description: "Email + password login with GitHub OAuth and show/hide password toggle.",
+    category: "Auth",
+    href: "/sign-in",
+    preview: <SignInPreview />,
+  },
+  {
+    name: "Sign Up",
+    description: "Registration form with name fields, email, and live password strength hints.",
+    category: "Auth",
+    href: "/sign-up",
+    preview: <SignUpPreview />,
+  },
+  {
+    name: "Create Account",
+    description: "Two-step flow: account type picker then profile details.",
+    category: "Auth",
+    href: "/create-account",
+    preview: <CreateAccountPreview />,
+  },
   {
     name: "Button",
     description: "Trigger actions with multiple variants and sizes.",
@@ -295,7 +462,20 @@ export function Gallery() {
               <div className="px-4 py-3 border-t border-border">
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-sm font-semibold text-foreground">{comp.name}</span>
-                  <span className="text-xs text-muted-foreground">{comp.category}</span>
+                  <div className="flex items-center gap-2">
+                    {comp.href && (
+                      <a
+                        href={comp.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`View ${comp.name} page`}
+                        className="text-xs text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors"
+                      >
+                        View <ArrowUpRight size={11} aria-hidden="true" />
+                      </a>
+                    )}
+                    <span className="text-xs text-muted-foreground">{comp.category}</span>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">{comp.description}</p>
               </div>
