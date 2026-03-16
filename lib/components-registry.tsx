@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -885,7 +885,7 @@ function CalendarTimePicker() {
   )
 }
 
-// ─── 6. Booking / Availability Calendar ─────────────────────────────────────�������
+// ─── 6. Booking / Availability Calendar ─────────────────────────────────────���������
 
 const SLOTS = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
 const BOOKED = new Set(["10:00 AM", "2:00 PM"])
@@ -1240,6 +1240,386 @@ function DropdownWithIcons() {
   )
 }
 
+// ─── Search Bar components ────────────────────────────────────────────────────
+
+function SearchBarBasic() {
+  const [value, setValue] = useState("")
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className={cn(
+      "flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-200 w-full max-w-md",
+      focused ? "border-primary ring-2 ring-primary/20" : "border-border"
+    )}>
+      <Search size={15} aria-hidden="true" className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+      <input
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder="Search anything..."
+        aria-label="Search"
+        className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+      />
+      {value && (
+        <button onClick={() => setValue("")} aria-label="Clear" className="text-muted-foreground hover:text-foreground transition-colors">
+          <X size={13} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+function SearchBarCommand() {
+  const [value, setValue] = useState("")
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className={cn(
+      "flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-300 w-full max-w-md",
+      focused ? "border-primary ring-2 ring-primary/20" : "border-border"
+    )}>
+      <Command size={14} aria-hidden="true" className={cn("shrink-0 transition-colors duration-200", focused ? "text-primary" : "text-muted-foreground")} />
+      <input
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder="Type a command..."
+        aria-label="Command search"
+        className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+      />
+      <div className="flex items-center gap-1 shrink-0">
+        <kbd className="hidden sm:flex items-center justify-center h-5 px-1.5 rounded border border-border bg-card text-[10px] font-mono text-muted-foreground">⌘</kbd>
+        <kbd className="hidden sm:flex items-center justify-center h-5 px-1.5 rounded border border-border bg-card text-[10px] font-mono text-muted-foreground">K</kbd>
+      </div>
+    </div>
+  )
+}
+
+function SearchBarWithSuggestions() {
+  const suggestions = ["Next.js App Router", "Tailwind CSS v4", "React Server Components", "TypeScript 5.4", "Vercel Edge Functions"]
+  const [value, setValue] = useState("")
+  const [focused, setFocused] = useState(false)
+  const filtered = value.trim() ? suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase())) : suggestions
+
+  return (
+    <div className="relative w-full max-w-md">
+      <div className={cn(
+        "flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-200",
+        focused ? "border-primary ring-2 ring-primary/20" : "border-border"
+      )}>
+        <Search size={15} aria-hidden="true" className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+        <input
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setTimeout(() => setFocused(false), 150)}
+          placeholder="Search docs..."
+          aria-label="Search docs"
+          aria-autocomplete="list"
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+        />
+        {value && (
+          <button onClick={() => setValue("")} aria-label="Clear" className="text-muted-foreground hover:text-foreground transition-colors">
+            <X size={13} aria-hidden="true" />
+          </button>
+        )}
+      </div>
+      {focused && filtered.length > 0 && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden py-1">
+          {filtered.map(s => (
+            <li key={s} role="option">
+              <button
+                onMouseDown={() => { setValue(s); setFocused(false) }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors text-left"
+              >
+                <Search size={12} aria-hidden="true" className="text-muted-foreground shrink-0" />
+                {s}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function SearchBarWithFilters() {
+  const filters = ["All", "Docs", "Blog", "API"]
+  const [value, setValue] = useState("")
+  const [active, setActive] = useState("All")
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-md">
+      <div className={cn(
+        "flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-200",
+        focused ? "border-primary ring-2 ring-primary/20" : "border-border"
+      )}>
+        <Search size={15} aria-hidden="true" className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+        <input
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={`Search ${active === "All" ? "everything" : active}...`}
+          aria-label="Filtered search"
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+        />
+        <Filter size={13} aria-hidden="true" className="text-muted-foreground shrink-0" />
+      </div>
+      <div className="flex items-center gap-2" role="group" aria-label="Filter options">
+        {filters.map(f => (
+          <button
+            key={f}
+            onClick={() => setActive(f)}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150",
+              active === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground border border-border"
+            )}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Toggle components ────────────────────────────────────────────────────────
+
+function ToggleDarkLight() {
+  const [dark, setDark] = useState(true)
+  return (
+    <button
+      onClick={() => setDark(d => !d)}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={dark}
+      className={cn(
+        "relative w-16 h-8 rounded-full border transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        dark ? "bg-primary border-primary" : "bg-secondary border-border"
+      )}
+    >
+      <span className={cn(
+        "absolute top-1 size-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-300",
+        dark ? "translate-x-8 bg-white" : "translate-x-1 bg-foreground"
+      )}>
+        {dark
+          ? <Moon size={12} aria-hidden="true" className="text-primary" />
+          : <Sun size={12} aria-hidden="true" className="text-background" />
+        }
+      </span>
+    </button>
+  )
+}
+
+function ToggleGroup() {
+  const [selected, setSelected] = useState<"system" | "light" | "dark">("dark")
+  return (
+    <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary border border-border" role="group" aria-label="Theme selection">
+      {(["light", "system", "dark"] as const).map(mode => (
+        <button
+          key={mode}
+          onClick={() => setSelected(mode)}
+          aria-pressed={selected === mode}
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 capitalize",
+            selected === mode ? "bg-card text-foreground shadow-sm border border-border" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {mode === "light" && <Sun size={12} aria-hidden="true" />}
+          {mode === "system" && <SlidersHorizontal size={12} aria-hidden="true" />}
+          {mode === "dark" && <Moon size={12} aria-hidden="true" />}
+          {mode}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function SwitchRow({ label, defaultOn }: { label: string; defaultOn: boolean }) {
+  const [checked, setChecked] = useState(defaultOn)
+  return (
+    <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border">
+      <span className="text-sm text-foreground">{label}</span>
+      <button
+        onClick={() => setChecked(c => !c)}
+        role="switch"
+        aria-checked={checked}
+        aria-label={`Toggle ${label}`}
+        className={cn(
+          "relative w-10 h-5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
+          checked ? "bg-primary" : "bg-muted border border-border"
+        )}
+      >
+        <span className={cn(
+          "absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform duration-200",
+          checked ? "translate-x-5" : "translate-x-0.5"
+        )} />
+      </button>
+    </div>
+  )
+}
+
+function TogglePill() {
+  const [on, setOn] = useState(false)
+  return (
+    <div className="flex flex-col items-center gap-6">
+      {/* Simple pill toggle */}
+      <div className="flex items-center gap-4">
+        <span className="text-sm text-muted-foreground w-16 text-right">{on ? "Enabled" : "Disabled"}</span>
+        <button
+          onClick={() => setOn(o => !o)}
+          aria-checked={on}
+          role="switch"
+          aria-label="Toggle feature"
+          className={cn(
+            "relative w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            on ? "bg-primary" : "bg-secondary border border-border"
+          )}
+        >
+          <span className={cn(
+            "absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform duration-200",
+            on ? "translate-x-5" : "translate-x-0.5"
+          )} />
+        </button>
+      </div>
+      {/* With label group */}
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <SwitchRow label="Notifications" defaultOn={true} />
+        <SwitchRow label="Auto-save" defaultOn={true} />
+        <SwitchRow label="Analytics" defaultOn={false} />
+      </div>
+    </div>
+  )
+}
+
+// ─── Color Palette components ─────────────────────────────────────────────────
+
+const PALETTES = [
+  {
+    name: "Ocean",
+    colors: ["#0f172a","#1e3a5f","#1d4ed8","#3b82f6","#93c5fd","#e0f2fe"],
+  },
+  {
+    name: "Sunset",
+    colors: ["#1c0a00","#7c2d12","#ea580c","#f97316","#fbbf24","#fef3c7"],
+  },
+  {
+    name: "Forest",
+    colors: ["#052e16","#14532d","#16a34a","#4ade80","#86efac","#dcfce7"],
+  },
+  {
+    name: "Violet",
+    colors: ["#0f0a1e","#3b0764","#7c3aed","#a78bfa","#c4b5fd","#f5f3ff"],
+  },
+]
+
+function ColorPaletteShowcase() {
+  const [copied, setCopied] = useState<string | null>(null)
+
+  function copy(hex: string) {
+    navigator.clipboard.writeText(hex)
+    setCopied(hex)
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-2xl">
+      {PALETTES.map(palette => (
+        <div key={palette.name} className="flex flex-col gap-2">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">{palette.name}</span>
+          <div className="flex rounded-xl overflow-hidden border border-border">
+            {palette.colors.map(hex => (
+              <button
+                key={hex}
+                onClick={() => copy(hex)}
+                title={hex}
+                aria-label={`Copy ${hex}`}
+                className="flex-1 h-12 relative group transition-all hover:flex-[2] duration-300"
+                style={{ backgroundColor: hex }}
+              >
+                <span className={cn(
+                  "absolute inset-0 flex items-center justify-center text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+                  parseInt(hex.slice(1), 16) > 0xaaaaaa ? "text-black/70" : "text-white/80"
+                )}>
+                  {copied === hex ? "✓" : hex}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const THEME_TOKENS = [
+  { label: "Background",  light: "#ffffff", dark: "#09090b" },
+  { label: "Foreground",  light: "#09090b", dark: "#fafafa" },
+  { label: "Primary",     light: "#1d4ed8", dark: "#3b82f6" },
+  { label: "Secondary",   light: "#f1f5f9", dark: "#1e293b" },
+  { label: "Muted",       light: "#94a3b8", dark: "#64748b" },
+  { label: "Border",      light: "#e2e8f0", dark: "#1e293b" },
+  { label: "Accent",      light: "#f97316", dark: "#f97316" },
+  { label: "Destructive", light: "#ef4444", dark: "#ef4444" },
+]
+
+function ColorTokensGrid() {
+  const [mode, setMode] = useState<"dark" | "light">("dark")
+  const [copied, setCopied] = useState<string | null>(null)
+
+  function copy(hex: string) {
+    navigator.clipboard.writeText(hex)
+    setCopied(hex)
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  return (
+    <div className="flex flex-col gap-4 w-full max-w-2xl">
+      {/* Mode toggle */}
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground">Preview mode:</span>
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary border border-border">
+          {(["dark","light"] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)}
+              className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 capitalize",
+                mode === m ? "bg-card text-foreground border border-border" : "text-muted-foreground hover:text-foreground"
+              )}>
+              {m === "dark" ? <Moon size={11} aria-hidden="true" /> : <Sun size={11} aria-hidden="true" />}
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Token grid */}
+      <div className="grid grid-cols-4 gap-2">
+        {THEME_TOKENS.map(token => {
+          const hex = mode === "dark" ? token.dark : token.light
+          return (
+            <button
+              key={token.label}
+              onClick={() => copy(hex)}
+              title={`${token.label}: ${hex}`}
+              aria-label={`Copy ${token.label} color ${hex}`}
+              className="flex flex-col gap-2 p-3 rounded-xl border border-border bg-secondary hover:border-primary/40 transition-all duration-150 group"
+            >
+              <div
+                className="w-full h-8 rounded-lg border border-white/5 shadow-inner transition-transform duration-150 group-hover:scale-95"
+                style={{ backgroundColor: hex }}
+              />
+              <div className="text-left">
+                <p className="text-[11px] font-medium text-foreground leading-none">{token.label}</p>
+                <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
+                  {copied === hex ? "Copied!" : hex}
+                </p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export type ComponentEntry = {
@@ -1253,7 +1633,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -2109,6 +2489,323 @@ export function DropdownWithIcons() {
           })}
         </ul>
       )}
+    </div>
+  )
+}`,
+  },
+  // ── Search Bar entries ───────────────────────────────────────────────────────
+  {
+    name: "Search — Basic", description: "Clean animated search bar with a glowing ring focus state and animated clear button.", category: "Search", tags: ["search", "input", "focus", "animated"], fullWidth: true, preview: <SearchBarBasic />,
+    code: `"use client"
+import { useState } from "react"
+import { Search, X } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+export function SearchBar() {
+  const [value, setValue] = useState("")
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className={cn(
+      "flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-200 w-full max-w-md",
+      focused ? "border-primary ring-2 ring-primary/20" : "border-border"
+    )}>
+      <Search size={15} className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+      <input
+        value={value} onChange={e => setValue(e.target.value)}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        placeholder="Search anything..." aria-label="Search"
+        className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+      />
+      {value && (
+        <button onClick={() => setValue("")} aria-label="Clear" className="text-muted-foreground hover:text-foreground transition-colors">
+          <X size={13} />
+        </button>
+      )}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Search — Command", description: "Command palette style search bar with ⌘K keyboard shortcut badge.", category: "Search", tags: ["search", "command", "keyboard", "palette"], fullWidth: true, preview: <SearchBarCommand />,
+    code: `"use client"
+import { useState } from "react"
+import { Command } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+export function CommandSearch() {
+  const [value, setValue] = useState("")
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className={cn(
+      "flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-300 w-full max-w-md",
+      focused ? "border-primary ring-2 ring-primary/20" : "border-border"
+    )}>
+      <Command size={14} className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+      <input
+        value={value} onChange={e => setValue(e.target.value)}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        placeholder="Type a command..." aria-label="Command search"
+        className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+      />
+      <div className="flex items-center gap-1 shrink-0">
+        <kbd className="flex items-center h-5 px-1.5 rounded border border-border bg-card text-[10px] font-mono text-muted-foreground">⌘</kbd>
+        <kbd className="flex items-center h-5 px-1.5 rounded border border-border bg-card text-[10px] font-mono text-muted-foreground">K</kbd>
+      </div>
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Search — With Suggestions", description: "Animated suggestions dropdown that appears on focus with live filtering.", category: "Search", tags: ["search", "suggestions", "autocomplete", "dropdown", "animated"], fullWidth: true, preview: <SearchBarWithSuggestions />,
+    code: `"use client"
+import { useState } from "react"
+import { Search, X } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const suggestions = ["Next.js App Router","Tailwind CSS v4","React Server Components","TypeScript 5.4","Vercel Edge Functions"]
+
+export function SearchWithSuggestions() {
+  const [value, setValue] = useState("")
+  const [focused, setFocused] = useState(false)
+  const filtered = value.trim() ? suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase())) : suggestions
+
+  return (
+    <div className="relative w-full max-w-md">
+      <div className={cn("flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-200",
+        focused ? "border-primary ring-2 ring-primary/20" : "border-border")}>
+        <Search size={15} className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+        <input value={value} onChange={e => setValue(e.target.value)}
+          onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)}
+          placeholder="Search docs..." aria-label="Search docs"
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" />
+        {value && <button onClick={() => setValue("")} aria-label="Clear" className="text-muted-foreground hover:text-foreground transition-colors"><X size={13} /></button>}
+      </div>
+      {focused && filtered.length > 0 && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden py-1">
+          {filtered.map(s => (
+            <li key={s} role="option">
+              <button onMouseDown={() => { setValue(s); setFocused(false) }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors text-left">
+                <Search size={12} className="text-muted-foreground shrink-0" />{s}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Search — With Filters", description: "Search bar with animated filter pill tabs to scope the search query.", category: "Search", tags: ["search", "filter", "tabs", "animated"], fullWidth: true, preview: <SearchBarWithFilters />,
+    code: `"use client"
+import { useState } from "react"
+import { Search, Filter } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const filters = ["All", "Docs", "Blog", "API"]
+
+export function SearchWithFilters() {
+  const [value, setValue] = useState("")
+  const [active, setActive] = useState("All")
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-md">
+      <div className={cn("flex items-center gap-3 px-4 py-3 rounded-xl border bg-secondary transition-all duration-200",
+        focused ? "border-primary ring-2 ring-primary/20" : "border-border")}>
+        <Search size={15} className={cn("shrink-0 transition-colors", focused ? "text-primary" : "text-muted-foreground")} />
+        <input value={value} onChange={e => setValue(e.target.value)}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          placeholder={\`Search \${active === "All" ? "everything" : active}...\`}
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" />
+        <Filter size={13} className="text-muted-foreground shrink-0" />
+      </div>
+      <div className="flex items-center gap-2">
+        {filters.map(f => (
+          <button key={f} onClick={() => setActive(f)}
+            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150",
+              active === f ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground border border-border")}>
+            {f}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}`,
+  },
+  // ── Toggle entries ───────────────────────────────────────────────────────────
+  {
+    name: "Toggle — Dark / Light", description: "Animated pill toggle that switches between dark and light mode with icon transitions.", category: "Toggle", tags: ["toggle", "dark", "light", "theme", "animated"], fullWidth: true, preview: <ToggleDarkLight />,
+    code: `"use client"
+import { useState } from "react"
+import { Sun, Moon } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+export function ThemeToggle() {
+  const [dark, setDark] = useState(true)
+  return (
+    <button onClick={() => setDark(d => !d)} aria-label={dark ? "Switch to light mode" : "Switch to dark mode"} aria-pressed={dark}
+      className={cn("relative w-16 h-8 rounded-full border transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        dark ? "bg-primary border-primary" : "bg-secondary border-border")}>
+      <span className={cn("absolute top-1 size-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-300",
+        dark ? "translate-x-8 bg-white" : "translate-x-1 bg-foreground")}>
+        {dark ? <Moon size={12} className="text-primary" /> : <Sun size={12} className="text-background" />}
+      </span>
+    </button>
+  )
+}`,
+  },
+  {
+    name: "Toggle — Mode Group", description: "Three-way segmented control for System / Light / Dark mode selection.", category: "Toggle", tags: ["toggle", "segmented", "theme", "mode", "group"], fullWidth: true, preview: <ToggleGroup />,
+    code: `"use client"
+import { useState } from "react"
+import { Sun, Moon, SlidersHorizontal } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+export function ModeToggleGroup() {
+  const [selected, setSelected] = useState<"system"|"light"|"dark">("dark")
+  return (
+    <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary border border-border" role="group" aria-label="Theme selection">
+      {(["light","system","dark"] as const).map(mode => (
+        <button key={mode} onClick={() => setSelected(mode)} aria-pressed={selected === mode}
+          className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 capitalize",
+            selected === mode ? "bg-card text-foreground shadow-sm border border-border" : "text-muted-foreground hover:text-foreground")}>
+          {mode === "light" && <Sun size={12} />}
+          {mode === "system" && <SlidersHorizontal size={12} />}
+          {mode === "dark" && <Moon size={12} />}
+          {mode}
+        </button>
+      ))}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Toggle — Switch List", description: "Settings-style list of labeled pill toggles with animated thumb transitions.", category: "Toggle", tags: ["toggle", "switch", "settings", "list", "animated"], fullWidth: true, preview: <TogglePill />,
+    code: `"use client"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+
+function Switch({ label, defaultChecked = false }: { label: string; defaultChecked?: boolean }) {
+  const [checked, setChecked] = useState(defaultChecked)
+  return (
+    <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border">
+      <span className="text-sm text-foreground">{label}</span>
+      <button onClick={() => setChecked(c => !c)} role="switch" aria-checked={checked} aria-label={\`Toggle \${label}\`}
+        className={cn("relative w-10 h-5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
+          checked ? "bg-primary" : "bg-muted border border-border")}>
+        <span className={cn("absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform duration-200",
+          checked ? "translate-x-5" : "translate-x-0.5")} />
+      </button>
+    </div>
+  )
+}
+
+export function SwitchList() {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-xs">
+      <Switch label="Notifications" defaultChecked />
+      <Switch label="Auto-save" defaultChecked />
+      <Switch label="Analytics" />
+    </div>
+  )
+}`,
+  },
+  // ── Color Palette entries ────────────────────────────────────────────────────
+  {
+    name: "Palette — Swatches", description: "Expanding swatch palette — hover to expand a color slot and click to copy the hex value.", category: "Palette", tags: ["color", "palette", "swatch", "copy", "design"], fullWidth: true, preview: <ColorPaletteShowcase />,
+    code: `"use client"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+
+const palettes = [
+  { name: "Ocean",  colors: ["#0f172a","#1e3a5f","#1d4ed8","#3b82f6","#93c5fd","#e0f2fe"] },
+  { name: "Sunset", colors: ["#1c0a00","#7c2d12","#ea580c","#f97316","#fbbf24","#fef3c7"] },
+  { name: "Forest", colors: ["#052e16","#14532d","#16a34a","#4ade80","#86efac","#dcfce7"] },
+  { name: "Violet", colors: ["#0f0a1e","#3b0764","#7c3aed","#a78bfa","#c4b5fd","#f5f3ff"] },
+]
+
+export function PaletteSwatches() {
+  const [copied, setCopied] = useState<string | null>(null)
+  function copy(hex: string) {
+    navigator.clipboard.writeText(hex); setCopied(hex); setTimeout(() => setCopied(null), 1500)
+  }
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-2xl">
+      {palettes.map(palette => (
+        <div key={palette.name} className="flex flex-col gap-2">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">{palette.name}</span>
+          <div className="flex rounded-xl overflow-hidden border border-border">
+            {palette.colors.map(hex => (
+              <button key={hex} onClick={() => copy(hex)} title={hex} aria-label={\`Copy \${hex}\`}
+                className="flex-1 h-12 relative group hover:flex-[2] transition-all duration-300"
+                style={{ backgroundColor: hex }}>
+                <span className={cn("absolute inset-0 flex items-center justify-center text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity",
+                  parseInt(hex.slice(1),16) > 0xaaaaaa ? "text-black/70" : "text-white/80")}>
+                  {copied === hex ? "✓" : hex}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Palette — Design Tokens", description: "Interactive design token grid with dark/light mode preview and one-click hex copy.", category: "Palette", tags: ["color", "tokens", "theme", "design", "system"], fullWidth: true, preview: <ColorTokensGrid />,
+    code: `"use client"
+import { useState } from "react"
+import { Sun, Moon } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const tokens = [
+  { label: "Background", light: "#ffffff", dark: "#09090b" },
+  { label: "Foreground", light: "#09090b", dark: "#fafafa" },
+  { label: "Primary",    light: "#1d4ed8", dark: "#3b82f6" },
+  { label: "Secondary",  light: "#f1f5f9", dark: "#1e293b" },
+  { label: "Muted",      light: "#94a3b8", dark: "#64748b" },
+  { label: "Border",     light: "#e2e8f0", dark: "#1e293b" },
+  { label: "Accent",     light: "#f97316", dark: "#f97316" },
+  { label: "Destructive",light: "#ef4444", dark: "#ef4444" },
+]
+
+export function DesignTokens() {
+  const [mode, setMode] = useState<"dark"|"light">("dark")
+  const [copied, setCopied] = useState<string | null>(null)
+  function copy(hex: string) {
+    navigator.clipboard.writeText(hex); setCopied(hex); setTimeout(() => setCopied(null), 1500)
+  }
+  return (
+    <div className="flex flex-col gap-4 w-full max-w-2xl">
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground">Preview mode:</span>
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary border border-border">
+          {(["dark","light"] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)}
+              className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 capitalize",
+                mode === m ? "bg-card text-foreground border border-border" : "text-muted-foreground hover:text-foreground")}>
+              {m === "dark" ? <Moon size={11} /> : <Sun size={11} />}{m}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {tokens.map(token => {
+          const hex = mode === "dark" ? token.dark : token.light
+          return (
+            <button key={token.label} onClick={() => copy(hex)}
+              className="flex flex-col gap-2 p-3 rounded-xl border border-border bg-secondary hover:border-primary/40 transition-all group">
+              <div className="w-full h-8 rounded-lg border border-white/5 shadow-inner group-hover:scale-95 transition-transform" style={{ backgroundColor: hex }} />
+              <div className="text-left">
+                <p className="text-[11px] font-medium text-foreground leading-none">{token.label}</p>
+                <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{copied === hex ? "Copied!" : hex}</p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }`,
