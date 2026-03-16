@@ -4784,6 +4784,19 @@ COMPONENTS.push(...FORM_REGISTRY)
 
 // ─── Chat UI components ───────────────────────────────────────────────────────
 
+// NexUI logo mark — used as the AI avatar across all chat components
+function NexLogo({ size = 12 }: { size?: number }) {
+  const s = Math.round(size * 0.65)
+  return (
+    <svg width={s} height={s} viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" />
+      <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.6" />
+      <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor" opacity="0.6" />
+      <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor" />
+    </svg>
+  )
+}
+
 type ChatRole = "user" | "assistant"
 type AttachmentType = "image" | "pdf" | "doc" | "csv"
 
@@ -4964,8 +4977,8 @@ function FullscreenChat() {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-              <Bot size={13} className="text-primary" />
+          <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <NexLogo size={20} />
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground leading-none">NexUI Assistant</p>
@@ -4991,7 +5004,7 @@ function FullscreenChat() {
             return (
               <div key={msg.id} className={cn("group flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
                 <div className={cn("size-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 border", isUser ? "bg-secondary border-border" : "bg-primary/15 border-primary/25")}>
-                  {isUser ? <User size={12} className="text-muted-foreground" /> : <Bot size={12} className="text-primary" />}
+                  {isUser ? <User size={12} className="text-muted-foreground" /> : <NexLogo size={18} />}
                 </div>
                 <div className={cn("flex flex-col gap-1 max-w-[75%]", isUser ? "items-end" : "items-start")}>
                   {isUser && msg.attachments?.map(a => (
@@ -5028,7 +5041,7 @@ function FullscreenChat() {
           {streaming && msgs[msgs.length - 1]?.role !== "assistant" && (
             <div className="flex gap-3">
               <div className="size-7 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center">
-                <Bot size={12} className="text-primary" />
+                <NexLogo size={20} />
               </div>
               <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-card border border-border flex items-center gap-1">
                 {[0,120,240].map(d => <span key={d} className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
@@ -5193,7 +5206,7 @@ function SidebarChat() {
         <div className="flex items-center gap-2">
           <div className="relative">
             <div className="size-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-              <Bot size={13} className="text-primary" />
+              <NexLogo size={22} />
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-green-400 border-2 border-card" />
           </div>
@@ -5221,7 +5234,7 @@ function SidebarChat() {
             <div key={msg.id} className={cn("flex gap-2", isUser ? "flex-row-reverse" : "flex-row")}>
               {!isUser && (
                 <div className="size-6 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot size={10} className="text-primary" />
+                  <NexLogo size={16} />
                 </div>
               )}
               <div className={cn("flex flex-col gap-0.5 max-w-[82%]", isUser ? "items-end" : "items-start")}>
@@ -5242,7 +5255,7 @@ function SidebarChat() {
         {streaming && msgs[msgs.length-1]?.role !== "assistant" && (
           <div className="flex gap-2">
             <div className="size-6 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center">
-              <Bot size={10} className="text-primary" />
+              <NexLogo size={16} />
             </div>
             <div className="px-3 py-2 rounded-2xl rounded-tl-sm bg-background border border-border flex gap-1 items-center">
               {[0,100,200].map(d => <span key={d} className="size-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
@@ -5322,7 +5335,7 @@ function FloatingChatWidget() {
           <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground shrink-0">
             <div className="flex items-center gap-2">
               <div className="size-7 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-                <Bot size={12} />
+                <NexLogo size={20} />
               </div>
               <div>
                 <p className="text-xs font-semibold leading-none">NexAI Support</p>
@@ -5485,7 +5498,7 @@ function VoiceChatUI() {
         {msgs.slice(-4).map((m, i) => (
           <div key={i} className={cn("flex gap-2", m.role === "user" ? "flex-row-reverse" : "flex-row")}>
             <div className={cn("size-5 rounded-full shrink-0 mt-0.5 flex items-center justify-center", m.role === "assistant" ? "bg-primary/15" : "bg-secondary")}>
-              {m.role === "assistant" ? <Bot size={9} className="text-primary" /> : <User size={9} className="text-muted-foreground" />}
+              {m.role === "assistant" ? <NexLogo size={14} /> : <User size={9} className="text-muted-foreground" />}
             </div>
             <div className={cn("px-3 py-2 rounded-2xl text-xs max-w-[80%]", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-secondary text-foreground rounded-tl-sm border border-border")}>
               {m.text.length > 80 ? m.text.slice(0, 80) + "…" : m.text}
