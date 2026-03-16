@@ -49,19 +49,19 @@ export function AuthPanel({
         <div className="relative w-full h-full rounded-3xl overflow-hidden">
           <Image
             src="/auth-panel.jpg"
-            alt="Abstract dark geometric background"
+            alt="Model wearing black over-ear headphones and cat-eye sunglasses"
             fill
-            className="object-cover"
+            className="object-cover object-top"
             priority
           />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-background/30" />
+          {/* Subtle gradient overlay so quote is readable */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
           {/* Quote */}
           <div className="absolute bottom-10 left-10 right-10">
-            <blockquote className="text-foreground text-xl font-semibold leading-snug text-balance">
+            <blockquote className="text-white text-xl font-semibold leading-snug text-balance drop-shadow-md">
               &ldquo;{quote}&rdquo;
             </blockquote>
-            <p className="mt-3 text-sm text-foreground/60">&mdash; {quoteAuthor}</p>
+            <p className="mt-3 text-sm text-white/60 drop-shadow-md">&mdash; {quoteAuthor}</p>
           </div>
         </div>
       </div>
