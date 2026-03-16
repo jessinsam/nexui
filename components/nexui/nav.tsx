@@ -59,7 +59,13 @@ export function Nav() {
             GitHub
           </a>
           <a
-            href="#installation"
+            href="/sign-in"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+          >
+            Sign in
+          </a>
+          <a
+            href="/create-account"
             className="text-sm bg-primary text-primary-foreground px-3.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors font-medium"
           >
             Get started
@@ -90,7 +96,14 @@ export function Nav() {
             </a>
           ))}
           <a
-            href="#installation"
+            href="/sign-in"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setOpen(false)}
+          >
+            Sign in
+          </a>
+          <a
+            href="/create-account"
             className="text-sm bg-primary text-primary-foreground px-3.5 py-2 rounded-md hover:bg-primary/90 transition-colors font-medium text-center"
           >
             Get started
