@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, ArrowUpRight, X, SlidersHorizontal } from "lucide-react"
+import { Search, ArrowUpRight, X, SlidersHorizontal, Copy, Check, Code2, Eye } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, COMPONENTS } from "@/lib/components-registry"
@@ -56,40 +56,97 @@ function Sidebar({
 
 function ComponentCard({ comp }: { comp: ComponentEntry }) {
   const isFullWidth = comp.fullWidth
+  const [tab, setTab] = useState<"preview" | "code">("preview")
+  const [copied, setCopied] = useState(false)
+
+  function copy() {
+    navigator.clipboard.writeText(comp.code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div className={cn(
       "group rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col",
       isFullWidth && "col-span-full"
     )}>
-      <div className={cn(
-        "flex items-center justify-center bg-background/40",
-        isFullWidth ? "p-6 md:p-10" : "min-h-[160px] p-6"
-      )}>
-        {isFullWidth ? (
-          <div className="w-full max-w-5xl">{comp.preview}</div>
-        ) : comp.preview}
-      </div>
-      <div className="px-4 py-3 border-t border-border">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-semibold text-foreground">{comp.name}</span>
-          <div className="flex items-center gap-3">
-            {comp.href && (
-              <a
-                href={comp.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`View ${comp.name} full page`}
-                className="text-xs text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors"
-              >
-                View full page <ArrowUpRight size={11} aria-hidden="true" />
-              </a>
-            )}
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
-              {comp.category}
-            </span>
-          </div>
+      {/* Card header: name, toggle, actions */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-sm font-semibold text-foreground truncate">{comp.name}</span>
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
+            {comp.category}
+          </span>
         </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {comp.href && (
+            <a
+              href={comp.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View ${comp.name} full page`}
+              className="hidden sm:flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowUpRight size={13} aria-hidden="true" />
+            </a>
+          )}
+          {/* Preview / Code toggle */}
+          <div className="flex items-center rounded-lg border border-border overflow-hidden bg-secondary">
+            <button
+              onClick={() => setTab("preview")}
+              aria-label="Show preview"
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors",
+                tab === "preview" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Eye size={12} aria-hidden="true" />
+              <span className="hidden sm:inline">Preview</span>
+            </button>
+            <button
+              onClick={() => setTab("code")}
+              aria-label="Show code"
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors",
+                tab === "code" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Code2 size={12} aria-hidden="true" />
+              <span className="hidden sm:inline">Code</span>
+            </button>
+          </div>
+          {/* Copy button */}
+          <button
+            onClick={copy}
+            aria-label={copied ? "Copied" : "Copy code"}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border bg-secondary text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {copied ? <Check size={12} aria-hidden="true" className="text-emerald-400" /> : <Copy size={12} aria-hidden="true" />}
+            <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Content area */}
+      {tab === "preview" ? (
+        <div className={cn(
+          "flex items-center justify-center bg-background/40",
+          isFullWidth ? "p-6 md:p-10" : "min-h-[160px] p-6"
+        )}>
+          {isFullWidth ? (
+            <div className="w-full max-w-5xl">{comp.preview}</div>
+          ) : comp.preview}
+        </div>
+      ) : (
+        <div className="relative bg-[var(--code-bg)]">
+          <pre className="overflow-x-auto p-5 text-xs font-mono leading-relaxed text-muted-foreground max-h-[480px] overflow-y-auto">
+            <code>{comp.code}</code>
+          </pre>
+        </div>
+      )}
+
+      {/* Footer: description */}
+      <div className="px-4 py-2.5 border-t border-border">
         <p className="text-xs text-muted-foreground leading-relaxed">{comp.description}</p>
       </div>
     </div>
