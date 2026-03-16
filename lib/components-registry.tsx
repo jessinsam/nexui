@@ -2,7 +2,7 @@
 
 // icons: lucide-react@0.564
 import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -2204,7 +2204,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -3853,4 +3853,932 @@ export function Tabs({ tabs }: { tabs: Tab[] }) {
 }`,
   },
 ]
+
+// ─── Form components are appended below via FORM_REGISTRY spread ──────────────
+// (COMPONENTS is reassigned after FORM_REGISTRY is defined — see bottom of file)
+
+// Shared field primitives
+function FormField({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-foreground">
+        {label}
+        {required && <span className="text-red-400 ml-0.5" aria-hidden="true">*</span>}
+      </label>
+      {children}
+      {error && (
+        <p className="flex items-center gap-1 text-xs text-red-400" role="alert">
+          <AlertTriangle size={11} aria-hidden="true" />
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      className={cn("w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all", className)}
+      {...props}
+    />
+  )
+}
+
+function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      className={cn("w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all resize-none", className)}
+      {...props}
+    />
+  )
+}
+
+function SubmitButton({ loading, children }: { loading: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="submit"
+      disabled={loading}
+      className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-60 transition-colors"
+    >
+      {loading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Send size={14} aria-hidden="true" />}
+      {children}
+    </button>
+  )
+}
+
+// ── Contact Form ───────────────────────────────────────────────────────────────
+function ContactForm() {
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  function validate() {
+    const e: Record<string, string> = {}
+    if (!form.name.trim()) e.name = "Name is required"
+    if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) e.email = "Enter a valid email"
+    if (!form.subject.trim()) e.subject = "Subject is required"
+    if (form.message.trim().length < 10) e.message = "Message must be at least 10 characters"
+    return e
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const errs = validate()
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1400))
+    setLoading(false)
+    setSent(true)
+  }
+
+  if (sent) return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="size-12 rounded-full bg-green-400/15 flex items-center justify-center">
+        <CheckCircle2 size={22} className="text-green-400" aria-hidden="true" />
+      </div>
+      <p className="font-semibold text-foreground">Message sent!</p>
+      <p className="text-sm text-muted-foreground max-w-xs">Thanks for reaching out. We'll get back to you within 24 hours.</p>
+      <button onClick={() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }) }} className="mt-2 text-xs text-primary hover:underline">Send another</button>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-lg mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      <div className="flex items-center gap-3">
+        <div className="size-9 rounded-xl bg-primary/15 flex items-center justify-center">
+          <Mail size={16} className="text-primary" aria-hidden="true" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Contact Us</h2>
+          <p className="text-xs text-muted-foreground">We'll reply within 24 hours</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Full name" required error={errors.name}>
+            <Input placeholder="Jane Smith" value={form.name} onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(err => ({ ...err, name: "" })) }} aria-required="true" />
+          </FormField>
+          <FormField label="Email" required error={errors.email}>
+            <Input type="email" placeholder="jane@example.com" value={form.email} onChange={e => { setForm(f => ({ ...f, email: e.target.value })); setErrors(err => ({ ...err, email: "" })) }} aria-required="true" />
+          </FormField>
+        </div>
+        <FormField label="Subject" required error={errors.subject}>
+          <Input placeholder="How can we help?" value={form.subject} onChange={e => { setForm(f => ({ ...f, subject: e.target.value })); setErrors(err => ({ ...err, subject: "" })) }} aria-required="true" />
+        </FormField>
+        <FormField label="Message" required error={errors.message}>
+          <Textarea rows={4} placeholder="Describe your question or issue in detail..." value={form.message} onChange={e => { setForm(f => ({ ...f, message: e.target.value })); setErrors(err => ({ ...err, message: "" })) }} aria-required="true" />
+        </FormField>
+        <SubmitButton loading={loading}>Send message</SubmitButton>
+      </form>
+    </div>
+  )
+}
+
+// ── Feedback Form ─────────────────────────────────────────────────────────────
+function FeedbackForm() {
+  const [rating, setRating] = useState(0)
+  const [hovered, setHovered] = useState(0)
+  const [category, setCategory] = useState("")
+  const [message, setMessage] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const categories = ["Bug report", "Feature request", "Performance", "Design", "Other"]
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const errs: Record<string, string> = {}
+    if (!rating) errs.rating = "Please select a rating"
+    if (!category) errs.category = "Please select a category"
+    if (message.trim().length < 5) errs.message = "Please describe your feedback"
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1200))
+    setLoading(false)
+    setSent(true)
+  }
+
+  if (sent) return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="size-12 rounded-full bg-primary/15 flex items-center justify-center">
+        <ThumbsUp size={22} className="text-primary" aria-hidden="true" />
+      </div>
+      <p className="font-semibold text-foreground">Thanks for your feedback!</p>
+      <p className="text-sm text-muted-foreground max-w-xs">Your input helps us build a better product.</p>
+      <button onClick={() => { setSent(false); setRating(0); setCategory(""); setMessage("") }} className="mt-2 text-xs text-primary hover:underline">Submit more feedback</button>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-md mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      <div className="flex items-center gap-3">
+        <div className="size-9 rounded-xl bg-primary/15 flex items-center justify-center">
+          <MessageSquare size={16} className="text-primary" aria-hidden="true" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Share Feedback</h2>
+          <p className="text-xs text-muted-foreground">Help us improve the product</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        {/* Star rating */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Overall rating <span className="text-red-400">*</span></span>
+          <div className="flex items-center gap-1" role="group" aria-label="Rating">
+            {[1, 2, 3, 4, 5].map(n => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => { setRating(n); setErrors(err => ({ ...err, rating: "" })) }}
+                onMouseEnter={() => setHovered(n)}
+                onMouseLeave={() => setHovered(0)}
+                aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                className="transition-transform hover:scale-110"
+              >
+                <Star
+                  size={24}
+                  className={cn("transition-colors", (hovered || rating) >= n ? "text-yellow-400 fill-yellow-400" : "text-border")}
+                  aria-hidden="true"
+                />
+              </button>
+            ))}
+            {rating > 0 && (
+              <span className="ml-2 text-xs text-muted-foreground">
+                {["", "Poor", "Fair", "Good", "Very good", "Excellent"][rating]}
+              </span>
+            )}
+          </div>
+          {errors.rating && <p className="flex items-center gap-1 text-xs text-red-400"><AlertTriangle size={11} />{errors.rating}</p>}
+        </div>
+        {/* Category chips */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Category <span className="text-red-400">*</span></span>
+          <div className="flex flex-wrap gap-2">
+            {categories.map(c => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => { setCategory(c); setErrors(err => ({ ...err, category: "" })) }}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
+                  category === c ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          {errors.category && <p className="flex items-center gap-1 text-xs text-red-400"><AlertTriangle size={11} />{errors.category}</p>}
+        </div>
+        <FormField label="Your feedback" required error={errors.message}>
+          <Textarea rows={3} placeholder="What's on your mind?" value={message} onChange={e => { setMessage(e.target.value); setErrors(err => ({ ...err, message: "" })) }} />
+        </FormField>
+        <SubmitButton loading={loading}>Submit feedback</SubmitButton>
+      </form>
+    </div>
+  )
+}
+
+// ── Survey Form (multi-step) ──────────────────────────────────────────────────
+const SURVEY_STEPS = [
+  { id: "role", title: "Your role" },
+  { id: "usage", title: "How you use it" },
+  { id: "nps", title: "Recommendation" },
+  { id: "done", title: "Done" },
+]
+
+function SurveyForm() {
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState({ role: "", usageFreq: "", usageFeature: [] as string[], nps: -1, extra: "" })
+  const [loading, setLoading] = useState(false)
+
+  const roles = ["Developer", "Designer", "Product manager", "Engineering lead", "Other"]
+  const freqs = ["Daily", "A few times a week", "Weekly", "Monthly"]
+  const features = ["Components", "Design tokens", "Code snippets", "Documentation", "Theming"]
+
+  function toggleFeature(f: string) {
+    setAnswers(a => ({
+      ...a,
+      usageFeature: a.usageFeature.includes(f) ? a.usageFeature.filter(x => x !== f) : [...a.usageFeature, f],
+    }))
+  }
+
+  async function finish() {
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1100))
+    setLoading(false)
+    setStep(3)
+  }
+
+  const progress = ((step) / (SURVEY_STEPS.length - 1)) * 100
+
+  if (step === 3) return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="size-12 rounded-full bg-green-400/15 flex items-center justify-center">
+        <CheckCircle2 size={22} className="text-green-400" />
+      </div>
+      <p className="font-semibold text-foreground">Survey complete — thank you!</p>
+      <p className="text-sm text-muted-foreground max-w-xs">Your responses help shape our roadmap.</p>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-lg mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Step {step + 1} of {SURVEY_STEPS.length - 1}</p>
+        <p className="text-xs font-medium text-foreground">{SURVEY_STEPS[step].title}</p>
+      </div>
+      {/* Progress bar */}
+      <div className="w-full h-1 rounded-full bg-secondary overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+        <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+      </div>
+
+      {/* Step 0 — role */}
+      {step === 0 && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-foreground">What best describes your role?</p>
+          <div className="flex flex-col gap-2">
+            {roles.map(r => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setAnswers(a => ({ ...a, role: r }))}
+                className={cn(
+                  "flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all",
+                  answers.role === r ? "border-primary bg-primary/10 text-foreground font-medium" : "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {r}
+                {answers.role === r && <Check size={14} className="text-primary shrink-0" aria-hidden="true" />}
+              </button>
+            ))}
+          </div>
+          <button disabled={!answers.role} onClick={() => setStep(1)} className="mt-1 flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-40 transition-colors">Next <ArrowRight size={14} /></button>
+        </div>
+      )}
+
+      {/* Step 1 — usage */}
+      {step === 1 && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-foreground">How often do you use NexUI?</p>
+            <div className="grid grid-cols-2 gap-2">
+              {freqs.map(f => (
+                <button key={f} type="button" onClick={() => setAnswers(a => ({ ...a, usageFreq: f }))}
+                  className={cn("px-3 py-2.5 rounded-xl border text-xs font-medium transition-all", answers.usageFreq === f ? "border-primary bg-primary/10 text-foreground" : "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground")}>
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-foreground">Which features do you use most? <span className="text-muted-foreground font-normal">(pick all that apply)</span></p>
+            <div className="flex flex-wrap gap-2">
+              {features.map(f => (
+                <button key={f} type="button" onClick={() => toggleFeature(f)}
+                  className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all", answers.usageFeature.includes(f) ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border hover:border-primary/40 hover:text-foreground")}>
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setStep(0)} className="flex items-center gap-1 px-4 py-2.5 rounded-lg border border-border bg-secondary text-sm text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft size={14} />Back</button>
+            <button disabled={!answers.usageFreq} onClick={() => setStep(2)} className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-40 transition-colors">Next <ArrowRight size={14} /></button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2 — NPS */}
+      {step === 2 && (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm font-medium text-foreground">How likely are you to recommend NexUI to a colleague?</p>
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-1 flex-wrap">
+              {Array.from({ length: 11 }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setAnswers(a => ({ ...a, nps: i }))}
+                  className={cn(
+                    "size-9 rounded-lg text-xs font-semibold border transition-all",
+                    answers.nps === i ? "bg-primary text-primary-foreground border-primary" :
+                    i >= 9 ? "border-green-400/30 bg-green-400/10 text-green-400 hover:bg-green-400/20" :
+                    i >= 7 ? "border-yellow-400/30 bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20" :
+                    "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  )}
+                >
+                  {i}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-1 px-0.5">
+              <span>Not likely</span>
+              <span>Extremely likely</span>
+            </div>
+          </div>
+          <FormField label="Anything else you'd like to share?" >
+            <Textarea rows={3} placeholder="Optional comments..." value={answers.extra} onChange={e => setAnswers(a => ({ ...a, extra: e.target.value }))} />
+          </FormField>
+          <div className="flex gap-2">
+            <button onClick={() => setStep(1)} className="flex items-center gap-1 px-4 py-2.5 rounded-lg border border-border bg-secondary text-sm text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft size={14} />Back</button>
+            <button disabled={answers.nps < 0 || loading} onClick={finish} className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-40 transition-colors">
+              {loading ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Submit
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Newsletter Subscribe Form ─────────────────────────────────────────────────
+function NewsletterForm() {
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) { setError("Enter a valid email address"); return }
+    setError("")
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1100))
+    setLoading(false)
+    setDone(true)
+  }
+
+  return (
+    <div className="w-full max-w-md mx-auto rounded-2xl border border-border bg-card p-8 flex flex-col items-center gap-5 text-center">
+      <div className="size-10 rounded-xl bg-primary/15 flex items-center justify-center">
+        <Mail size={18} className="text-primary" aria-hidden="true" />
+      </div>
+      <div>
+        <h2 className="font-semibold text-foreground">Stay in the loop</h2>
+        <p className="text-sm text-muted-foreground mt-1">Get notified when new components drop. No spam, ever.</p>
+      </div>
+      {done ? (
+        <div className="flex flex-col items-center gap-2">
+          <CheckCircle2 size={28} className="text-green-400" aria-hidden="true" />
+          <p className="text-sm font-medium text-foreground">You're subscribed!</p>
+          <p className="text-xs text-muted-foreground">Check your inbox for a confirmation.</p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} noValidate className="w-full flex flex-col gap-3">
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setError("") }}
+              aria-label="Email address"
+              aria-required="true"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center gap-1.5 shrink-0 bg-primary text-primary-foreground text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-60 transition-colors"
+            >
+              {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
+              Subscribe
+            </button>
+          </div>
+          {error && <p className="flex items-center justify-center gap-1 text-xs text-red-400"><AlertTriangle size={11} />{error}</p>}
+          <p className="text-[11px] text-muted-foreground">By subscribing you agree to our Privacy Policy.</p>
+        </form>
+      )}
+    </div>
+  )
+}
+
+// ── Support / Bug Report Form ─────────────────────────────────────────────────
+function SupportForm() {
+  const [form, setForm] = useState({ title: "", severity: "", description: "", steps: "", email: "" })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const severities = [
+    { value: "low", label: "Low", desc: "Minor issue", color: "text-green-400 bg-green-400/10 border-green-400/30" },
+    { value: "medium", label: "Medium", desc: "Needs attention", color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/30" },
+    { value: "high", label: "High", desc: "Blocking issue", color: "text-red-400 bg-red-400/10 border-red-400/30" },
+  ]
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const errs: Record<string, string> = {}
+    if (!form.title.trim()) errs.title = "Title is required"
+    if (!form.severity) errs.severity = "Select a severity"
+    if (form.description.trim().length < 10) errs.description = "Describe the issue"
+    if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errs.email = "Enter a valid email"
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1300))
+    setLoading(false)
+    setSent(true)
+  }
+
+  if (sent) return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="size-12 rounded-full bg-green-400/15 flex items-center justify-center">
+        <CheckCircle2 size={22} className="text-green-400" />
+      </div>
+      <p className="font-semibold text-foreground">Report submitted</p>
+      <p className="text-sm text-muted-foreground max-w-xs">We'll investigate and follow up via email.</p>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-lg mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      <div className="flex items-center gap-3">
+        <div className="size-9 rounded-xl bg-red-400/15 flex items-center justify-center">
+          <AlertTriangle size={16} className="text-red-400" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Report a Bug</h2>
+          <p className="text-xs text-muted-foreground">Help us fix it fast</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <FormField label="Issue title" required error={errors.title}>
+          <Input placeholder="Short description of the bug" value={form.title} onChange={e => { setForm(f => ({ ...f, title: e.target.value })); setErrors(err => ({ ...err, title: "" })) }} />
+        </FormField>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Severity <span className="text-red-400">*</span></span>
+          <div className="grid grid-cols-3 gap-2">
+            {severities.map(s => (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => { setForm(f => ({ ...f, severity: s.value })); setErrors(err => ({ ...err, severity: "" })) }}
+                className={cn(
+                  "flex flex-col items-start px-3 py-2.5 rounded-xl border text-left transition-all",
+                  form.severity === s.value ? s.color + " font-semibold" : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
+                )}
+              >
+                <span className="text-xs font-semibold">{s.label}</span>
+                <span className="text-[10px] mt-0.5 opacity-80">{s.desc}</span>
+              </button>
+            ))}
+          </div>
+          {errors.severity && <p className="flex items-center gap-1 text-xs text-red-400"><AlertTriangle size={11} />{errors.severity}</p>}
+        </div>
+        <FormField label="Description" required error={errors.description}>
+          <Textarea rows={3} placeholder="What happened? What did you expect?" value={form.description} onChange={e => { setForm(f => ({ ...f, description: e.target.value })); setErrors(err => ({ ...err, description: "" })) }} />
+        </FormField>
+        <FormField label="Steps to reproduce">
+          <Textarea rows={2} placeholder="1. Go to...&#10;2. Click on...&#10;3. See error" value={form.steps} onChange={e => setForm(f => ({ ...f, steps: e.target.value }))} />
+        </FormField>
+        <FormField label="Your email" required error={errors.email}>
+          <Input type="email" placeholder="we'll follow up here" value={form.email} onChange={e => { setForm(f => ({ ...f, email: e.target.value })); setErrors(err => ({ ...err, email: "" })) }} />
+        </FormField>
+        <SubmitButton loading={loading}>Submit report</SubmitButton>
+      </form>
+    </div>
+  )
+}
+
+// ── Request a Feature Form ────────────────────────────────────────────────────
+function FeatureRequestForm() {
+  const [form, setForm] = useState({ title: "", problem: "", solution: "", priority: "" })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const priorities = ["Nice to have", "Would use it", "Blocking me"]
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const errs: Record<string, string> = {}
+    if (!form.title.trim()) errs.title = "Feature title is required"
+    if (form.problem.trim().length < 10) errs.problem = "Describe the problem you're facing"
+    if (!form.priority) errs.priority = "Select a priority level"
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1200))
+    setLoading(false)
+    setSent(true)
+  }
+
+  if (sent) return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="size-12 rounded-full bg-primary/15 flex items-center justify-center">
+        <Zap size={22} className="text-primary" />
+      </div>
+      <p className="font-semibold text-foreground">Feature request submitted!</p>
+      <p className="text-sm text-muted-foreground max-w-xs">We review all requests and vote them into the roadmap.</p>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-lg mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      <div className="flex items-center gap-3">
+        <div className="size-9 rounded-xl bg-primary/15 flex items-center justify-center">
+          <Plus size={16} className="text-primary" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Request a Feature</h2>
+          <p className="text-xs text-muted-foreground">Shape the roadmap</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <FormField label="Feature title" required error={errors.title}>
+          <Input placeholder="e.g. Dark mode toggle, Data table, etc." value={form.title} onChange={e => { setForm(f => ({ ...f, title: e.target.value })); setErrors(err => ({ ...err, title: "" })) }} />
+        </FormField>
+        <FormField label="What problem does this solve?" required error={errors.problem}>
+          <Textarea rows={3} placeholder="Describe the pain point or use case..." value={form.problem} onChange={e => { setForm(f => ({ ...f, problem: e.target.value })); setErrors(err => ({ ...err, problem: "" })) }} />
+        </FormField>
+        <FormField label="Suggested solution (optional)">
+          <Textarea rows={2} placeholder="How would you imagine this working?" value={form.solution} onChange={e => setForm(f => ({ ...f, solution: e.target.value }))} />
+        </FormField>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Priority for you <span className="text-red-400">*</span></span>
+          <div className="flex gap-2">
+            {priorities.map(p => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => { setForm(f => ({ ...f, priority: p })); setErrors(err => ({ ...err, priority: "" })) }}
+                className={cn(
+                  "flex-1 py-2 px-2 rounded-xl border text-xs font-medium transition-all",
+                  form.priority === p ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          {errors.priority && <p className="flex items-center gap-1 text-xs text-red-400"><AlertTriangle size={11} />{errors.priority}</p>}
+        </div>
+        <SubmitButton loading={loading}>Submit request</SubmitButton>
+      </form>
+    </div>
+  )
+}
+
+// ── Onboarding Profile Form ───────────────────────────────────────────────────
+function OnboardingForm() {
+  const [step, setStep] = useState(0)
+  const [form, setForm] = useState({ name: "", role: "", team: "", avatar: "" })
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
+
+  const roles = ["Frontend developer", "Backend developer", "Full-stack developer", "Designer", "Product manager", "Other"]
+  const teamSizes = ["Just me", "2–5", "6–15", "16–50", "50+"]
+  const avatarColors = ["bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-orange-500", "bg-pink-500", "bg-teal-500"]
+
+  async function finish() {
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1100))
+    setLoading(false)
+    setDone(true)
+  }
+
+  if (done) return (
+    <div className="flex flex-col items-center gap-4 py-10 text-center">
+      <div className={cn("size-16 rounded-full flex items-center justify-center text-white text-2xl font-bold", form.avatar || "bg-primary")}>
+        {form.name ? form.name[0].toUpperCase() : "?"}
+      </div>
+      <div>
+        <p className="font-semibold text-foreground text-lg">Welcome, {form.name || "there"}!</p>
+        <p className="text-sm text-muted-foreground mt-1">Your profile is all set.</p>
+      </div>
+    </div>
+  )
+
+  const totalSteps = 3
+
+  return (
+    <div className="w-full max-w-md mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-muted-foreground font-medium">Step {step + 1} of {totalSteps}</p>
+          <p className="text-xs font-semibold text-foreground">{["Your name", "Your role", "Team size"][step]}</p>
+        </div>
+        <div className="flex gap-1">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div key={i} className={cn("h-1 flex-1 rounded-full transition-all duration-300", i <= step ? "bg-primary" : "bg-secondary")} />
+          ))}
+        </div>
+      </div>
+
+      {step === 0 && (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm font-medium text-foreground">What should we call you?</p>
+          <Input placeholder="Your name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} autoFocus />
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-muted-foreground font-medium">Pick an avatar color</p>
+            <div className="flex gap-2">
+              {avatarColors.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, avatar: c }))}
+                  className={cn("size-8 rounded-full transition-transform hover:scale-110", c, form.avatar === c && "ring-2 ring-offset-2 ring-offset-card ring-primary")}
+                  aria-label={c.replace("bg-", "").replace("-500", "")}
+                />
+              ))}
+            </div>
+          </div>
+          <button disabled={!form.name.trim()} onClick={() => setStep(1)} className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-40 transition-colors">Continue <ArrowRight size={14} /></button>
+        </div>
+      )}
+
+      {step === 1 && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-foreground">What's your primary role?</p>
+          <div className="flex flex-col gap-2">
+            {roles.map(r => (
+              <button key={r} type="button" onClick={() => setForm(f => ({ ...f, role: r }))}
+                className={cn("flex items-center justify-between px-4 py-3 rounded-xl border text-sm transition-all", form.role === r ? "border-primary bg-primary/10 text-foreground font-medium" : "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground")}>
+                {r}
+                {form.role === r && <Check size={14} className="text-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-1">
+            <button onClick={() => setStep(0)} className="flex items-center gap-1 px-4 py-2.5 rounded-lg border border-border bg-secondary text-sm text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft size={14} />Back</button>
+            <button disabled={!form.role} onClick={() => setStep(2)} className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-40 transition-colors">Next <ArrowRight size={14} /></button>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-foreground">How big is your team?</p>
+          <div className="grid grid-cols-3 gap-2">
+            {teamSizes.map(t => (
+              <button key={t} type="button" onClick={() => setForm(f => ({ ...f, team: t }))}
+                className={cn("py-2.5 rounded-xl border text-xs font-medium transition-all", form.team === t ? "border-primary bg-primary/10 text-foreground" : "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground")}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-1">
+            <button onClick={() => setStep(1)} className="flex items-center gap-1 px-4 py-2.5 rounded-lg border border-border bg-secondary text-sm text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft size={14} />Back</button>
+            <button disabled={!form.team || loading} onClick={finish} className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-40 transition-colors">
+              {loading ? <Loader2 size={14} className="animate-spin" /> : null} Finish setup
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Quick Reaction Widget ─────────────────────────────────────────────────────
+function ReactionForm() {
+  const [voted, setVoted] = useState<string | null>(null)
+  const [counts, setCounts] = useState({ helpful: 124, notHelpful: 18 })
+
+  function vote(type: "helpful" | "notHelpful") {
+    if (voted) return
+    setVoted(type)
+    setCounts(c => ({ ...c, [type]: c[type] + 1 }))
+  }
+
+  return (
+    <div className="w-full max-w-sm mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col items-center gap-4 text-center">
+      <p className="text-sm font-medium text-foreground">Was this documentation helpful?</p>
+      {voted ? (
+        <div className="flex flex-col items-center gap-2">
+          <CheckCircle2 size={28} className="text-green-400" />
+          <p className="text-sm text-muted-foreground">Thanks for your feedback!</p>
+        </div>
+      ) : (
+        <div className="flex gap-3">
+          <button
+            onClick={() => vote("helpful")}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-secondary text-sm text-muted-foreground hover:border-green-400/40 hover:text-green-400 hover:bg-green-400/10 transition-all font-medium"
+          >
+            <ThumbsUp size={15} aria-hidden="true" /> Yes, helpful
+          </button>
+          <button
+            onClick={() => vote("notHelpful")}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-secondary text-sm text-muted-foreground hover:border-red-400/40 hover:text-red-400 hover:bg-red-400/10 transition-all font-medium"
+          >
+            <ThumbsDown size={15} aria-hidden="true" /> Not really
+          </button>
+        </div>
+      )}
+      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+        <span>{counts.helpful} found helpful</span>
+        <span className="text-border">·</span>
+        <span>{counts.notHelpful} didn't</span>
+      </div>
+    </div>
+  )
+}
+
+export const FORM_REGISTRY: ComponentEntry[] = [
+  {
+    name: "Contact Form",
+    description: "Full contact form with name, email, subject, and message fields. Includes client-side validation, error states, loading spinner, and success confirmation.",
+    category: "Forms",
+    tags: ["contact", "form", "email", "validation", "submit"],
+    fullWidth: true,
+    preview: <ContactForm />,
+    code: `"use client"
+import { useState } from "react"
+import { Send, Mail, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+function FormField({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-foreground">
+        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      {children}
+      {error && <p className="flex items-center gap-1 text-xs text-red-400" role="alert"><AlertTriangle size={11} />{error}</p>}
+    </div>
+  )
+}
+
+export function ContactForm() {
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  function validate() {
+    const e: Record<string, string> = {}
+    if (!form.name.trim()) e.name = "Name is required"
+    if (!form.email.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/)) e.email = "Enter a valid email"
+    if (!form.subject.trim()) e.subject = "Subject is required"
+    if (form.message.trim().length < 10) e.message = "Message must be at least 10 characters"
+    return e
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const errs = validate()
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 1400))
+    setLoading(false)
+    setSent(true)
+  }
+
+  if (sent) return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="size-12 rounded-full bg-green-400/15 flex items-center justify-center">
+        <CheckCircle2 size={22} className="text-green-400" />
+      </div>
+      <p className="font-semibold text-foreground">Message sent!</p>
+      <p className="text-sm text-muted-foreground max-w-xs">We'll get back to you within 24 hours.</p>
+    </div>
+  )
+
+  return (
+    <div className="w-full max-w-lg mx-auto rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
+      <div className="flex items-center gap-3">
+        <div className="size-9 rounded-xl bg-primary/15 flex items-center justify-center">
+          <Mail size={16} className="text-primary" />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Contact Us</h2>
+          <p className="text-xs text-muted-foreground">We'll reply within 24 hours</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="Full name" required error={errors.name}>
+            <input className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all"
+              placeholder="Jane Smith" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          </FormField>
+          <FormField label="Email" required error={errors.email}>
+            <input type="email" className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all"
+              placeholder="jane@example.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+          </FormField>
+        </div>
+        <FormField label="Subject" required error={errors.subject}>
+          <input className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all"
+            placeholder="How can we help?" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} />
+        </FormField>
+        <FormField label="Message" required error={errors.message}>
+          <textarea rows={4} className="w-full px-3 py-2.5 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all resize-none"
+            placeholder="Describe your question..." value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+        </FormField>
+        <button type="submit" disabled={loading}
+          className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-60 transition-colors">
+          {loading ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+          Send message
+        </button>
+      </form>
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Feedback Form",
+    description: "Product feedback form with a 5-star rating, category chip selector, and open text. Validates all fields before submitting.",
+    category: "Forms",
+    tags: ["feedback", "rating", "stars", "form", "survey"],
+    fullWidth: true,
+    preview: <FeedbackForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+  {
+    name: "Survey Form — Multi-step",
+    description: "Three-step survey with progress bar, single-select list, multi-select chips, and NPS 0–10 grid. Each step validates before advancing.",
+    category: "Forms",
+    tags: ["survey", "multi-step", "nps", "wizard", "progress", "form"],
+    fullWidth: true,
+    preview: <SurveyForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+  {
+    name: "Newsletter Form",
+    description: "Minimal email subscribe form with inline validation, loading state, and success confirmation. Ideal for footers or landing pages.",
+    category: "Forms",
+    tags: ["newsletter", "subscribe", "email", "form", "cta"],
+    fullWidth: true,
+    preview: <NewsletterForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+  {
+    name: "Bug Report Form",
+    description: "Support form with severity selector (Low / Medium / High with color coding), reproduction steps, and email for follow-up.",
+    category: "Forms",
+    tags: ["bug", "support", "report", "severity", "form"],
+    fullWidth: true,
+    preview: <SupportForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+  {
+    name: "Feature Request Form",
+    description: "Feature request form capturing the problem, suggested solution, and personal priority level. Helps product teams triage incoming ideas.",
+    category: "Forms",
+    tags: ["feature", "request", "roadmap", "form"],
+    fullWidth: true,
+    preview: <FeatureRequestForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+  {
+    name: "Onboarding Profile Form",
+    description: "Three-step onboarding wizard: name + avatar color, role picker, and team-size selector. Ends with a personalised welcome screen.",
+    category: "Forms",
+    tags: ["onboarding", "profile", "wizard", "multi-step", "form"],
+    fullWidth: true,
+    preview: <OnboardingForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+  {
+    name: "Quick Reaction Widget",
+    description: "Thumbs-up / thumbs-down doc-page feedback widget. One click locks in your vote and shows aggregate counts.",
+    category: "Forms",
+    tags: ["reaction", "thumbs", "vote", "feedback", "widget"],
+    preview: <ReactionForm />,
+    code: `// See Contact Form for the shared field primitives pattern.`,
+  },
+]
+
+// Merge form entries into the main COMPONENTS array
+COMPONENTS.push(...FORM_REGISTRY)
 
