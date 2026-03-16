@@ -51,8 +51,8 @@ const steps = [
   },
   {
     step: "02",
-    title: "Add a component",
-    description: "Use the CLI to pull any component straight into your project — or copy the file manually. Either way, the code is yours.",
+    title: "Copy a component",
+    description: "Browse the library, find a component you want, and copy its code directly into your project. No package, no install command — the file is yours from the start.",
     command: "npx nexui@latest add button",
     language: "bash",
     usePackageManager: true,
@@ -60,7 +60,7 @@ const steps = [
   {
     step: "03",
     title: "Use it",
-    description: "Import the component and use it anywhere in your application.",
+    description: "Import the component and use it anywhere in your app. It's plain TypeScript and Tailwind — rename it, restyle it, delete what you don't need.",
     command: `import { Button } from "@/components/ui/button"
 
 export default function Page() {
@@ -87,10 +87,10 @@ export function Installation() {
         <div className="mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Installation</p>
           <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
-            Up and running in minutes.
+            Up and running in seconds.
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-            No package to install. No version conflicts. Just copy the component code into your project and make it your own.
+            No package to install. No version conflicts. No Radix. No shadcn wrappers. Copy the component file into your project and it just works.
           </p>
         </div>
 

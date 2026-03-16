@@ -110,7 +110,7 @@ export function Theming() {
             Make it yours.
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-            All components use CSS custom properties. Swap your accent color, tweak the radius, and the entire system updates instantly.
+            All components use CSS custom properties — no theming library, no provider, no context. Swap your accent color, tweak the radius, and the entire system updates instantly.
           </p>
         </div>
 
@@ -146,6 +146,7 @@ export function Theming() {
             <div className="flex flex-col gap-3 pt-2">
               {[
                 "One CSS file controls every component",
+                "No theming provider or context required",
                 "Works with Tailwind CSS v4 and v3",
                 "Dark mode built in by default",
                 "Fully typed with TypeScript",

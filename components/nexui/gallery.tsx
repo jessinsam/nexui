@@ -425,7 +425,7 @@ export function Gallery() {
             Everything you need.
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-            40+ components ready to copy into your project. Each one is accessible, responsive, and built with Tailwind CSS.
+            50+ fully custom components — no Radix, no shadcn, no third-party primitives. Copy the code straight into your project and own every line.
           </p>
         </div>
 
@@ -484,7 +484,7 @@ export function Gallery() {
         </div>
 
         <p className="mt-8 text-sm text-muted-foreground">
-          And many more — dialogs, dropdowns, tables, calendars, data pickers, and more coming soon.
+          More components coming — dialogs, dropdowns, tables, date pickers, and more. All hand-written, all yours.
         </p>
       </div>
     </section>
