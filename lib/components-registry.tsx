@@ -1,8 +1,8 @@
 "use client"
 
 // icons: lucide-react@0.564
-import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp } from "lucide-react"
+import React, { useState } from "react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -2204,7 +2204,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -4781,4 +4781,499 @@ export function ContactForm() {
 
 // Merge form entries into the main COMPONENTS array
 COMPONENTS.push(...FORM_REGISTRY)
+
+// ─── Chat UI components ───────────────────────────────────────────────────────
+
+type ChatRole = "user" | "assistant"
+type AttachmentType = "image" | "pdf" | "doc" | "csv"
+
+interface Attachment {
+  id: string
+  name: string
+  size: string
+  type: AttachmentType
+}
+
+interface ChatMessage {
+  id: string
+  role: ChatRole
+  content: string
+  attachments?: Attachment[]
+  timestamp: string
+  streaming?: boolean
+}
+
+const ATTACHMENT_ICON: Record<AttachmentType, React.ReactNode> = {
+  image: <ImageIcon size={12} aria-hidden="true" />,
+  pdf:   <FileText size={12} aria-hidden="true" />,
+  doc:   <FileText size={12} aria-hidden="true" />,
+  csv:   <FileText size={12} aria-hidden="true" />,
+}
+
+const ATTACHMENT_COLOR: Record<AttachmentType, string> = {
+  image: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  pdf:   "text-red-400 bg-red-400/10 border-red-400/20",
+  doc:   "text-primary bg-primary/10 border-primary/20",
+  csv:   "text-green-400 bg-green-400/10 border-green-400/20",
+}
+
+const SAMPLE_CONVERSATIONS: ChatMessage[] = [
+  {
+    id: "1", role: "assistant",
+    content: "Hi! I'm your AI assistant. I can help you write code, answer questions, analyse documents, and much more. What would you like to work on today?",
+    timestamp: "9:41 AM",
+  },
+  {
+    id: "2", role: "user",
+    content: "Can you summarise the key points from this PDF?",
+    timestamp: "9:42 AM",
+    attachments: [{ id: "a1", name: "Q3_Report.pdf", size: "2.4 MB", type: "pdf" }],
+  },
+  {
+    id: "3", role: "assistant",
+    content: "I've reviewed the PDF. Here are the key takeaways:\n\n**Revenue** grew 24% YoY, reaching $4.2M in Q3.\n\n**Top performing channels** were organic search (38%) and direct (27%).\n\n**Churn** decreased from 5.1% to 3.8%, attributed to the onboarding improvements shipped in July.\n\n**Recommended actions** from the report:\n1. Double down on SEO investment\n2. Expand the customer success team\n3. Launch referral programme in Q4",
+    timestamp: "9:42 AM",
+  },
+  {
+    id: "4", role: "user",
+    content: "Great! Can you also help me draft a follow-up email to the team?",
+    timestamp: "9:43 AM",
+  },
+  {
+    id: "5", role: "assistant",
+    content: "Sure! Here's a draft:\n\n---\n\n**Subject:** Q3 Results — Strong Quarter, Clear Path Forward\n\nHi team,\n\nJust a quick note to share the Q3 highlights. Revenue hit $4.2M (up 24% YoY) and churn dropped to 3.8% — both are direct results of your hard work.\n\nHeading into Q4 we'll be investing more in SEO, growing the CS team, and launching our referral programme.\n\nMore details in the full report linked below. Thank you all!\n\n---\n\nWant me to adjust the tone or add anything?",
+    timestamp: "9:43 AM",
+  },
+]
+
+const SUGGESTED_PROMPTS = [
+  { icon: <Sparkles size={13} />, label: "Summarise a document" },
+  { icon: <Code2 size={13} />, label: "Write a code snippet" },
+  { icon: <FileText size={13} />, label: "Draft an email" },
+  { icon: <Hash size={13} />, label: "Explain a concept" },
+]
+
+function useTypewriter(text: string, active: boolean, speed = 18) {
+  const [displayed, setDisplayed] = useState("")
+  const [done, setDone] = useState(false)
+  React.useEffect(() => {
+    if (!active) { setDisplayed(text); setDone(true); return }
+    setDisplayed("")
+    setDone(false)
+    let i = 0
+    const id = setInterval(() => {
+      i++
+      setDisplayed(text.slice(0, i))
+      if (i >= text.length) { clearInterval(id); setDone(true) }
+    }, speed)
+    return () => clearInterval(id)
+  }, [text, active, speed])
+  return { displayed, done }
+}
+
+function AttachmentChip({ a, onRemove }: { a: Attachment; onRemove?: () => void }) {
+  return (
+    <div className={cn("inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium", ATTACHMENT_COLOR[a.type])}>
+      {ATTACHMENT_ICON[a.type]}
+      <span className="max-w-[120px] truncate">{a.name}</span>
+      <span className="text-[10px] opacity-60 shrink-0">{a.size}</span>
+      {onRemove && (
+        <button onClick={onRemove} aria-label={`Remove ${a.name}`} className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity">
+          <X size={11} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+function MessageBubble({ msg, isLatest }: { msg: ChatMessage; isLatest: boolean }) {
+  const isUser = msg.role === "user"
+  const { displayed } = useTypewriter(msg.content, !isUser && isLatest && !!msg.streaming)
+  const content = (!isUser && isLatest && msg.streaming) ? displayed : msg.content
+  const [copied, setCopied] = useState(false)
+
+  function copy() {
+    navigator.clipboard.writeText(msg.content).catch(() => {})
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  // Minimal markdown: bold **text**, numbered lists, horizontal rule
+  function renderContent(raw: string) {
+    return raw.split("\n").map((line, i) => {
+      if (line === "---") return <hr key={i} className="border-border my-2" />
+      const parts = line.split(/(\*\*[^*]+\*\*)/g).map((p, j) =>
+        p.startsWith("**") && p.endsWith("**")
+          ? <strong key={j} className="font-semibold text-foreground">{p.slice(2, -2)}</strong>
+          : p
+      )
+      return <p key={i} className={cn("leading-relaxed", line === "" ? "mt-2" : "")}>{parts}</p>
+    })
+  }
+
+  return (
+    <div className={cn("group flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
+      {/* Avatar */}
+      {!isUser ? (
+        <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5">
+          <Bot size={13} className="text-primary" aria-hidden="true" />
+        </div>
+      ) : (
+        <div className="size-7 rounded-full bg-secondary border border-border flex items-center justify-center shrink-0 mt-0.5">
+          <User size={13} className="text-muted-foreground" aria-hidden="true" />
+        </div>
+      )}
+
+      <div className={cn("flex flex-col gap-1.5 max-w-[78%]", isUser ? "items-end" : "items-start")}>
+        {/* Attachments above bubble for user */}
+        {isUser && msg.attachments && msg.attachments.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 justify-end">
+            {msg.attachments.map(a => <AttachmentChip key={a.id} a={a} />)}
+          </div>
+        )}
+
+        {/* Bubble */}
+        <div className={cn(
+          "px-4 py-3 rounded-2xl text-sm leading-relaxed",
+          isUser
+            ? "bg-primary text-primary-foreground rounded-tr-sm"
+            : "bg-card border border-border text-foreground rounded-tl-sm"
+        )}>
+          {renderContent(content)}
+          {!isUser && isLatest && msg.streaming && !displayed.endsWith(msg.content) && (
+            <span className="inline-block w-1.5 h-4 bg-primary ml-0.5 animate-pulse rounded-sm align-middle" aria-label="typing" />
+          )}
+        </div>
+
+        {/* Timestamp + actions */}
+        <div className={cn("flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity", isUser ? "flex-row-reverse" : "flex-row")}>
+          <span className="text-[10px] text-muted-foreground">{msg.timestamp}</span>
+          {!isUser && (
+            <button onClick={copy} aria-label="Copy message" className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+              {copied ? <CheckCircle2 size={10} className="text-green-400" /> : <Copy size={10} />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const EMOJI_LIST = ["👍", "👏", "🔥", "✅", "💡", "😊", "🎉", "❤️"]
+
+function ModernChatUI() {
+  const [messages, setMessages] = useState<ChatMessage[]>(SAMPLE_CONVERSATIONS)
+  const [input, setInput] = useState("")
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [isRecording, setIsRecording] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [showEmoji, setShowEmoji] = useState(false)
+  const [showAttachMenu, setShowAttachMenu] = useState(false)
+  const bottomRef = React.useRef<HTMLDivElement>(null)
+  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  function autoResize(el: HTMLTextAreaElement) {
+    el.style.height = "auto"
+    el.style.height = Math.min(el.scrollHeight, 160) + "px"
+  }
+
+  const MOCK_REPLIES = [
+    "That's a great question! Let me think through this carefully.\n\nBased on what you've shared, I'd recommend breaking this into smaller steps and tackling the most impactful piece first.",
+    "Absolutely! Here's how I'd approach that:\n\n1. Start by defining your goal clearly\n2. Identify any constraints or requirements\n3. Build an MVP and iterate quickly\n\nWant me to go deeper on any of these?",
+    "Happy to help with that. The short answer is **yes**, it's definitely possible — and here's the most efficient way to do it.",
+  ]
+
+  async function sendMessage() {
+    const text = input.trim()
+    if (!text && attachments.length === 0) return
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: text,
+      attachments: attachments.length > 0 ? [...attachments] : undefined,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    }
+    setMessages(m => [...m, userMsg])
+    setInput("")
+    setAttachments([])
+    if (inputRef.current) inputRef.current.style.height = "auto"
+
+    // Simulate AI streaming reply
+    setIsStreaming(true)
+    const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)]
+    const botMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: reply,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      streaming: true,
+    }
+    setMessages(m => [...m, botMsg])
+    await new Promise(r => setTimeout(r, reply.length * 18 + 400))
+    setMessages(m => m.map(msg => msg.id === botMsg.id ? { ...msg, streaming: false } : msg))
+    setIsStreaming(false)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage() }
+  }
+
+  function mockAttach(type: AttachmentType, name: string, size: string) {
+    setAttachments(a => [...a, { id: Date.now().toString(), name, size, type }])
+    setShowAttachMenu(false)
+  }
+
+  function toggleRecording() {
+    setIsRecording(r => !r)
+    if (isRecording) {
+      setInput(v => v + (v ? " " : "") + "Voice message transcribed here...")
+      if (inputRef.current) autoResize(inputRef.current)
+    }
+  }
+
+  const canSend = input.trim().length > 0 || attachments.length > 0
+
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto h-[620px] rounded-2xl border border-border bg-background overflow-hidden shadow-xl">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card shrink-0">
+        <div className="relative">
+          <div className="size-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+            <Bot size={16} className="text-primary" aria-hidden="true" />
+          </div>
+          <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-green-400 border-2 border-card" aria-label="Online" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">NexUI Assistant</p>
+          <p className="text-[10px] text-green-400 font-medium">Online · Ready to help</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setMessages(SAMPLE_CONVERSATIONS)}
+            aria-label="Reset conversation"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <RotateCcw size={14} aria-hidden="true" />
+          </button>
+          <button aria-label="Voice call" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <Volume2 size={14} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 scroll-smooth">
+        {messages.map((msg, i) => (
+          <MessageBubble key={msg.id} msg={msg} isLatest={i === messages.length - 1} />
+        ))}
+        {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
+          <div className="flex gap-3 items-end">
+            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <Bot size={13} className="text-primary" />
+            </div>
+            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-card border border-border">
+              <div className="flex gap-1 items-center h-4">
+                {[0, 150, 300].map(d => (
+                  <span key={d} className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: `${d}ms` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Suggested prompts — shown when no user messages yet or after reset */}
+      {messages.filter(m => m.role === "user").length === 0 && (
+        <div className="px-4 pb-2 flex flex-wrap gap-2 shrink-0">
+          {SUGGESTED_PROMPTS.map(p => (
+            <button
+              key={p.label}
+              onClick={() => { setInput(p.label); inputRef.current?.focus() }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-secondary text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+            >
+              {p.icon}{p.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Pending attachments */}
+      {attachments.length > 0 && (
+        <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
+          {attachments.map(a => (
+            <AttachmentChip key={a.id} a={a} onRemove={() => setAttachments(prev => prev.filter(x => x.id !== a.id))} />
+          ))}
+        </div>
+      )}
+
+      {/* Input area */}
+      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-border bg-card">
+        {/* Recording indicator */}
+        {isRecording && (
+          <div className="flex items-center gap-2 mb-2 px-3 py-1.5 rounded-lg bg-red-400/10 border border-red-400/20">
+            <span className="size-2 rounded-full bg-red-400 animate-pulse" />
+            <span className="text-xs text-red-400 font-medium">Recording… tap mic to stop</span>
+          </div>
+        )}
+
+        <div className="flex items-end gap-2">
+          {/* Emoji picker toggle */}
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setShowEmoji(v => !v)}
+              aria-label="Emoji picker"
+              aria-expanded={showEmoji}
+              className="size-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary border border-border transition-colors"
+            >
+              <Smile size={16} aria-hidden="true" />
+            </button>
+            {showEmoji && (
+              <div className="absolute bottom-11 left-0 z-20 p-2 rounded-xl border border-border bg-card shadow-xl grid grid-cols-4 gap-1">
+                {EMOJI_LIST.map(e => (
+                  <button
+                    key={e}
+                    onClick={() => { setInput(v => v + e); setShowEmoji(false); inputRef.current?.focus() }}
+                    className="text-base p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                    aria-label={e}
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Attach menu */}
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setShowAttachMenu(v => !v)}
+              aria-label="Attach file"
+              aria-expanded={showAttachMenu}
+              className="size-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary border border-border transition-colors"
+            >
+              <Paperclip size={16} aria-hidden="true" />
+            </button>
+            {showAttachMenu && (
+              <div className="absolute bottom-11 left-0 z-20 w-44 rounded-xl border border-border bg-card shadow-xl py-1 overflow-hidden">
+                {([
+                  { type: "pdf" as AttachmentType, label: "Upload PDF", name: "document.pdf", size: "1.2 MB" },
+                  { type: "image" as AttachmentType, label: "Upload image", name: "screenshot.png", size: "340 KB" },
+                  { type: "doc" as AttachmentType, label: "Upload document", name: "notes.docx", size: "88 KB" },
+                  { type: "csv" as AttachmentType, label: "Upload spreadsheet", name: "data.csv", size: "210 KB" },
+                ] as const).map(item => (
+                  <button
+                    key={item.type}
+                    onClick={() => mockAttach(item.type, item.name, item.size)}
+                    className="flex items-center gap-2 w-full px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    {ATTACHMENT_ICON[item.type]}
+                    {item.label}
+                  </button>
+                ))}
+                <div className="border-t border-border mx-2 my-1" />
+                <button
+                  onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false) }}
+                  className="flex items-center gap-2 w-full px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Upload size={12} /> Browse files
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Text input */}
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => { setInput(e.target.value); autoResize(e.target) }}
+            onKeyDown={handleKeyDown}
+            placeholder="Message NexUI Assistant… (Enter to send, Shift+Enter for newline)"
+            rows={1}
+            aria-label="Chat input"
+            className="flex-1 resize-none bg-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all min-h-[40px] max-h-40 overflow-y-auto leading-relaxed"
+            style={{ height: "auto" }}
+          />
+
+          {/* Voice button */}
+          <button
+            onClick={toggleRecording}
+            aria-label={isRecording ? "Stop recording" : "Start voice input"}
+            className={cn(
+              "size-9 shrink-0 flex items-center justify-center rounded-xl border transition-all",
+              isRecording
+                ? "bg-red-400/20 border-red-400/40 text-red-400 hover:bg-red-400/30"
+                : "bg-secondary border-border text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+            )}
+          >
+            {isRecording ? <MicOff size={15} aria-hidden="true" /> : <Mic size={15} aria-hidden="true" />}
+          </button>
+
+          {/* Send / Stop */}
+          {isStreaming ? (
+            <button
+              onClick={() => { setIsStreaming(false); setMessages(m => m.map(msg => msg.streaming ? { ...msg, streaming: false } : msg)) }}
+              aria-label="Stop generating"
+              className="size-9 shrink-0 flex items-center justify-center rounded-xl bg-red-400/20 border border-red-400/30 text-red-400 hover:bg-red-400/30 transition-all"
+            >
+              <StopCircle size={16} aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              onClick={sendMessage}
+              disabled={!canSend}
+              aria-label="Send message"
+              className={cn(
+                "size-9 shrink-0 flex items-center justify-center rounded-xl border transition-all",
+                canSend
+                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 shadow-sm"
+                  : "bg-secondary border-border text-muted-foreground opacity-50 cursor-not-allowed"
+              )}
+            >
+              <ArrowUp size={16} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+
+        <input ref={fileInputRef} type="file" className="hidden" aria-hidden="true" tabIndex={-1} />
+        <p className="text-center text-[10px] text-muted-foreground mt-2">
+          AI can make mistakes. Verify important information.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Chat registry entries ────────────────────────────────────────────────────
+const CHAT_REGISTRY: ComponentEntry[] = [
+  {
+    name: "Modern Chat UI",
+    description: "Full-featured AI chat interface with streaming typewriter replies, file attachments (PDF, image, doc, CSV), voice recording toggle, emoji picker, stop generation, copy message, and suggested prompts. Zero dependencies.",
+    category: "Chat",
+    tags: ["chat", "ai", "voice", "attachments", "streaming", "emoji", "modern"],
+    fullWidth: true,
+    preview: <ModernChatUI />,
+    code: `"use client"
+// Full source available in lib/components-registry.tsx
+// Key features:
+//   • Streaming typewriter effect for AI replies
+//   • File attachment menu (PDF, image, doc, CSV, browse)
+//   • Voice recording toggle with indicator
+//   • Emoji picker grid
+//   • Stop generation button while streaming
+//   • Copy message on hover
+//   • Suggested prompt chips
+//   • Auto-resizing textarea (Shift+Enter for newline)
+//   • Fully accessible (aria-labels, roles, keyboard nav)
+`,
+  },
+]
+
+COMPONENTS.push(...CHAT_REGISTRY)
 
