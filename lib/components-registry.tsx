@@ -885,7 +885,7 @@ function CalendarTimePicker() {
   )
 }
 
-// ─── 6. Booking / Availability Calendar ──────────────────────────────────────
+// ─── 6. Booking / Availability Calendar ─────────────────────────────────────���
 
 const SLOTS = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
 const BOOKED = new Set(["10:00 AM", "2:00 PM"])
@@ -999,12 +999,13 @@ function CalendarBooking() {
 
 // 1. Basic Dropdown — matches the reference screenshot exactly
 function DropdownBasic() {
-  const options = ["Next.js", "React", "Svelte", "Astro", "Nuxt"]
+  const options = ["Next.js", "Remix", "Astro", "SvelteKit"]
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState("Next.js")
 
   return (
     <div className="relative w-72">
+      {/* Trigger */}
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox"
@@ -1014,27 +1015,37 @@ function DropdownBasic() {
         {selected}
         <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
       </button>
+
+      {/* Open list */}
       {open && (
         <ul
           role="listbox"
-          className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden"
+          className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden py-1"
         >
-          {options.map(opt => (
-            <li key={opt} role="option" aria-selected={selected === opt}>
-              <button
-                onClick={() => { setSelected(opt); setOpen(false) }}
-                className={cn(
-                  "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
-                  selected === opt
-                    ? "text-foreground bg-primary/10 font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                )}
-              >
-                {opt}
-                {selected === opt && <Check size={13} aria-hidden="true" className="text-primary" />}
-              </button>
-            </li>
-          ))}
+          {options.map(opt => {
+            const isSel = selected === opt
+            return (
+              <li key={opt} role="option" aria-selected={isSel}>
+                <button
+                  onClick={() => { setSelected(opt); setOpen(false) }}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2.5 mx-1 rounded-lg text-sm transition-colors",
+                    isSel
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-foreground hover:bg-secondary"
+                  )}
+                  style={{ width: "calc(100% - 8px)" }}
+                >
+                  <Check
+                    size={14}
+                    aria-hidden="true"
+                    className={cn("shrink-0", isSel ? "opacity-100" : "opacity-0")}
+                  />
+                  {opt}
+                </button>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
@@ -1885,13 +1896,13 @@ export function CalendarBooking() {
 }`,
   },
   {
-    name: "Dropdown — Basic", description: "Clean pill-style single-select dropdown matching the reference design — dark background, chevron toggle, check mark on selected.", category: "Dropdown", tags: ["dropdown", "select", "menu", "picker"], fullWidth: true, preview: <DropdownBasic />,
+    name: "Dropdown — Basic", description: "Single-select dropdown with a solid primary background on the selected item and a left-aligned checkmark — matching the macOS-native style.", category: "Dropdown", tags: ["dropdown", "select", "menu", "picker"], fullWidth: true, preview: <DropdownBasic />,
     code: `"use client"
 import { useState } from "react"
 import { ChevronDown, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const options = ["Next.js", "React", "Svelte", "Astro", "Nuxt"]
+const options = ["Next.js", "Remix", "Astro", "SvelteKit"]
 
 export function Dropdown() {
   const [open, setOpen] = useState(false)
@@ -1909,21 +1920,25 @@ export function Dropdown() {
         <ChevronDown size={15} className={cn("text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
       </button>
       {open && (
-        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-          {options.map(opt => (
-            <li key={opt} role="option" aria-selected={selected === opt}>
-              <button
-                onClick={() => { setSelected(opt); setOpen(false) }}
-                className={cn(
-                  "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
-                  selected === opt ? "text-foreground bg-primary/10 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                )}
-              >
-                {opt}
-                {selected === opt && <Check size={13} className="text-primary" />}
-              </button>
-            </li>
-          ))}
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden py-1">
+          {options.map(opt => {
+            const isSel = selected === opt
+            return (
+              <li key={opt} role="option" aria-selected={isSel}>
+                <button
+                  onClick={() => { setSelected(opt); setOpen(false) }}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 mx-1 rounded-lg text-sm transition-colors",
+                    isSel ? "bg-primary text-primary-foreground font-medium" : "text-foreground hover:bg-secondary"
+                  )}
+                  style={{ width: "calc(100% - 8px)" }}
+                >
+                  <Check size={14} className={cn("shrink-0", isSel ? "opacity-100" : "opacity-0")} />
+                  {opt}
+                </button>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
