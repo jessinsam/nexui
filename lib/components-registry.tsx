@@ -1,5 +1,6 @@
 "use client"
 
+// icons: lucide-react@0.564
 import { useState } from "react"
 import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp } from "lucide-react"
 import Image from "next/image"
