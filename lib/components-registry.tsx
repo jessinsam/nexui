@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -995,6 +995,237 @@ function CalendarBooking() {
   )
 }
 
+// ─── Dropdown components ──────────────────────────────────────────────────────
+
+// 1. Basic Dropdown — matches the reference screenshot exactly
+function DropdownBasic() {
+  const options = ["Next.js", "React", "Svelte", "Astro", "Nuxt"]
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState("Next.js")
+
+  return (
+    <div className="relative w-72">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
+      >
+        {selected}
+        <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden"
+        >
+          {options.map(opt => (
+            <li key={opt} role="option" aria-selected={selected === opt}>
+              <button
+                onClick={() => { setSelected(opt); setOpen(false) }}
+                className={cn(
+                  "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
+                  selected === opt
+                    ? "text-foreground bg-primary/10 font-medium"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                )}
+              >
+                {opt}
+                {selected === opt && <Check size={13} aria-hidden="true" className="text-primary" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// 2. Searchable Dropdown
+function DropdownSearch() {
+  const options = ["TypeScript", "JavaScript", "Python", "Rust", "Go", "Swift", "Kotlin", "C++"]
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<string | null>(null)
+  const [query, setQuery] = useState("")
+  const filtered = options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+
+  return (
+    <div className="relative w-72">
+      <button
+        onClick={() => { setOpen(o => !o); setQuery("") }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
+      >
+        <span className={selected ? "text-foreground" : "text-muted-foreground"}>{selected ?? "Select language..."}</span>
+        <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary">
+              <Search size={13} aria-hidden="true" className="text-muted-foreground shrink-0" />
+              <input
+                autoFocus
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search..."
+                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+              />
+            </div>
+          </div>
+          <ul role="listbox" className="max-h-48 overflow-y-auto py-1">
+            {filtered.length === 0 ? (
+              <li className="px-4 py-3 text-xs text-muted-foreground text-center">No results</li>
+            ) : filtered.map(opt => (
+              <li key={opt} role="option" aria-selected={selected === opt}>
+                <button
+                  onClick={() => { setSelected(opt); setOpen(false) }}
+                  className={cn(
+                    "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
+                    selected === opt
+                      ? "text-foreground bg-primary/10 font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  {opt}
+                  {selected === opt && <Check size={13} aria-hidden="true" className="text-primary" />}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// 3. Multi-select Dropdown
+function DropdownMulti() {
+  const options = ["UI Design", "Frontend", "Backend", "DevOps", "Mobile", "Data Science"]
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<string[]>(["UI Design", "Frontend"])
+
+  function toggle(opt: string) {
+    setSelected(s => s.includes(opt) ? s.filter(x => x !== opt) : [...s, opt])
+  }
+
+  return (
+    <div className="relative w-72">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-multiselectable="true"
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-secondary border border-border text-sm hover:border-primary/40 transition-colors min-h-[46px]"
+      >
+        <div className="flex flex-wrap gap-1.5 flex-1">
+          {selected.length === 0 ? (
+            <span className="text-muted-foreground text-sm">Select skills...</span>
+          ) : selected.map(s => (
+            <span key={s} className="inline-flex items-center gap-1 rounded-md bg-primary/15 text-primary text-xs font-medium px-2 py-0.5">
+              {s}
+              <button
+                onClick={e => { e.stopPropagation(); toggle(s) }}
+                aria-label={`Remove ${s}`}
+                className="hover:text-primary/60 transition-colors"
+              >
+                <X size={10} aria-hidden="true" />
+              </button>
+            </span>
+          ))}
+        </div>
+        <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden py-1">
+          {options.map(opt => {
+            const isSel = selected.includes(opt)
+            return (
+              <li key={opt} role="option" aria-selected={isSel}>
+                <button
+                  onClick={() => toggle(opt)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-secondary"
+                >
+                  <span className={cn(
+                    "size-4 rounded flex items-center justify-center border shrink-0 transition-colors",
+                    isSel ? "bg-primary border-primary" : "border-border"
+                  )}>
+                    {isSel && <Check size={10} aria-hidden="true" className="text-primary-foreground" />}
+                  </span>
+                  <span className={isSel ? "text-foreground font-medium" : "text-muted-foreground"}>{opt}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// 4. Dropdown with icons
+const FRAMEWORK_OPTIONS = [
+  { label: "Next.js", desc: "React framework", icon: Globe },
+  { label: "Nuxt", desc: "Vue framework", icon: Layers },
+  { label: "SvelteKit", desc: "Svelte framework", icon: Zap },
+  { label: "Astro", desc: "Content-first", icon: Server },
+]
+
+function DropdownWithIcons() {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(FRAMEWORK_OPTIONS[0])
+
+  return (
+    <div className="relative w-72">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-secondary border border-border hover:border-primary/40 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <selected.icon size={13} aria-hidden="true" className="text-primary" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-medium text-foreground leading-none">{selected.label}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{selected.desc}</p>
+          </div>
+        </div>
+        <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden py-1">
+          {FRAMEWORK_OPTIONS.map(opt => {
+            const isSel = selected.label === opt.label
+            return (
+              <li key={opt.label} role="option" aria-selected={isSel}>
+                <button
+                  onClick={() => { setSelected(opt); setOpen(false) }}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-2.5 transition-colors",
+                    isSel ? "bg-primary/10" : "hover:bg-secondary"
+                  )}
+                >
+                  <div className="size-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                    <opt.icon size={13} aria-hidden="true" className={isSel ? "text-primary" : "text-muted-foreground"} />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className={cn("text-sm leading-none", isSel ? "text-foreground font-medium" : "text-muted-foreground")}>{opt.label}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
+                  </div>
+                  {isSel && <Check size={13} aria-hidden="true" className="text-primary shrink-0" />}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export type ComponentEntry = {
@@ -1008,7 +1239,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -1654,7 +1885,217 @@ export function CalendarBooking() {
 }`,
   },
   {
-    name: "Button", description: "Trigger actions with multiple variants and sizes.", category: "Inputs", tags: ["button", "action", "cta", "variant"], preview: <ButtonPreview />,
+    name: "Dropdown — Basic", description: "Clean pill-style single-select dropdown matching the reference design — dark background, chevron toggle, check mark on selected.", category: "Dropdown", tags: ["dropdown", "select", "menu", "picker"], fullWidth: true, preview: <DropdownBasic />,
+    code: `"use client"
+import { useState } from "react"
+import { ChevronDown, Check } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const options = ["Next.js", "React", "Svelte", "Astro", "Nuxt"]
+
+export function Dropdown() {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState("Next.js")
+
+  return (
+    <div className="relative w-72">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
+      >
+        {selected}
+        <ChevronDown size={15} className={cn("text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+          {options.map(opt => (
+            <li key={opt} role="option" aria-selected={selected === opt}>
+              <button
+                onClick={() => { setSelected(opt); setOpen(false) }}
+                className={cn(
+                  "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
+                  selected === opt ? "text-foreground bg-primary/10 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                )}
+              >
+                {opt}
+                {selected === opt && <Check size={13} className="text-primary" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Dropdown — Searchable", description: "Dropdown with a live search input to filter a long list of options.", category: "Dropdown", tags: ["dropdown", "search", "filter", "combobox"], fullWidth: true, preview: <DropdownSearch />,
+    code: `"use client"
+import { useState } from "react"
+import { ChevronDown, Check, Search } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const options = ["TypeScript", "JavaScript", "Python", "Rust", "Go", "Swift", "Kotlin", "C++"]
+
+export function DropdownSearch() {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<string | null>(null)
+  const [query, setQuery] = useState("")
+  const filtered = options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+
+  return (
+    <div className="relative w-72">
+      <button
+        onClick={() => { setOpen(o => !o); setQuery("") }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border text-sm font-medium hover:border-primary/40 transition-colors"
+      >
+        <span className={selected ? "text-foreground" : "text-muted-foreground"}>{selected ?? "Select language..."}</span>
+        <ChevronDown size={15} className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary">
+              <Search size={13} className="text-muted-foreground shrink-0" />
+              <input autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search..." className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none" />
+            </div>
+          </div>
+          <ul role="listbox" className="max-h-48 overflow-y-auto py-1">
+            {filtered.length === 0
+              ? <li className="px-4 py-3 text-xs text-muted-foreground text-center">No results</li>
+              : filtered.map(opt => (
+                <li key={opt} role="option" aria-selected={selected === opt}>
+                  <button onClick={() => { setSelected(opt); setOpen(false) }} className={cn("w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors", selected === opt ? "text-foreground bg-primary/10 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
+                    {opt}
+                    {selected === opt && <Check size={13} className="text-primary" />}
+                  </button>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Dropdown — Multi-select", description: "Select multiple options with checkboxes and removable chip badges.", category: "Dropdown", tags: ["dropdown", "multi", "multiselect", "checkbox", "chips"], fullWidth: true, preview: <DropdownMulti />,
+    code: `"use client"
+import { useState } from "react"
+import { ChevronDown, Check, X } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const options = ["UI Design", "Frontend", "Backend", "DevOps", "Mobile", "Data Science"]
+
+export function DropdownMulti() {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<string[]>([])
+
+  function toggle(opt: string) {
+    setSelected(s => s.includes(opt) ? s.filter(x => x !== opt) : [...s, opt])
+  }
+
+  return (
+    <div className="relative w-72">
+      <button onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open} aria-multiselectable="true"
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-secondary border border-border hover:border-primary/40 transition-colors min-h-[46px]">
+        <div className="flex flex-wrap gap-1.5 flex-1">
+          {selected.length === 0
+            ? <span className="text-muted-foreground text-sm">Select skills...</span>
+            : selected.map(s => (
+              <span key={s} className="inline-flex items-center gap-1 rounded-md bg-primary/15 text-primary text-xs font-medium px-2 py-0.5">
+                {s}
+                <button onClick={e => { e.stopPropagation(); toggle(s) }} aria-label={\`Remove \${s}\`} className="hover:text-primary/60"><X size={10} /></button>
+              </span>
+            ))}
+        </div>
+        <ChevronDown size={15} className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden py-1">
+          {options.map(opt => {
+            const isSel = selected.includes(opt)
+            return (
+              <li key={opt} role="option" aria-selected={isSel}>
+                <button onClick={() => toggle(opt)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-secondary">
+                  <span className={cn("size-4 rounded flex items-center justify-center border shrink-0 transition-colors", isSel ? "bg-primary border-primary" : "border-border")}>
+                    {isSel && <Check size={10} className="text-primary-foreground" />}
+                  </span>
+                  <span className={isSel ? "text-foreground font-medium" : "text-muted-foreground"}>{opt}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Dropdown — With Icons", description: "Rich dropdown with icon, title, and subtitle per option — great for framework or service pickers.", category: "Dropdown", tags: ["dropdown", "icons", "rich", "select", "picker"], fullWidth: true, preview: <DropdownWithIcons />,
+    code: `"use client"
+import { useState } from "react"
+import { ChevronDown, Check, Globe, Layers, Zap, Server } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const options = [
+  { label: "Next.js", desc: "React framework", icon: Globe },
+  { label: "Nuxt", desc: "Vue framework", icon: Layers },
+  { label: "SvelteKit", desc: "Svelte framework", icon: Zap },
+  { label: "Astro", desc: "Content-first", icon: Server },
+]
+
+export function DropdownWithIcons() {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState(options[0])
+
+  return (
+    <div className="relative w-72">
+      <button onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-secondary border border-border hover:border-primary/40 transition-colors">
+        <div className="flex items-center gap-3">
+          <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <selected.icon size={13} className="text-primary" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-medium text-foreground leading-none">{selected.label}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{selected.desc}</p>
+          </div>
+        </div>
+        <ChevronDown size={15} className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden py-1">
+          {options.map(opt => {
+            const isSel = selected.label === opt.label
+            return (
+              <li key={opt.label} role="option" aria-selected={isSel}>
+                <button onClick={() => { setSelected(opt); setOpen(false) }} className={cn("w-full flex items-center gap-3 px-4 py-2.5 transition-colors", isSel ? "bg-primary/10" : "hover:bg-secondary")}>
+                  <div className="size-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                    <opt.icon size={13} className={isSel ? "text-primary" : "text-muted-foreground"} />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className={cn("text-sm leading-none", isSel ? "text-foreground font-medium" : "text-muted-foreground")}>{opt.label}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
+                  </div>
+                  {isSel && <Check size={13} className="text-primary shrink-0" />}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}`,
+  },
+  { name: "Button", description: "Trigger actions with multiple variants and sizes.", category: "Inputs", tags: ["button", "action", "cta", "variant"], preview: <ButtonPreview />,
     code: `import { cn } from "@/lib/utils"
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
