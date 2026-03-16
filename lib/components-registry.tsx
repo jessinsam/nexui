@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns3, Table2, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, LayoutKanban, Plus, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -1620,6 +1620,432 @@ function ColorTokensGrid() {
   )
 }
 
+// ─── Data Views shared data ───────────────────────────────────────────────────
+
+type Priority = "Low" | "Medium" | "High"
+type Status = "Todo" | "In Progress" | "In Review" | "Done"
+
+interface Task {
+  id: number
+  title: string
+  status: Status
+  priority: Priority
+  tag: string
+  assignee: string
+  date: string
+  starred: boolean
+}
+
+const TASKS: Task[] = [
+  { id: 1, title: "Design system tokens", status: "Done", priority: "High", tag: "Design", assignee: "AK", date: "Mar 10", starred: true },
+  { id: 2, title: "Implement auth flow", status: "In Progress", priority: "High", tag: "Dev", assignee: "JS", date: "Mar 12", starred: false },
+  { id: 3, title: "Write API docs", status: "Todo", priority: "Medium", tag: "Docs", assignee: "ML", date: "Mar 15", starred: false },
+  { id: 4, title: "Fix mobile layout", status: "In Review", priority: "Medium", tag: "Dev", assignee: "AK", date: "Mar 13", starred: true },
+  { id: 5, title: "Onboarding emails", status: "Todo", priority: "Low", tag: "Marketing", assignee: "NP", date: "Mar 18", starred: false },
+  { id: 6, title: "Performance audit", status: "In Progress", priority: "High", tag: "Dev", assignee: "JS", date: "Mar 11", starred: false },
+  { id: 7, title: "User research interviews", status: "Done", priority: "Medium", tag: "Research", assignee: "ML", date: "Mar 9", starred: true },
+  { id: 8, title: "Dashboard analytics", status: "In Review", priority: "Low", tag: "Dev", assignee: "NP", date: "Mar 14", starred: false },
+]
+
+const STATUS_CONFIG: Record<Status, { color: string; icon: React.ReactNode }> = {
+  "Todo":        { color: "text-muted-foreground", icon: <Circle size={12} /> },
+  "In Progress": { color: "text-blue-400", icon: <PauseCircle size={12} /> },
+  "In Review":   { color: "text-yellow-400", icon: <AlertCircle size={12} /> },
+  "Done":        { color: "text-green-400", icon: <CheckCircle2 size={12} /> },
+}
+
+const PRIORITY_CONFIG: Record<Priority, { dot: string; label: string }> = {
+  "Low":    { dot: "bg-muted-foreground", label: "Low" },
+  "Medium": { dot: "bg-yellow-400", label: "Medium" },
+  "High":   { dot: "bg-red-400", label: "High" },
+}
+
+const AVATAR_COLORS: Record<string, string> = {
+  AK: "bg-violet-500", JS: "bg-blue-500", ML: "bg-emerald-500", NP: "bg-orange-500",
+}
+
+function Avatar({ initials }: { initials: string }) {
+  return (
+    <span className={cn("inline-flex items-center justify-center size-6 rounded-full text-[10px] font-bold text-white shrink-0", AVATAR_COLORS[initials] ?? "bg-primary")}>
+      {initials}
+    </span>
+  )
+}
+
+function PriorityBadge({ p }: { p: Priority }) {
+  const { dot, label } = PRIORITY_CONFIG[p]
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className={cn("size-1.5 rounded-full shrink-0", dot)} />
+      {label}
+    </span>
+  )
+}
+
+function StatusBadge({ s }: { s: Status }) {
+  const { color, icon } = STATUS_CONFIG[s]
+  return (
+    <span className={cn("inline-flex items-center gap-1 text-xs font-medium", color)}>
+      {icon}
+      {s}
+    </span>
+  )
+}
+
+// ─── Filter + Sort toolbar (shared) ───────────────────────────────────────────
+
+type SortKey = "title" | "priority" | "date" | "status"
+type SortDir = "asc" | "desc"
+
+const PRIORITY_ORDER: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 }
+const STATUS_ORDER: Record<Status, number> = { "In Progress": 0, "In Review": 1, "Todo": 2, "Done": 3 }
+
+function useFilterSort(initial: Task[]) {
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<Status | "All">("All")
+  const [priorityFilter, setPriorityFilter] = useState<Priority | "All">("All")
+  const [sortKey, setSortKey] = useState<SortKey>("date")
+  const [sortDir, setSortDir] = useState<SortDir>("asc")
+
+  const filtered = initial
+    .filter(t => t.title.toLowerCase().includes(search.toLowerCase()))
+    .filter(t => statusFilter === "All" || t.status === statusFilter)
+    .filter(t => priorityFilter === "All" || t.priority === priorityFilter)
+    .sort((a, b) => {
+      let cmp = 0
+      if (sortKey === "title") cmp = a.title.localeCompare(b.title)
+      else if (sortKey === "priority") cmp = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+      else if (sortKey === "date") cmp = a.date.localeCompare(b.date)
+      else if (sortKey === "status") cmp = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
+      return sortDir === "asc" ? cmp : -cmp
+    })
+
+  return { search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, sortKey, setSortKey, sortDir, setSortDir, filtered }
+}
+
+function Toolbar({
+  search, setSearch,
+  statusFilter, setStatusFilter,
+  priorityFilter, setPriorityFilter,
+  sortKey, setSortKey,
+  sortDir, setSortDir,
+}: ReturnType<typeof useFilterSort>) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {/* Search */}
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border flex-1 min-w-[140px]">
+        <Search size={13} className="text-muted-foreground shrink-0" />
+        <input
+          value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Filter tasks..." aria-label="Filter tasks"
+          className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full"
+        />
+        {search && <button onClick={() => setSearch("")} aria-label="Clear"><X size={11} className="text-muted-foreground" /></button>}
+      </div>
+      {/* Status filter */}
+      <select
+        value={statusFilter}
+        onChange={e => setStatusFilter(e.target.value as Status | "All")}
+        aria-label="Filter by status"
+        className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer"
+      >
+        {(["All", "Todo", "In Progress", "In Review", "Done"] as const).map(s => <option key={s}>{s}</option>)}
+      </select>
+      {/* Priority filter */}
+      <select
+        value={priorityFilter}
+        onChange={e => setPriorityFilter(e.target.value as Priority | "All")}
+        aria-label="Filter by priority"
+        className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer"
+      >
+        {(["All", "High", "Medium", "Low"] as const).map(p => <option key={p}>{p}</option>)}
+      </select>
+      {/* Sort key */}
+      <select
+        value={sortKey}
+        onChange={e => setSortKey(e.target.value as SortKey)}
+        aria-label="Sort by"
+        className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer"
+      >
+        {(["date", "title", "priority", "status"] as const).map(k => (
+          <option key={k} value={k}>{k.charAt(0).toUpperCase() + k.slice(1)}</option>
+        ))}
+      </select>
+      {/* Sort direction */}
+      <button
+        onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
+        aria-label={sortDir === "asc" ? "Sort descending" : "Sort ascending"}
+        className="p-2 rounded-lg bg-secondary border border-border text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {sortDir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />}
+      </button>
+    </div>
+  )
+}
+
+// ─── View: Kanban ─────────────────────────────────────────────────────────────
+
+const KANBAN_COLS: Status[] = ["Todo", "In Progress", "In Review", "Done"]
+
+function ViewKanban() {
+  const state = useFilterSort(TASKS)
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Toolbar {...state} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {KANBAN_COLS.map(col => {
+          const colTasks = state.filtered.filter(t => t.status === col)
+          const { color, icon } = STATUS_CONFIG[col]
+          return (
+            <div key={col} className="flex flex-col gap-2">
+              {/* Column header */}
+              <div className="flex items-center justify-between px-1">
+                <span className={cn("flex items-center gap-1.5 text-xs font-semibold", color)}>
+                  {icon} {col}
+                </span>
+                <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-full border border-border">{colTasks.length}</span>
+              </div>
+              {/* Cards */}
+              <div className="flex flex-col gap-2 min-h-[80px]">
+                {colTasks.map(t => (
+                  <div key={t.id} className="p-3 rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-150 cursor-default group">
+                    <div className="flex items-start justify-between gap-1 mb-2">
+                      <p className="text-xs font-medium text-foreground leading-snug">{t.title}</p>
+                      <Star size={11} className={cn("shrink-0 mt-0.5", t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <PriorityBadge p={t.priority} />
+                      <Avatar initials={t.assignee} />
+                    </div>
+                    <span className="mt-2 inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary border border-border text-muted-foreground">{t.tag}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── View: Board (wider swimlanes) ────────────────────────────────────────────
+
+function ViewBoard() {
+  const state = useFilterSort(TASKS)
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Toolbar {...state} />
+      <div className="flex flex-col gap-3">
+        {KANBAN_COLS.map(col => {
+          const colTasks = state.filtered.filter(t => t.status === col)
+          const { color, icon } = STATUS_CONFIG[col]
+          if (colTasks.length === 0) return null
+          return (
+            <div key={col} className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className={cn("flex items-center gap-2 px-4 py-2.5 border-b border-border", color)}>
+                {icon}
+                <span className="text-xs font-semibold">{col}</span>
+                <span className="ml-auto text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-full border border-border">{colTasks.length}</span>
+              </div>
+              <div className="flex gap-3 p-3 overflow-x-auto">
+                {colTasks.map(t => (
+                  <div key={t.id} className="flex-shrink-0 w-52 p-3 rounded-lg border border-border bg-secondary hover:border-primary/30 transition-all duration-150 cursor-default">
+                    <div className="flex items-start justify-between gap-1 mb-2">
+                      <p className="text-xs font-medium text-foreground leading-snug">{t.title}</p>
+                      <Star size={11} className={cn("shrink-0 mt-0.5", t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <PriorityBadge p={t.priority} />
+                      <Avatar initials={t.assignee} />
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-card border border-border text-muted-foreground">{t.tag}</span>
+                      <span className="text-[10px] text-muted-foreground">{t.date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── View: Cards grid ─────────────────────────────────────────────────────────
+
+function ViewCards() {
+  const state = useFilterSort(TASKS)
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Toolbar {...state} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {state.filtered.map(t => (
+          <div key={t.id} className="flex flex-col gap-3 p-4 rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-150 cursor-default">
+            <div className="flex items-start justify-between">
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary border border-border text-muted-foreground">{t.tag}</span>
+              <Star size={12} className={cn(t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
+            </div>
+            <p className="text-sm font-medium text-foreground leading-snug">{t.title}</p>
+            <div className="mt-auto flex flex-col gap-2">
+              <StatusBadge s={t.status} />
+              <div className="flex items-center justify-between">
+                <PriorityBadge p={t.priority} />
+                <Avatar initials={t.assignee} />
+              </div>
+              <span className="text-[10px] text-muted-foreground">{t.date}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── View: List ───────────────────────────────────────────────────────────────
+
+function ViewList() {
+  const state = useFilterSort(TASKS)
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Toolbar {...state} />
+      <div className="flex flex-col rounded-xl border border-border overflow-hidden">
+        {state.filtered.map((t, i) => (
+          <div
+            key={t.id}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors cursor-default",
+              i < state.filtered.length - 1 && "border-b border-border"
+            )}
+          >
+            <GripVertical size={13} className="text-border shrink-0" />
+            <Star size={12} className={cn("shrink-0", t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
+            <p className="flex-1 text-sm text-foreground truncate">{t.title}</p>
+            <span className="hidden sm:block text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary border border-border text-muted-foreground shrink-0">{t.tag}</span>
+            <StatusBadge s={t.status} />
+            <PriorityBadge p={t.priority} />
+            <Avatar initials={t.assignee} />
+            <span className="text-[10px] text-muted-foreground shrink-0 hidden md:block">{t.date}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── View: Table ─────────────────────────────────────────────────────────────
+
+function ViewTable() {
+  const state = useFilterSort(TASKS)
+
+  function SortHeader({ label, k }: { label: string; k: SortKey }) {
+    const active = state.sortKey === k
+    return (
+      <button
+        onClick={() => {
+          if (active) state.setSortDir(d => d === "asc" ? "desc" : "asc")
+          else { state.setSortKey(k); state.setSortDir("asc") }
+        }}
+        className={cn("flex items-center gap-1 text-xs font-semibold transition-colors", active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
+      >
+        {label}
+        {active
+          ? (state.sortDir === "asc" ? <ArrowUp size={11} /> : <ArrowDown size={11} />)
+          : <ArrowUpDown size={11} className="opacity-40" />
+        }
+      </button>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Toolbar {...state} />
+      <div className="rounded-xl border border-border overflow-hidden">
+        <table className="w-full text-sm" role="table">
+          <thead>
+            <tr className="border-b border-border bg-secondary/60">
+              <th className="px-4 py-2.5 text-left"><SortHeader label="Title" k="title" /></th>
+              <th className="px-3 py-2.5 text-left"><SortHeader label="Status" k="status" /></th>
+              <th className="px-3 py-2.5 text-left hidden md:table-cell"><SortHeader label="Priority" k="priority" /></th>
+              <th className="px-3 py-2.5 text-left hidden lg:table-cell text-xs font-semibold text-muted-foreground">Tag</th>
+              <th className="px-3 py-2.5 text-left hidden lg:table-cell text-xs font-semibold text-muted-foreground">Assignee</th>
+              <th className="px-3 py-2.5 text-right"><SortHeader label="Date" k="date" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.filtered.map((t, i) => (
+              <tr
+                key={t.id}
+                className={cn("group hover:bg-secondary/40 transition-colors cursor-default", i < state.filtered.length - 1 && "border-b border-border")}
+              >
+                <td className="px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <Star size={11} className={cn(t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
+                    <span className="text-xs text-foreground truncate max-w-[140px]">{t.title}</span>
+                  </div>
+                </td>
+                <td className="px-3 py-2.5"><StatusBadge s={t.status} /></td>
+                <td className="px-3 py-2.5 hidden md:table-cell"><PriorityBadge p={t.priority} /></td>
+                <td className="px-3 py-2.5 hidden lg:table-cell">
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary border border-border text-muted-foreground">{t.tag}</span>
+                </td>
+                <td className="px-3 py-2.5 hidden lg:table-cell"><Avatar initials={t.assignee} /></td>
+                <td className="px-3 py-2.5 text-right text-[10px] text-muted-foreground">{t.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ─── All Views Switcher (master showcase) ─────────────────────────────────────
+
+type ViewMode = "kanban" | "board" | "cards" | "list" | "table"
+
+const VIEW_TABS: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
+  { id: "kanban", label: "Kanban", icon: <LayoutKanban size={13} /> },
+  { id: "board",  label: "Board",  icon: <Columns3 size={13} /> },
+  { id: "cards",  label: "Cards",  icon: <LayoutGrid size={13} /> },
+  { id: "list",   label: "List",   icon: <List size={13} /> },
+  { id: "table",  label: "Table",  icon: <Table2 size={13} /> },
+]
+
+function ViewSwitcher() {
+  const [view, setView] = useState<ViewMode>("kanban")
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      {/* View tabs */}
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary border border-border w-fit" role="tablist">
+        {VIEW_TABS.map(tab => (
+          <button
+            key={tab.id}
+            role="tab"
+            aria-selected={view === tab.id}
+            onClick={() => setView(tab.id)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150",
+              view === tab.id ? "bg-card text-foreground border border-border shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab.icon}
+            <span className="hidden sm:inline">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+      {/* Active view */}
+      {view === "kanban" && <ViewKanban />}
+      {view === "board"  && <ViewBoard />}
+      {view === "cards"  && <ViewCards />}
+      {view === "list"   && <ViewList />}
+      {view === "table"  && <ViewTable />}
+    </div>
+  )
+}
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export type ComponentEntry = {
@@ -1633,7 +2059,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -2806,6 +3232,146 @@ export function DesignTokens() {
           )
         })}
       </div>
+    </div>
+  )
+}`,
+  },
+  // ── Data Views entries ───────────────────────────────────────────────────────
+  {
+    name: "View — Kanban", description: "Classic Kanban board with status columns, priority badges, assignee avatars, and a full filter/sort toolbar.", category: "Data Views", tags: ["kanban", "board", "columns", "filter", "sort", "view"], fullWidth: true, preview: <ViewKanban />,
+    code: `// See "View — All Views" for the full multi-view implementation with shared data and toolbar.`,
+  },
+  {
+    name: "View — Board", description: "Horizontal swimlane board grouping tasks by status, with horizontal card scroll per lane.", category: "Data Views", tags: ["board", "swimlane", "horizontal", "filter", "sort", "view"], fullWidth: true, preview: <ViewBoard />,
+    code: `// See "View — All Views" for the full multi-view implementation with shared data and toolbar.`,
+  },
+  {
+    name: "View — Cards", description: "Responsive card grid view showing full task details with tag, status, priority, and assignee.", category: "Data Views", tags: ["cards", "grid", "view", "filter", "sort"], fullWidth: true, preview: <ViewCards />,
+    code: `// See "View — All Views" for the full multi-view implementation with shared data and toolbar.`,
+  },
+  {
+    name: "View — List", description: "Compact single-column list view with drag handles, inline badges, and all metadata at a glance.", category: "Data Views", tags: ["list", "compact", "view", "filter", "sort"], fullWidth: true, preview: <ViewList />,
+    code: `// See "View — All Views" for the full multi-view implementation with shared data and toolbar.`,
+  },
+  {
+    name: "View — Table", description: "Sortable data table with clickable column headers, status and priority chips, and avatar assignees.", category: "Data Views", tags: ["table", "data", "sort", "view", "grid"], fullWidth: true, preview: <ViewTable />,
+    code: `// See "View — All Views" for the full multi-view implementation with shared data and toolbar.`,
+  },
+  {
+    name: "View — All Views", description: "Full view-switcher with Kanban, Board, Cards, List, and Table — all sharing the same filter and sort toolbar.", category: "Data Views", tags: ["view", "switcher", "kanban", "table", "list", "cards", "filter", "sort"], fullWidth: true, preview: <ViewSwitcher />,
+    code: `"use client"
+import { useState } from "react"
+import { Search, X, Star, ArrowUp, ArrowDown, ArrowUpDown, GripVertical, LayoutKanban, Columns3, LayoutGrid, List, Table2, Circle, PauseCircle, AlertCircle, CheckCircle2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+type Priority = "Low" | "Medium" | "High"
+type Status = "Todo" | "In Progress" | "In Review" | "Done"
+type SortKey = "title" | "priority" | "date" | "status"
+type SortDir = "asc" | "desc"
+
+interface Task { id: number; title: string; status: Status; priority: Priority; tag: string; assignee: string; date: string; starred: boolean }
+
+const TASKS: Task[] = [
+  { id: 1, title: "Design system tokens", status: "Done", priority: "High", tag: "Design", assignee: "AK", date: "Mar 10", starred: true },
+  { id: 2, title: "Implement auth flow", status: "In Progress", priority: "High", tag: "Dev", assignee: "JS", date: "Mar 12", starred: false },
+  { id: 3, title: "Write API docs", status: "Todo", priority: "Medium", tag: "Docs", assignee: "ML", date: "Mar 15", starred: false },
+  { id: 4, title: "Fix mobile layout", status: "In Review", priority: "Medium", tag: "Dev", assignee: "AK", date: "Mar 13", starred: true },
+  { id: 5, title: "Onboarding emails", status: "Todo", priority: "Low", tag: "Marketing", assignee: "NP", date: "Mar 18", starred: false },
+  { id: 6, title: "Performance audit", status: "In Progress", priority: "High", tag: "Dev", assignee: "JS", date: "Mar 11", starred: false },
+  { id: 7, title: "User research interviews", status: "Done", priority: "Medium", tag: "Research", assignee: "ML", date: "Mar 9", starred: true },
+  { id: 8, title: "Dashboard analytics", status: "In Review", priority: "Low", tag: "Dev", assignee: "NP", date: "Mar 14", starred: false },
+]
+
+const STATUS_CONFIG = {
+  "Todo":        { color: "text-muted-foreground", icon: <Circle size={12} /> },
+  "In Progress": { color: "text-blue-400",         icon: <PauseCircle size={12} /> },
+  "In Review":   { color: "text-yellow-400",        icon: <AlertCircle size={12} /> },
+  "Done":        { color: "text-green-400",         icon: <CheckCircle2 size={12} /> },
+}
+const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 }
+const STATUS_ORDER   = { "In Progress": 0, "In Review": 1, "Todo": 2, "Done": 3 }
+const AVATAR_COLORS  = { AK: "bg-violet-500", JS: "bg-blue-500", ML: "bg-emerald-500", NP: "bg-orange-500" }
+const KANBAN_COLS: Status[] = ["Todo", "In Progress", "In Review", "Done"]
+
+function Avatar({ initials }: { initials: string }) {
+  return <span className={cn("inline-flex items-center justify-center size-6 rounded-full text-[10px] font-bold text-white shrink-0", AVATAR_COLORS[initials as keyof typeof AVATAR_COLORS] ?? "bg-primary")}>{initials}</span>
+}
+function PriorityBadge({ p }: { p: Priority }) {
+  const dots = { Low: "bg-muted-foreground", Medium: "bg-yellow-400", High: "bg-red-400" }
+  return <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span className={cn("size-1.5 rounded-full shrink-0", dots[p])} />{p}</span>
+}
+function StatusBadge({ s }: { s: Status }) {
+  const { color, icon } = STATUS_CONFIG[s]
+  return <span className={cn("inline-flex items-center gap-1 text-xs font-medium", color)}>{icon}{s}</span>
+}
+
+export function ViewSwitcher() {
+  const [view, setView] = useState<"kanban"|"board"|"cards"|"list"|"table">("kanban")
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<Status|"All">("All")
+  const [priorityFilter, setPriorityFilter] = useState<Priority|"All">("All")
+  const [sortKey, setSortKey] = useState<SortKey>("date")
+  const [sortDir, setSortDir] = useState<SortDir>("asc")
+
+  const filtered = TASKS
+    .filter(t => t.title.toLowerCase().includes(search.toLowerCase()))
+    .filter(t => statusFilter === "All" || t.status === statusFilter)
+    .filter(t => priorityFilter === "All" || t.priority === priorityFilter)
+    .sort((a, b) => {
+      let cmp = sortKey === "title" ? a.title.localeCompare(b.title)
+        : sortKey === "priority" ? PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+        : sortKey === "status"   ? STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
+        : a.date.localeCompare(b.date)
+      return sortDir === "asc" ? cmp : -cmp
+    })
+
+  const VIEWS = [
+    { id: "kanban", label: "Kanban", icon: <LayoutKanban size={13} /> },
+    { id: "board",  label: "Board",  icon: <Columns3 size={13} /> },
+    { id: "cards",  label: "Cards",  icon: <LayoutGrid size={13} /> },
+    { id: "list",   label: "List",   icon: <List size={13} /> },
+    { id: "table",  label: "Table",  icon: <Table2 size={13} /> },
+  ]
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      {/* View switcher tabs */}
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary border border-border w-fit">
+        {VIEWS.map(v => (
+          <button key={v.id} onClick={() => setView(v.id as typeof view)}
+            className={cn("flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+              view === v.id ? "bg-card text-foreground border border-border shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+            {v.icon}<span className="hidden sm:inline">{v.label}</span>
+          </button>
+        ))}
+      </div>
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border flex-1 min-w-[140px]">
+          <Search size={13} className="text-muted-foreground shrink-0" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter tasks..."
+            className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full" />
+          {search && <button onClick={() => setSearch("")}><X size={11} className="text-muted-foreground" /></button>}
+        </div>
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)}
+          className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer">
+          {["All","Todo","In Progress","In Review","Done"].map(s => <option key={s}>{s}</option>)}
+        </select>
+        <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value as any)}
+          className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer">
+          {["All","High","Medium","Low"].map(p => <option key={p}>{p}</option>)}
+        </select>
+        <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}
+          className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer">
+          {["date","title","priority","status"].map(k => <option key={k} value={k}>{k.charAt(0).toUpperCase()+k.slice(1)}</option>)}
+        </select>
+        <button onClick={() => setSortDir(d => d==="asc"?"desc":"asc")}
+          className="p-2 rounded-lg bg-secondary border border-border text-muted-foreground hover:text-foreground transition-colors">
+          {sortDir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />}
+        </button>
+      </div>
+      {/* Views */}
+      {/* ... render filtered tasks in the selected view layout ... */}
     </div>
   )
 }`,
