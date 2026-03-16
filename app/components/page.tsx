@@ -55,15 +55,25 @@ function Sidebar({
 // ─── Component card ───────────────────────────────────────────────────────────
 
 function ComponentCard({ comp }: { comp: ComponentEntry }) {
+  const isFullWidth = comp.fullWidth
+
   return (
-    <div className="group rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col">
-      <div className="flex-1 min-h-[160px] flex items-center justify-center p-6 bg-background/40">
-        {comp.preview}
+    <div className={cn(
+      "group rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col",
+      isFullWidth && "col-span-full"
+    )}>
+      <div className={cn(
+        "flex items-center justify-center bg-background/40",
+        isFullWidth ? "p-6 md:p-10" : "min-h-[160px] p-6"
+      )}>
+        {isFullWidth ? (
+          <div className="w-full max-w-5xl">{comp.preview}</div>
+        ) : comp.preview}
       </div>
       <div className="px-4 py-3 border-t border-border">
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm font-semibold text-foreground">{comp.name}</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {comp.href && (
               <a
                 href={comp.href}
@@ -72,7 +82,7 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
                 aria-label={`View ${comp.name} full page`}
                 className="text-xs text-primary hover:text-primary/80 flex items-center gap-0.5 transition-colors"
               >
-                View <ArrowUpRight size={11} aria-hidden="true" />
+                View full page <ArrowUpRight size={11} aria-hidden="true" />
               </a>
             )}
             <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
