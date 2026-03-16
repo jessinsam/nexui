@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns3, Table2, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, LayoutKanban, Plus, TrendingUp } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -2007,11 +2007,11 @@ function ViewTable() {
 type ViewMode = "kanban" | "board" | "cards" | "list" | "table"
 
 const VIEW_TABS: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
-  { id: "kanban", label: "Kanban", icon: <LayoutKanban size={13} /> },
-  { id: "board",  label: "Board",  icon: <Columns3 size={13} /> },
+  { id: "kanban", label: "Kanban", icon: <Kanban size={13} /> },
+  { id: "board",  label: "Board",  icon: <Columns size={13} /> },
   { id: "cards",  label: "Cards",  icon: <LayoutGrid size={13} /> },
   { id: "list",   label: "List",   icon: <List size={13} /> },
-  { id: "table",  label: "Table",  icon: <Table2 size={13} /> },
+  { id: "table",  label: "Table",  icon: <Table size={13} /> },
 ]
 
 function ViewSwitcher() {
@@ -3261,7 +3261,7 @@ export function DesignTokens() {
     name: "View — All Views", description: "Full view-switcher with Kanban, Board, Cards, List, and Table — all sharing the same filter and sort toolbar.", category: "Data Views", tags: ["view", "switcher", "kanban", "table", "list", "cards", "filter", "sort"], fullWidth: true, preview: <ViewSwitcher />,
     code: `"use client"
 import { useState } from "react"
-import { Search, X, Star, ArrowUp, ArrowDown, ArrowUpDown, GripVertical, LayoutKanban, Columns3, LayoutGrid, List, Table2, Circle, PauseCircle, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Search, X, Star, ArrowUp, ArrowDown, ArrowUpDown, GripVertical, Kanban, Columns, LayoutGrid, List, Table, Circle, PauseCircle, AlertCircle, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Priority = "Low" | "Medium" | "High"
@@ -3326,11 +3326,11 @@ export function ViewSwitcher() {
     })
 
   const VIEWS = [
-    { id: "kanban", label: "Kanban", icon: <LayoutKanban size={13} /> },
-    { id: "board",  label: "Board",  icon: <Columns3 size={13} /> },
+    { id: "kanban", label: "Kanban", icon: <Kanban size={13} /> },
+    { id: "board",  label: "Board",  icon: <Columns size={13} /> },
     { id: "cards",  label: "Cards",  icon: <LayoutGrid size={13} /> },
     { id: "list",   label: "List",   icon: <List size={13} /> },
-    { id: "table",  label: "Table",  icon: <Table2 size={13} /> },
+    { id: "table",  label: "Table",  icon: <Table size={13} /> },
   ]
 
   return (
