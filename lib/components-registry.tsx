@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2 } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
@@ -477,6 +477,524 @@ function CreateAccountFull() {
   )
 }
 
+// ─── Calendar helpers ─────────────────────────────────────────────────────────
+
+const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+function getDays(year: number, month: number) {
+  const first = new Date(year, month, 1).getDay()
+  const total = new Date(year, month + 1, 0).getDate()
+  return { first, total }
+}
+
+function isSameDay(a: Date | null, b: Date | null) {
+  if (!a || !b) return false
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
+
+function isBetween(d: Date, start: Date | null, end: Date | null) {
+  if (!start || !end) return false
+  return d > start && d < end
+}
+
+// ─── 1. Basic Calendar ────────────────────────────────────────────────────────
+
+function CalendarBasic() {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+  const [selected, setSelected] = useState<Date | null>(today)
+  const { first, total } = getDays(year, month)
+
+  function prev() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
+  function next() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
+
+  return (
+    <div className="w-full max-w-xs rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={prev} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" aria-label="Previous month">
+          <ChevronLeft size={15} aria-hidden="true" />
+        </button>
+        <span className="text-sm font-semibold text-foreground">{MONTHS[month]} {year}</span>
+        <button onClick={next} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" aria-label="Next month">
+          <ChevronRight size={15} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 mb-2">
+        {DAYS.map(d => <span key={d} className="text-[10px] font-medium text-muted-foreground text-center py-1">{d}</span>)}
+      </div>
+      <div className="grid grid-cols-7 gap-y-1">
+        {Array.from({ length: first }).map((_, i) => <span key={`e${i}`} />)}
+        {Array.from({ length: total }).map((_, i) => {
+          const day = i + 1
+          const date = new Date(year, month, day)
+          const isToday = isSameDay(date, today)
+          const isSel = isSameDay(date, selected)
+          return (
+            <button
+              key={day}
+              onClick={() => setSelected(date)}
+              className={cn(
+                "size-8 mx-auto flex items-center justify-center rounded-lg text-xs transition-all",
+                isSel ? "bg-primary text-primary-foreground font-semibold" :
+                isToday ? "border border-primary text-primary font-semibold" :
+                "text-foreground hover:bg-secondary"
+              )}
+            >
+              {day}
+            </button>
+          )
+        })}
+      </div>
+      {selected && (
+        <div className="mt-4 pt-4 border-t border-border text-center">
+          <p className="text-xs text-muted-foreground">Selected: <span className="text-foreground font-medium">{selected.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span></p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── 2. Range Picker ─────────────────────────────────────────────────────────
+
+function CalendarRange() {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+  const [start, setStart] = useState<Date | null>(new Date(today.getFullYear(), today.getMonth(), 8))
+  const [end, setEnd] = useState<Date | null>(new Date(today.getFullYear(), today.getMonth(), 18))
+  const [hovered, setHovered] = useState<Date | null>(null)
+  const { first, total } = getDays(year, month)
+
+  function prev() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
+  function next() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
+
+  function handleClick(date: Date) {
+    if (!start || (start && end)) { setStart(date); setEnd(null) }
+    else { if (date < start) { setEnd(start); setStart(date) } else setEnd(date) }
+  }
+
+  const rangeEnd = end ?? hovered
+
+  return (
+    <div className="w-full max-w-xs rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={prev} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground" aria-label="Previous month">
+          <ChevronLeft size={15} aria-hidden="true" />
+        </button>
+        <span className="text-sm font-semibold text-foreground">{MONTHS[month]} {year}</span>
+        <button onClick={next} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground" aria-label="Next month">
+          <ChevronRight size={15} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 mb-2">
+        {DAYS.map(d => <span key={d} className="text-[10px] font-medium text-muted-foreground text-center py-1">{d}</span>)}
+      </div>
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {Array.from({ length: first }).map((_, i) => <span key={`e${i}`} />)}
+        {Array.from({ length: total }).map((_, i) => {
+          const day = i + 1
+          const date = new Date(year, month, day)
+          const isStart = isSameDay(date, start)
+          const isEnd = isSameDay(date, end)
+          const inRange = start && rangeEnd && isBetween(date, start < rangeEnd ? start : rangeEnd, start < rangeEnd ? rangeEnd : start)
+          return (
+            <button
+              key={day}
+              onClick={() => handleClick(date)}
+              onMouseEnter={() => !end && setHovered(date)}
+              onMouseLeave={() => setHovered(null)}
+              className={cn(
+                "size-8 mx-auto flex items-center justify-center text-xs transition-all relative",
+                isStart || isEnd ? "bg-primary text-primary-foreground font-semibold rounded-lg z-10" :
+                inRange ? "bg-primary/15 text-foreground rounded-none" :
+                "text-foreground hover:bg-secondary rounded-lg"
+              )}
+            >
+              {day}
+            </button>
+          )
+        })}
+      </div>
+      <div className="mt-4 pt-4 border-t border-border flex gap-3">
+        <div className="flex-1 rounded-lg bg-secondary px-3 py-2">
+          <p className="text-[10px] text-muted-foreground mb-0.5">From</p>
+          <p className="text-xs text-foreground font-medium">{start ? start.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}</p>
+        </div>
+        <div className="flex-1 rounded-lg bg-secondary px-3 py-2">
+          <p className="text-[10px] text-muted-foreground mb-0.5">To</p>
+          <p className="text-xs text-foreground font-medium">{end ? end.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── 3. Calendar With Events ──────────────────────────────────────────────────
+
+const SAMPLE_EVENTS: Record<number, { label: string; color: string }[]> = {
+  3: [{ label: "Team standup", color: "bg-primary" }],
+  7: [{ label: "Design review", color: "bg-[oklch(0.7_0.15_160)]" }],
+  12: [{ label: "Product launch", color: "bg-[oklch(0.65_0.22_300)]" }, { label: "All-hands", color: "bg-primary" }],
+  18: [{ label: "1:1 with Alex", color: "bg-[oklch(0.75_0.18_85)]" }],
+  22: [{ label: "Sprint planning", color: "bg-primary" }],
+  27: [{ label: "Offsite", color: "bg-[oklch(0.6_0.19_30)]" }],
+}
+
+function CalendarWithEvents() {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+  const [selected, setSelected] = useState<Date | null>(null)
+  const { first, total } = getDays(year, month)
+
+  function prev() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
+  function next() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
+
+  const selectedEvents = selected ? (SAMPLE_EVENTS[selected.getDate()] ?? []) : []
+
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-border bg-card overflow-hidden">
+      <div className="px-5 pt-5 pb-3">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={prev} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground" aria-label="Previous month">
+            <ChevronLeft size={15} aria-hidden="true" />
+          </button>
+          <span className="text-sm font-semibold text-foreground">{MONTHS[month]} {year}</span>
+          <button onClick={next} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground" aria-label="Next month">
+            <ChevronRight size={15} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 mb-1">
+          {DAYS.map(d => <span key={d} className="text-[10px] font-medium text-muted-foreground text-center py-1">{d}</span>)}
+        </div>
+        <div className="grid grid-cols-7 gap-y-1">
+          {Array.from({ length: first }).map((_, i) => <span key={`e${i}`} />)}
+          {Array.from({ length: total }).map((_, i) => {
+            const day = i + 1
+            const date = new Date(year, month, day)
+            const isToday = isSameDay(date, today)
+            const isSel = isSameDay(date, selected)
+            const events = SAMPLE_EVENTS[day] ?? []
+            return (
+              <button
+                key={day}
+                onClick={() => setSelected(isSel ? null : date)}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 py-1 rounded-lg transition-all",
+                  isSel ? "bg-primary/10" : "hover:bg-secondary"
+                )}
+              >
+                <span className={cn(
+                  "size-6 flex items-center justify-center rounded-full text-xs",
+                  isSel ? "bg-primary text-primary-foreground font-semibold" :
+                  isToday ? "border border-primary text-primary font-semibold" :
+                  "text-foreground"
+                )}>{day}</span>
+                <div className="flex gap-0.5">
+                  {events.slice(0, 2).map((e, ei) => (
+                    <span key={ei} className={cn("w-1 h-1 rounded-full", e.color)} />
+                  ))}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      {selected && (
+        <div className="border-t border-border px-5 py-3">
+          <p className="text-xs font-medium text-foreground mb-2">{selected.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+          {selectedEvents.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No events</p>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              {selectedEvents.map((e, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className={cn("w-2 h-2 rounded-full shrink-0", e.color)} />
+                  <span className="text-xs text-foreground">{e.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── 4. Mini Inline Calendar ──────────────────────────────────────────────────
+
+function CalendarMini() {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+  const [selected, setSelected] = useState<Date | null>(today)
+  const { first, total } = getDays(year, month)
+
+  function prev() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
+  function next() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
+
+  return (
+    <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start">
+      <div className="w-64 rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <button onClick={prev} className="size-6 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground" aria-label="Previous month">
+            <ChevronLeft size={13} aria-hidden="true" />
+          </button>
+          <span className="text-xs font-semibold text-foreground">{MONTHS[month].slice(0, 3)} {year}</span>
+          <button onClick={next} className="size-6 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground" aria-label="Next month">
+            <ChevronRight size={13} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 mb-1">
+          {DAYS.map(d => <span key={d} className="text-[9px] font-medium text-muted-foreground text-center">{d}</span>)}
+        </div>
+        <div className="grid grid-cols-7 gap-y-0.5">
+          {Array.from({ length: first }).map((_, i) => <span key={`e${i}`} />)}
+          {Array.from({ length: total }).map((_, i) => {
+            const day = i + 1
+            const date = new Date(year, month, day)
+            const isToday = isSameDay(date, today)
+            const isSel = isSameDay(date, selected)
+            return (
+              <button
+                key={day}
+                onClick={() => setSelected(date)}
+                className={cn(
+                  "size-7 mx-auto flex items-center justify-center rounded-md text-[10px] transition-all",
+                  isSel ? "bg-primary text-primary-foreground font-bold" :
+                  isToday ? "border border-primary/60 text-primary" :
+                  "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                )}
+              >
+                {day}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 lg:pt-1">
+        <p className="text-xs font-medium text-foreground">Upcoming</p>
+        {[
+          { day: 12, label: "Product launch", time: "2:00 PM", color: "bg-[oklch(0.65_0.22_300)]" },
+          { day: 18, label: "1:1 with Alex", time: "10:30 AM", color: "bg-[oklch(0.75_0.18_85)]" },
+          { day: 22, label: "Sprint planning", time: "9:00 AM", color: "bg-primary" },
+        ].map(e => (
+          <div key={e.day} className="flex items-center gap-3 rounded-xl border border-border bg-secondary px-3 py-2.5">
+            <span className={cn("w-2 h-2 rounded-full shrink-0", e.color)} />
+            <div>
+              <p className="text-xs font-medium text-foreground">{e.label}</p>
+              <p className="text-[10px] text-muted-foreground">{MONTHS[month].slice(0, 3)} {e.day} &middot; {e.time}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── 5. Date + Time Picker ────────────────────────────────────────────────────
+
+function CalendarTimePicker() {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+  const [selected, setSelected] = useState<Date | null>(today)
+  const [hour, setHour] = useState(10)
+  const [minute, setMinute] = useState(30)
+  const [ampm, setAmpm] = useState<"AM" | "PM">("AM")
+  const { first, total } = getDays(year, month)
+
+  function prev() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
+  function next() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-4 w-full max-w-xl">
+      <div className="flex-1 rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={prev} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Previous month">
+            <ChevronLeft size={15} aria-hidden="true" />
+          </button>
+          <span className="text-sm font-semibold text-foreground">{MONTHS[month]} {year}</span>
+          <button onClick={next} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Next month">
+            <ChevronRight size={15} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 mb-2">
+          {DAYS.map(d => <span key={d} className="text-[10px] font-medium text-muted-foreground text-center py-1">{d}</span>)}
+        </div>
+        <div className="grid grid-cols-7 gap-y-1">
+          {Array.from({ length: first }).map((_, i) => <span key={`e${i}`} />)}
+          {Array.from({ length: total }).map((_, i) => {
+            const day = i + 1
+            const date = new Date(year, month, day)
+            const isToday = isSameDay(date, today)
+            const isSel = isSameDay(date, selected)
+            return (
+              <button
+                key={day}
+                onClick={() => setSelected(date)}
+                className={cn(
+                  "size-8 mx-auto flex items-center justify-center rounded-lg text-xs transition-all",
+                  isSel ? "bg-primary text-primary-foreground font-semibold" :
+                  isToday ? "border border-primary text-primary" :
+                  "text-foreground hover:bg-secondary"
+                )}
+              >{day}</button>
+            )
+          })}
+        </div>
+      </div>
+      <div className="lg:w-44 rounded-2xl border border-border bg-card p-5 flex flex-col gap-5">
+        <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+          <Clock size={13} className="text-primary" aria-hidden="true" />
+          Select time
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-1 flex-1">
+            <button onClick={() => setHour(h => h === 12 ? 1 : h + 1)} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Increase hour"><ChevronRight size={13} className="rotate-[-90deg]" aria-hidden="true" /></button>
+            <span className="text-lg font-semibold text-foreground w-8 text-center">{String(hour).padStart(2, "0")}</span>
+            <button onClick={() => setHour(h => h === 1 ? 12 : h - 1)} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Decrease hour"><ChevronLeft size={13} className="rotate-[-90deg]" aria-hidden="true" /></button>
+          </div>
+          <span className="text-lg font-bold text-muted-foreground mb-0.5">:</span>
+          <div className="flex flex-col items-center gap-1 flex-1">
+            <button onClick={() => setMinute(m => m === 55 ? 0 : m + 5)} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Increase minute"><ChevronRight size={13} className="rotate-[-90deg]" aria-hidden="true" /></button>
+            <span className="text-lg font-semibold text-foreground w-8 text-center">{String(minute).padStart(2, "0")}</span>
+            <button onClick={() => setMinute(m => m === 0 ? 55 : m - 5)} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Decrease minute"><ChevronLeft size={13} className="rotate-[-90deg]" aria-hidden="true" /></button>
+          </div>
+        </div>
+        <div className="flex rounded-lg border border-border overflow-hidden">
+          {(["AM", "PM"] as const).map(p => (
+            <button
+              key={p}
+              onClick={() => setAmpm(p)}
+              className={cn("flex-1 text-xs py-1.5 transition-colors font-medium", ampm === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+            >{p}</button>
+          ))}
+        </div>
+        {selected && (
+          <div className="mt-auto rounded-xl bg-secondary px-3 py-2.5">
+            <p className="text-[10px] text-muted-foreground mb-0.5">Scheduled</p>
+            <p className="text-xs font-semibold text-foreground">{selected.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+            <p className="text-xs text-primary font-medium">{String(hour).padStart(2, "0")}:{String(minute).padStart(2, "0")} {ampm}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── 6. Booking / Availability Calendar ──────────────────────────────────────
+
+const SLOTS = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
+const BOOKED = new Set(["10:00 AM", "2:00 PM"])
+
+function CalendarBooking() {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
+  const [selected, setSelected] = useState<Date | null>(today)
+  const [slot, setSlot] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
+  const { first, total } = getDays(year, month)
+
+  function prev() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
+  function next() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-4 w-full max-w-2xl">
+      <div className="flex-1 rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={prev} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Previous month">
+            <ChevronLeft size={15} aria-hidden="true" />
+          </button>
+          <span className="text-sm font-semibold text-foreground">{MONTHS[month]} {year}</span>
+          <button onClick={next} className="size-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground" aria-label="Next month">
+            <ChevronRight size={15} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 mb-2">
+          {DAYS.map(d => <span key={d} className="text-[10px] font-medium text-muted-foreground text-center py-1">{d}</span>)}
+        </div>
+        <div className="grid grid-cols-7 gap-y-1">
+          {Array.from({ length: first }).map((_, i) => <span key={`e${i}`} />)}
+          {Array.from({ length: total }).map((_, i) => {
+            const day = i + 1
+            const date = new Date(year, month, day)
+            const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            const isToday = isSameDay(date, today)
+            const isSel = isSameDay(date, selected)
+            return (
+              <button
+                key={day}
+                onClick={() => { if (!isPast) { setSelected(date); setSlot(null); setConfirmed(false) } }}
+                disabled={isPast}
+                className={cn(
+                  "size-8 mx-auto flex items-center justify-center rounded-lg text-xs transition-all",
+                  isPast ? "text-muted-foreground/30 cursor-not-allowed" :
+                  isSel ? "bg-primary text-primary-foreground font-semibold" :
+                  isToday ? "border border-primary text-primary" :
+                  "text-foreground hover:bg-secondary"
+                )}
+              >{day}</button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="lg:w-56 rounded-2xl border border-border bg-card p-5 flex flex-col gap-4">
+        <div>
+          <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <CalendarDays size={13} className="text-primary" aria-hidden="true" />
+            {selected ? selected.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : "Pick a date"}
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Available time slots</p>
+        </div>
+        {confirmed ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+            <div className="size-10 rounded-full bg-[oklch(0.7_0.15_160)]/20 flex items-center justify-center">
+              <Check size={18} className="text-[oklch(0.7_0.15_160)]" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Booked!</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{slot} on {selected?.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+            </div>
+            <button onClick={() => { setSlot(null); setConfirmed(false) }} className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"><X size={11} aria-hidden="true" /> Cancel booking</button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1.5 flex-1">
+              {SLOTS.map(s => {
+                const isBooked = BOOKED.has(s)
+                const isSel = slot === s
+                return (
+                  <button
+                    key={s}
+                    onClick={() => !isBooked && setSlot(isSel ? null : s)}
+                    disabled={isBooked}
+                    className={cn(
+                      "w-full rounded-lg px-3 py-2 text-xs font-medium transition-all text-left",
+                      isBooked ? "bg-secondary/50 text-muted-foreground/40 cursor-not-allowed line-through" :
+                      isSel ? "bg-primary text-primary-foreground" :
+                      "bg-secondary text-foreground hover:bg-secondary/80 hover:border-primary/30 border border-transparent"
+                    )}
+                  >{s}{isBooked && <span className="ml-2 text-[10px] no-underline">(taken)</span>}</button>
+                )
+              })}
+            </div>
+            <button
+              onClick={() => slot && setConfirmed(true)}
+              disabled={!slot}
+              className="w-full h-9 rounded-xl bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-40 hover:bg-primary/90 transition-all"
+            >Confirm booking</button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export type ComponentEntry = {
@@ -489,12 +1007,18 @@ export type ComponentEntry = {
   preview: React.ReactNode
 }
 
-export const CATEGORIES = ["All", "Auth", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Inputs", "Display", "Feedback", "Navigation"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   { name: "Sign In", description: "Email + password login with GitHub OAuth and show/hide password toggle.", category: "Auth", tags: ["auth", "login", "form", "password", "github"], href: "/sign-in", fullWidth: true, preview: <SignInFull /> },
   { name: "Sign Up", description: "Registration form with name fields, email, and live password strength hints.", category: "Auth", tags: ["auth", "register", "form", "password"], href: "/sign-up", fullWidth: true, preview: <SignUpFull /> },
   { name: "Create Account", description: "Two-step flow: account type picker then profile details.", category: "Auth", tags: ["auth", "onboarding", "stepper", "form"], href: "/create-account", fullWidth: true, preview: <CreateAccountFull /> },
+  { name: "Calendar — Basic", description: "Single date picker with month navigation and today indicator.", category: "Calendar", tags: ["calendar", "date", "picker", "datepicker"], preview: <CalendarBasic /> },
+  { name: "Calendar — Range", description: "Select a start and end date with an interactive range highlight.", category: "Calendar", tags: ["calendar", "range", "date", "picker", "from", "to"], preview: <CalendarRange /> },
+  { name: "Calendar — With Events", description: "Monthly view with colour-coded event dots and a day detail panel.", category: "Calendar", tags: ["calendar", "events", "schedule", "dots"], preview: <CalendarWithEvents /> },
+  { name: "Calendar — Mini", description: "Compact inline calendar paired with an upcoming events list.", category: "Calendar", tags: ["calendar", "mini", "inline", "compact", "events"], preview: <CalendarMini /> },
+  { name: "Calendar — Time Picker", description: "Date picker combined with an AM/PM hour and minute roller.", category: "Calendar", tags: ["calendar", "time", "datetime", "picker", "schedule"], preview: <CalendarTimePicker /> },
+  { name: "Calendar — Booking", description: "Date selector with available time slots and a confirm booking flow.", category: "Calendar", tags: ["calendar", "booking", "slots", "availability", "schedule"], preview: <CalendarBooking /> },
   { name: "Button", description: "Trigger actions with multiple variants and sizes.", category: "Inputs", tags: ["button", "action", "cta", "variant"], preview: <ButtonPreview /> },
   { name: "Checkbox", description: "Multi-select control with accessible toggle states.", category: "Inputs", tags: ["checkbox", "toggle", "select", "form"], preview: <CheckboxPreview /> },
   { name: "Select", description: "Dropdown menu for choosing from a list of options.", category: "Inputs", tags: ["select", "dropdown", "form", "picker"], preview: <SelectPreview /> },
