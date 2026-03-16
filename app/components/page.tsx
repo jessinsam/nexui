@@ -55,7 +55,6 @@ function Sidebar({
 // ─── Component card ───────────────────────────────────────────────────────────
 
 function ComponentCard({ comp }: { comp: ComponentEntry }) {
-  const isFullWidth = comp.fullWidth
   const [tab, setTab] = useState<"preview" | "code">("preview")
   const [copied, setCopied] = useState(false)
 
@@ -66,10 +65,7 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
   }
 
   return (
-    <div className={cn(
-      "group rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col",
-      isFullWidth && "col-span-full"
-    )}>
+    <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col">
       {/* Card header: name, toggle, actions */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -129,13 +125,8 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
 
       {/* Content area */}
       {tab === "preview" ? (
-        <div className={cn(
-          "flex items-center justify-center bg-background/40",
-          isFullWidth ? "p-6 md:p-10" : "min-h-[160px] p-6"
-        )}>
-          {isFullWidth ? (
-            <div className="w-full max-w-5xl">{comp.preview}</div>
-          ) : comp.preview}
+        <div className="flex items-center justify-center bg-background/40 p-8 md:p-12">
+          <div className="w-full max-w-5xl">{comp.preview}</div>
         </div>
       ) : (
         <div className="relative bg-[var(--code-bg)]">
@@ -308,18 +299,9 @@ export default function ComponentsPage() {
 
             {filtered.length > 0 ? (
               <div className="flex flex-col gap-6">
-                {/* Full-width components (Auth, Calendar, etc.) */}
-                {filtered.filter(c => c.fullWidth).map((comp) => (
+                {filtered.map((comp) => (
                   <ComponentCard key={comp.name} comp={comp} />
                 ))}
-                {/* Compact grid components */}
-                {filtered.filter(c => !c.fullWidth).length > 0 && (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.filter(c => !c.fullWidth).map((comp) => (
-                      <ComponentCard key={comp.name} comp={comp} />
-                    ))}
-                  </div>
-                )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-24 text-center">
