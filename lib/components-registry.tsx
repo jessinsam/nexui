@@ -885,7 +885,7 @@ function CalendarTimePicker() {
   )
 }
 
-// ─── 6. Booking / Availability Calendar ─────────────────────────────────────�����
+// ─── 6. Booking / Availability Calendar ─────────────────────────────────────�������
 
 const SLOTS = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
 const BOOKED = new Set(["10:00 AM", "2:00 PM"])
@@ -1010,10 +1010,10 @@ function DropdownBasic() {
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
+        className="w-full flex items-center justify-between pl-4 pr-5 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
       >
         {selected}
-        <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+        <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
       </button>
 
       {/* Open list */}
@@ -1066,7 +1066,7 @@ function DropdownSearch() {
         onClick={() => { setOpen(o => !o); setQuery("") }}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
+        className="w-full flex items-center justify-between pl-4 pr-5 py-3 rounded-xl bg-secondary border border-border text-sm font-medium text-foreground hover:border-primary/40 transition-colors"
       >
         <span className={selected ? "text-foreground" : "text-muted-foreground"}>{selected ?? "Select language..."}</span>
         <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
@@ -1130,7 +1130,7 @@ function DropdownMulti() {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-multiselectable="true"
-        className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-secondary border border-border text-sm hover:border-primary/40 transition-colors min-h-[46px]"
+        className="w-full flex items-center justify-between gap-2 pl-4 pr-5 py-3 rounded-xl bg-secondary border border-border text-sm hover:border-primary/40 transition-colors min-h-[46px]"
       >
         <div className="flex flex-wrap gap-1.5 flex-1">
           {selected.length === 0 ? (
@@ -1195,7 +1195,7 @@ function DropdownWithIcons() {
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-secondary border border-border hover:border-primary/40 transition-colors"
+        className="w-full flex items-center justify-between gap-3 pl-4 pr-5 py-3 rounded-xl bg-secondary border border-border hover:border-primary/40 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
