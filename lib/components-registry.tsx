@@ -885,7 +885,7 @@ function CalendarTimePicker() {
   )
 }
 
-// ─── 6. Booking / Availability Calendar ─────────────────────────────────────���
+// ─── 6. Booking / Availability Calendar ─────────────────────────────────────�����
 
 const SLOTS = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
 const BOOKED = new Set(["10:00 AM", "2:00 PM"])
@@ -1072,7 +1072,7 @@ function DropdownSearch() {
         <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+        <div className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden">
           <div className="p-2 border-b border-border">
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary">
               <Search size={13} aria-hidden="true" className="text-muted-foreground shrink-0" />
@@ -1088,22 +1088,24 @@ function DropdownSearch() {
           <ul role="listbox" className="max-h-48 overflow-y-auto py-1">
             {filtered.length === 0 ? (
               <li className="px-4 py-3 text-xs text-muted-foreground text-center">No results</li>
-            ) : filtered.map(opt => (
-              <li key={opt} role="option" aria-selected={selected === opt}>
-                <button
-                  onClick={() => { setSelected(opt); setOpen(false) }}
-                  className={cn(
-                    "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
-                    selected === opt
-                      ? "text-foreground bg-primary/10 font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                  )}
-                >
-                  {opt}
-                  {selected === opt && <Check size={13} aria-hidden="true" className="text-primary" />}
-                </button>
-              </li>
-            ))}
+            ) : filtered.map(opt => {
+              const isSel = selected === opt
+              return (
+                <li key={opt} role="option" aria-selected={isSel}>
+                  <button
+                    onClick={() => { setSelected(opt); setOpen(false) }}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 mx-1 rounded-lg text-sm transition-colors",
+                      isSel ? "bg-primary text-primary-foreground font-medium" : "text-foreground hover:bg-secondary"
+                    )}
+                    style={{ width: "calc(100% - 8px)" }}
+                  >
+                    <Check size={14} aria-hidden="true" className={cn("shrink-0", isSel ? "opacity-100" : "opacity-0")} />
+                    {opt}
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
@@ -1207,7 +1209,7 @@ function DropdownWithIcons() {
         <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
       </button>
       {open && (
-        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden py-1">
+        <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden py-1">
           {FRAMEWORK_OPTIONS.map(opt => {
             const isSel = selected.label === opt.label
             return (
@@ -1215,18 +1217,19 @@ function DropdownWithIcons() {
                 <button
                   onClick={() => { setSelected(opt); setOpen(false) }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-2.5 transition-colors",
-                    isSel ? "bg-primary/10" : "hover:bg-secondary"
+                    "flex items-center gap-3 px-3 py-2.5 mx-1 rounded-lg transition-colors",
+                    isSel ? "bg-primary" : "hover:bg-secondary"
                   )}
+                  style={{ width: "calc(100% - 8px)" }}
                 >
-                  <div className="size-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                    <opt.icon size={13} aria-hidden="true" className={isSel ? "text-primary" : "text-muted-foreground"} />
+                  <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0", isSel ? "bg-white/10" : "bg-secondary")}>
+                    <opt.icon size={13} aria-hidden="true" className={isSel ? "text-primary-foreground" : "text-muted-foreground"} />
                   </div>
                   <div className="text-left flex-1">
-                    <p className={cn("text-sm leading-none", isSel ? "text-foreground font-medium" : "text-muted-foreground")}>{opt.label}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
+                    <p className={cn("text-sm leading-none", isSel ? "text-primary-foreground font-medium" : "text-foreground")}>{opt.label}</p>
+                    <p className={cn("text-[11px] mt-0.5", isSel ? "text-primary-foreground/70" : "text-muted-foreground")}>{opt.desc}</p>
                   </div>
-                  {isSel && <Check size={13} aria-hidden="true" className="text-primary shrink-0" />}
+                  <Check size={13} aria-hidden="true" className={cn("shrink-0", isSel ? "text-primary-foreground opacity-100" : "opacity-0")} />
                 </button>
               </li>
             )
@@ -1652,7 +1655,7 @@ export function CalendarWithEvents() {
 }`,
   },
   {
-    name: "Calendar — Mini", description: "Compact inline calendar paired with an upcoming events list.", category: "Calendar", tags: ["calendar", "mini", "inline", "compact", "events"], fullWidth: true, preview: <CalendarMini />,
+    name: "Calendar �� Mini", description: "Compact inline calendar paired with an upcoming events list.", category: "Calendar", tags: ["calendar", "mini", "inline", "compact", "events"], fullWidth: true, preview: <CalendarMini />,
     code: `"use client"
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
