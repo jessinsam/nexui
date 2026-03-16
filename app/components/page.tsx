@@ -65,9 +65,9 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col">
+    <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 flex flex-col">
       {/* Card header: name, toggle, actions */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border gap-3">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border gap-3 rounded-t-xl overflow-hidden">
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-sm font-semibold text-foreground truncate">{comp.name}</span>
           <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
@@ -137,7 +137,7 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
       )}
 
       {/* Footer: description */}
-      <div className="px-4 py-2.5 border-t border-border">
+      <div className="px-4 py-2.5 border-t border-border rounded-b-xl overflow-hidden">
         <p className="text-xs text-muted-foreground leading-relaxed">{comp.description}</p>
       </div>
     </div>
