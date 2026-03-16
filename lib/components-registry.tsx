@@ -1126,12 +1126,15 @@ function DropdownMulti() {
 
   return (
     <div className="relative w-72">
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen(o => !o)}
+        onKeyDown={e => (e.key === "Enter" || e.key === " ") && setOpen(o => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-multiselectable="true"
-        className="w-full flex items-center justify-between gap-2 pl-4 pr-5 py-3 rounded-xl bg-secondary border border-border text-sm hover:border-primary/40 transition-colors min-h-[46px]"
+        className="w-full flex items-center justify-between gap-2 pl-4 pr-5 py-3 rounded-xl bg-secondary border border-border text-sm hover:border-primary/40 transition-colors min-h-[46px] cursor-pointer select-none"
       >
         <div className="flex flex-wrap gap-1.5 flex-1">
           {selected.length === 0 ? (
@@ -1150,7 +1153,7 @@ function DropdownMulti() {
           ))}
         </div>
         <ChevronDown size={15} aria-hidden="true" className={cn("text-muted-foreground transition-transform duration-200 shrink-0", open && "rotate-180")} />
-      </button>
+      </div>
       {open && (
         <ul role="listbox" className="absolute z-50 mt-1.5 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden py-1">
           {options.map(opt => {
