@@ -1637,7 +1637,7 @@ interface Task {
   starred: boolean
 }
 
-const TASKS: Task[] = [
+const INITIAL_TASKS: Task[] = [
   { id: 1, title: "Design system tokens", status: "Done", priority: "High", tag: "Design", assignee: "AK", date: "Mar 10", starred: true },
   { id: 2, title: "Implement auth flow", status: "In Progress", priority: "High", tag: "Dev", assignee: "JS", date: "Mar 12", starred: false },
   { id: 3, title: "Write API docs", status: "Todo", priority: "Medium", tag: "Docs", assignee: "ML", date: "Mar 15", starred: false },
@@ -1650,15 +1650,15 @@ const TASKS: Task[] = [
 
 const STATUS_CONFIG: Record<Status, { color: string; icon: React.ReactNode }> = {
   "Todo":        { color: "text-muted-foreground", icon: <Circle size={12} /> },
-  "In Progress": { color: "text-blue-400", icon: <PauseCircle size={12} /> },
-  "In Review":   { color: "text-yellow-400", icon: <AlertCircle size={12} /> },
-  "Done":        { color: "text-green-400", icon: <CheckCircle2 size={12} /> },
+  "In Progress": { color: "text-blue-400",         icon: <PauseCircle size={12} /> },
+  "In Review":   { color: "text-yellow-400",        icon: <AlertCircle size={12} /> },
+  "Done":        { color: "text-green-400",         icon: <CheckCircle2 size={12} /> },
 }
 
-const PRIORITY_CONFIG: Record<Priority, { dot: string; label: string }> = {
-  "Low":    { dot: "bg-muted-foreground", label: "Low" },
-  "Medium": { dot: "bg-yellow-400", label: "Medium" },
-  "High":   { dot: "bg-red-400", label: "High" },
+const PRIORITY_CONFIG: Record<Priority, { dot: string }> = {
+  "Low":    { dot: "bg-muted-foreground" },
+  "Medium": { dot: "bg-yellow-400" },
+  "High":   { dot: "bg-red-400" },
 }
 
 const AVATAR_COLORS: Record<string, string> = {
@@ -1674,11 +1674,10 @@ function Avatar({ initials }: { initials: string }) {
 }
 
 function PriorityBadge({ p }: { p: Priority }) {
-  const { dot, label } = PRIORITY_CONFIG[p]
   return (
     <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-      <span className={cn("size-1.5 rounded-full shrink-0", dot)} />
-      {label}
+      <span className={cn("size-1.5 rounded-full shrink-0", PRIORITY_CONFIG[p].dot)} />
+      {p}
     </span>
   )
 }
@@ -1687,9 +1686,61 @@ function StatusBadge({ s }: { s: Status }) {
   const { color, icon } = STATUS_CONFIG[s]
   return (
     <span className={cn("inline-flex items-center gap-1 text-xs font-medium", color)}>
-      {icon}
-      {s}
+      {icon}{s}
     </span>
+  )
+}
+
+// ─── Custom mini-dropdown (replaces native <select>) ──────────────────────────
+
+function MiniSelect<T extends string>({
+  value, onChange, options, label,
+}: {
+  value: T
+  onChange: (v: T) => void
+  options: { value: T; label: string }[]
+  label: string
+}) {
+  const [open, setOpen] = useState(false)
+  const current = options.find(o => o.value === value)
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-label={label}
+        aria-expanded={open}
+        className="flex items-center gap-1.5 pl-3 pr-2 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground hover:border-primary/40 transition-colors whitespace-nowrap"
+      >
+        {current?.label ?? value}
+        <ChevronDown size={11} className={cn("text-muted-foreground transition-transform duration-150 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          aria-label={label}
+          className="absolute z-50 mt-1 min-w-full rounded-xl border border-border bg-card shadow-xl py-1 overflow-hidden"
+        >
+          {options.map(opt => {
+            const sel = opt.value === value
+            return (
+              <li key={opt.value} role="option" aria-selected={sel}>
+                <button
+                  onClick={() => { onChange(opt.value); setOpen(false) }}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 mx-1 rounded-lg text-xs transition-colors w-[calc(100%-8px)]",
+                    sel ? "bg-primary text-primary-foreground font-medium" : "text-foreground hover:bg-secondary"
+                  )}
+                >
+                  <Check size={11} className={cn("shrink-0", sel ? "opacity-100" : "opacity-0")} />
+                  {opt.label}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
   )
 }
 
@@ -1702,13 +1753,14 @@ const PRIORITY_ORDER: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 }
 const STATUS_ORDER: Record<Status, number> = { "In Progress": 0, "In Review": 1, "Todo": 2, "Done": 3 }
 
 function useFilterSort(initial: Task[]) {
+  const [tasks, setTasks] = useState<Task[]>(initial)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<Status | "All">("All")
   const [priorityFilter, setPriorityFilter] = useState<Priority | "All">("All")
   const [sortKey, setSortKey] = useState<SortKey>("date")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
 
-  const filtered = initial
+  const filtered = tasks
     .filter(t => t.title.toLowerCase().includes(search.toLowerCase()))
     .filter(t => statusFilter === "All" || t.status === statusFilter)
     .filter(t => priorityFilter === "All" || t.priority === priorityFilter)
@@ -1721,75 +1773,94 @@ function useFilterSort(initial: Task[]) {
       return sortDir === "asc" ? cmp : -cmp
     })
 
-  return { search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, sortKey, setSortKey, sortDir, setSortDir, filtered }
+  return { tasks, setTasks, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, sortKey, setSortKey, sortDir, setSortDir, filtered }
 }
 
-function Toolbar({
-  search, setSearch,
-  statusFilter, setStatusFilter,
-  priorityFilter, setPriorityFilter,
-  sortKey, setSortKey,
-  sortDir, setSortDir,
-}: ReturnType<typeof useFilterSort>) {
+const STATUS_OPTIONS: { value: Status | "All"; label: string }[] = [
+  { value: "All", label: "All Status" },
+  { value: "Todo", label: "Todo" },
+  { value: "In Progress", label: "In Progress" },
+  { value: "In Review", label: "In Review" },
+  { value: "Done", label: "Done" },
+]
+const PRIORITY_OPTIONS: { value: Priority | "All"; label: string }[] = [
+  { value: "All", label: "All Priority" },
+  { value: "High", label: "High" },
+  { value: "Medium", label: "Medium" },
+  { value: "Low", label: "Low" },
+]
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "date", label: "Date" },
+  { value: "title", label: "Title" },
+  { value: "priority", label: "Priority" },
+  { value: "status", label: "Status" },
+]
+
+function Toolbar(state: ReturnType<typeof useFilterSort>) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Search */}
       <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border flex-1 min-w-[140px]">
         <Search size={13} className="text-muted-foreground shrink-0" />
         <input
-          value={search} onChange={e => setSearch(e.target.value)}
+          value={state.search} onChange={e => state.setSearch(e.target.value)}
           placeholder="Filter tasks..." aria-label="Filter tasks"
           className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full"
         />
-        {search && <button onClick={() => setSearch("")} aria-label="Clear"><X size={11} className="text-muted-foreground" /></button>}
+        {state.search && (
+          <button onClick={() => state.setSearch("")} aria-label="Clear search">
+            <X size={11} className="text-muted-foreground hover:text-foreground" />
+          </button>
+        )}
       </div>
-      {/* Status filter */}
-      <select
-        value={statusFilter}
-        onChange={e => setStatusFilter(e.target.value as Status | "All")}
-        aria-label="Filter by status"
-        className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer"
-      >
-        {(["All", "Todo", "In Progress", "In Review", "Done"] as const).map(s => <option key={s}>{s}</option>)}
-      </select>
-      {/* Priority filter */}
-      <select
-        value={priorityFilter}
-        onChange={e => setPriorityFilter(e.target.value as Priority | "All")}
-        aria-label="Filter by priority"
-        className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer"
-      >
-        {(["All", "High", "Medium", "Low"] as const).map(p => <option key={p}>{p}</option>)}
-      </select>
-      {/* Sort key */}
-      <select
-        value={sortKey}
-        onChange={e => setSortKey(e.target.value as SortKey)}
-        aria-label="Sort by"
-        className="px-3 py-2 rounded-lg bg-secondary border border-border text-xs text-foreground outline-none cursor-pointer"
-      >
-        {(["date", "title", "priority", "status"] as const).map(k => (
-          <option key={k} value={k}>{k.charAt(0).toUpperCase() + k.slice(1)}</option>
-        ))}
-      </select>
-      {/* Sort direction */}
+      <MiniSelect<Status | "All">
+        value={state.statusFilter}
+        onChange={state.setStatusFilter}
+        options={STATUS_OPTIONS}
+        label="Filter by status"
+      />
+      <MiniSelect<Priority | "All">
+        value={state.priorityFilter}
+        onChange={state.setPriorityFilter}
+        options={PRIORITY_OPTIONS}
+        label="Filter by priority"
+      />
+      <MiniSelect<SortKey>
+        value={state.sortKey}
+        onChange={state.setSortKey}
+        options={SORT_OPTIONS}
+        label="Sort by"
+      />
       <button
-        onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
-        aria-label={sortDir === "asc" ? "Sort descending" : "Sort ascending"}
-        className="p-2 rounded-lg bg-secondary border border-border text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => state.setSortDir(d => d === "asc" ? "desc" : "asc")}
+        aria-label={state.sortDir === "asc" ? "Sort descending" : "Sort ascending"}
+        className="p-2 rounded-lg bg-secondary border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
       >
-        {sortDir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />}
+        {state.sortDir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />}
       </button>
     </div>
   )
 }
 
-// ─── View: Kanban ─────────────────────────────────────────────────────────────
+// ─── View: Kanban (with drag-and-drop between columns) ────────────────────────
 
 const KANBAN_COLS: Status[] = ["Todo", "In Progress", "In Review", "Done"]
 
 function ViewKanban() {
-  const state = useFilterSort(TASKS)
+  const state = useFilterSort(INITIAL_TASKS)
+  const [dragId, setDragId] = useState<number | null>(null)
+  const [overCol, setOverCol] = useState<Status | null>(null)
+
+  function onDragStart(id: number) {
+    setDragId(id)
+  }
+
+  function onDrop(col: Status) {
+    if (dragId === null) return
+    state.setTasks(prev => prev.map(t => t.id === dragId ? { ...t, status: col } : t))
+    setDragId(null)
+    setOverCol(null)
+  }
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <Toolbar {...state} />
@@ -1797,19 +1868,36 @@ function ViewKanban() {
         {KANBAN_COLS.map(col => {
           const colTasks = state.filtered.filter(t => t.status === col)
           const { color, icon } = STATUS_CONFIG[col]
+          const isOver = overCol === col
           return (
-            <div key={col} className="flex flex-col gap-2">
-              {/* Column header */}
+            <div
+              key={col}
+              onDragOver={e => { e.preventDefault(); setOverCol(col) }}
+              onDragLeave={() => setOverCol(null)}
+              onDrop={() => onDrop(col)}
+              className={cn(
+                "flex flex-col gap-2 rounded-xl p-2 transition-colors duration-150 min-h-[120px]",
+                isOver ? "bg-primary/5 ring-1 ring-primary/30" : "bg-transparent"
+              )}
+            >
               <div className="flex items-center justify-between px-1">
                 <span className={cn("flex items-center gap-1.5 text-xs font-semibold", color)}>
                   {icon} {col}
                 </span>
                 <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-full border border-border">{colTasks.length}</span>
               </div>
-              {/* Cards */}
-              <div className="flex flex-col gap-2 min-h-[80px]">
+              <div className="flex flex-col gap-2">
                 {colTasks.map(t => (
-                  <div key={t.id} className="p-3 rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-150 cursor-default group">
+                  <div
+                    key={t.id}
+                    draggable
+                    onDragStart={() => onDragStart(t.id)}
+                    onDragEnd={() => { setDragId(null); setOverCol(null) }}
+                    className={cn(
+                      "p-3 rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-150 cursor-grab active:cursor-grabbing select-none",
+                      dragId === t.id && "opacity-40 scale-95"
+                    )}
+                  >
                     <div className="flex items-start justify-between gap-1 mb-2">
                       <p className="text-xs font-medium text-foreground leading-snug">{t.title}</p>
                       <Star size={11} className={cn("shrink-0 mt-0.5", t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
@@ -1821,6 +1909,9 @@ function ViewKanban() {
                     <span className="mt-2 inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary border border-border text-muted-foreground">{t.tag}</span>
                   </div>
                 ))}
+                {isOver && dragId !== null && (
+                  <div className="h-14 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5" />
+                )}
               </div>
             </div>
           )
@@ -1830,10 +1921,28 @@ function ViewKanban() {
   )
 }
 
-// ─── View: Board (wider swimlanes) ────────────────────────────────────────────
+// ─── View: Board (horizontal swimlanes, drag to reorder within lane) ──────────
 
 function ViewBoard() {
-  const state = useFilterSort(TASKS)
+  const state = useFilterSort(INITIAL_TASKS)
+  const [dragId, setDragId] = useState<number | null>(null)
+  const [overId, setOverId] = useState<number | null>(null)
+
+  function onDrop(targetId: number) {
+    if (dragId === null || dragId === targetId) return
+    state.setTasks(prev => {
+      const arr = [...prev]
+      const fromIdx = arr.findIndex(t => t.id === dragId)
+      const toIdx   = arr.findIndex(t => t.id === targetId)
+      if (fromIdx < 0 || toIdx < 0) return prev
+      const [item] = arr.splice(fromIdx, 1)
+      arr.splice(toIdx, 0, item)
+      return arr
+    })
+    setDragId(null)
+    setOverId(null)
+  }
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <Toolbar {...state} />
@@ -1851,7 +1960,19 @@ function ViewBoard() {
               </div>
               <div className="flex gap-3 p-3 overflow-x-auto">
                 {colTasks.map(t => (
-                  <div key={t.id} className="flex-shrink-0 w-52 p-3 rounded-lg border border-border bg-secondary hover:border-primary/30 transition-all duration-150 cursor-default">
+                  <div
+                    key={t.id}
+                    draggable
+                    onDragStart={() => setDragId(t.id)}
+                    onDragEnd={() => { setDragId(null); setOverId(null) }}
+                    onDragOver={e => { e.preventDefault(); setOverId(t.id) }}
+                    onDrop={() => onDrop(t.id)}
+                    className={cn(
+                      "flex-shrink-0 w-52 p-3 rounded-lg border border-border bg-secondary transition-all duration-150 cursor-grab active:cursor-grabbing select-none",
+                      dragId === t.id && "opacity-40 scale-95",
+                      overId === t.id && dragId !== t.id && "ring-1 ring-primary/50 border-primary/40"
+                    )}
+                  >
                     <div className="flex items-start justify-between gap-1 mb-2">
                       <p className="text-xs font-medium text-foreground leading-snug">{t.title}</p>
                       <Star size={11} className={cn("shrink-0 mt-0.5", t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
@@ -1878,7 +1999,7 @@ function ViewBoard() {
 // ─── View: Cards grid ─────────────────────────────────────────────────────────
 
 function ViewCards() {
-  const state = useFilterSort(TASKS)
+  const state = useFilterSort(INITIAL_TASKS)
   return (
     <div className="flex flex-col gap-4 w-full">
       <Toolbar {...state} />
@@ -1905,10 +2026,28 @@ function ViewCards() {
   )
 }
 
-// ─── View: List ───────────────────────────────────────────────────────────────
+// ─── View: List (drag to reorder) ─────────────────────────────────────────────
 
 function ViewList() {
-  const state = useFilterSort(TASKS)
+  const state = useFilterSort(INITIAL_TASKS)
+  const [dragId, setDragId] = useState<number | null>(null)
+  const [overId, setOverId] = useState<number | null>(null)
+
+  function onDrop(targetId: number) {
+    if (dragId === null || dragId === targetId) return
+    state.setTasks(prev => {
+      const arr = [...prev]
+      const fromIdx = arr.findIndex(t => t.id === dragId)
+      const toIdx   = arr.findIndex(t => t.id === targetId)
+      if (fromIdx < 0 || toIdx < 0) return prev
+      const [item] = arr.splice(fromIdx, 1)
+      arr.splice(toIdx, 0, item)
+      return arr
+    })
+    setDragId(null)
+    setOverId(null)
+  }
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <Toolbar {...state} />
@@ -1916,9 +2055,16 @@ function ViewList() {
         {state.filtered.map((t, i) => (
           <div
             key={t.id}
+            draggable
+            onDragStart={() => setDragId(t.id)}
+            onDragEnd={() => { setDragId(null); setOverId(null) }}
+            onDragOver={e => { e.preventDefault(); setOverId(t.id) }}
+            onDrop={() => onDrop(t.id)}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors cursor-default",
-              i < state.filtered.length - 1 && "border-b border-border"
+              "flex items-center gap-3 px-4 py-3 transition-all duration-100 cursor-grab active:cursor-grabbing select-none",
+              i < state.filtered.length - 1 && "border-b border-border",
+              dragId === t.id && "opacity-40",
+              overId === t.id && dragId !== t.id && "bg-primary/5 border-l-2 border-l-primary"
             )}
           >
             <GripVertical size={13} className="text-border shrink-0" />
@@ -1939,7 +2085,7 @@ function ViewList() {
 // ─── View: Table ─────────────────────────────────────────────────────────────
 
 function ViewTable() {
-  const state = useFilterSort(TASKS)
+  const state = useFilterSort(INITIAL_TASKS)
 
   function SortHeader({ label, k }: { label: string; k: SortKey }) {
     const active = state.sortKey === k
@@ -1977,10 +2123,7 @@ function ViewTable() {
           </thead>
           <tbody>
             {state.filtered.map((t, i) => (
-              <tr
-                key={t.id}
-                className={cn("group hover:bg-secondary/40 transition-colors cursor-default", i < state.filtered.length - 1 && "border-b border-border")}
-              >
+              <tr key={t.id} className={cn("hover:bg-secondary/40 transition-colors cursor-default", i < state.filtered.length - 1 && "border-b border-border")}>
                 <td className="px-4 py-2.5">
                   <div className="flex items-center gap-2">
                     <Star size={11} className={cn(t.starred ? "text-yellow-400 fill-yellow-400" : "text-border")} />
@@ -2019,7 +2162,6 @@ function ViewSwitcher() {
   const [view, setView] = useState<ViewMode>("kanban")
   return (
     <div className="flex flex-col gap-4 w-full">
-      {/* View tabs */}
       <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary border border-border w-fit" role="tablist">
         {VIEW_TABS.map(tab => (
           <button
@@ -2037,7 +2179,6 @@ function ViewSwitcher() {
           </button>
         ))}
       </div>
-      {/* Active view */}
       {view === "kanban" && <ViewKanban />}
       {view === "board"  && <ViewBoard />}
       {view === "cards"  && <ViewCards />}
