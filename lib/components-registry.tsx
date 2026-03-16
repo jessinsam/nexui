@@ -3976,7 +3976,7 @@ function ContactForm() {
   )
 }
 
-// ── Feedback Form ─────────────────────────────────────────────────────────────
+// ── Feedback Form ────────────────────��────────────────────────────────────────
 function FeedbackForm() {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
@@ -4803,475 +4803,735 @@ interface ChatMessage {
   streaming?: boolean
 }
 
-const ATTACHMENT_ICON: Record<AttachmentType, React.ReactNode> = {
-  image: <ImageIcon size={12} aria-hidden="true" />,
-  pdf:   <FileText size={12} aria-hidden="true" />,
-  doc:   <FileText size={12} aria-hidden="true" />,
-  csv:   <FileText size={12} aria-hidden="true" />,
-}
+// Shared helpers ──────────────────────────────────────────────────────────────
 
-const ATTACHMENT_COLOR: Record<AttachmentType, string> = {
-  image: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  pdf:   "text-red-400 bg-red-400/10 border-red-400/20",
+const FILE_COLORS: Record<AttachmentType, string> = {
+  image: "text-sky-400 bg-sky-400/10 border-sky-400/20",
+  pdf:   "text-rose-400 bg-rose-400/10 border-rose-400/20",
   doc:   "text-primary bg-primary/10 border-primary/20",
-  csv:   "text-green-400 bg-green-400/10 border-green-400/20",
+  csv:   "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
 }
 
-const SAMPLE_CONVERSATIONS: ChatMessage[] = [
-  {
-    id: "1", role: "assistant",
-    content: "Hi! I'm your AI assistant. I can help you write code, answer questions, analyse documents, and much more. What would you like to work on today?",
-    timestamp: "9:41 AM",
-  },
-  {
-    id: "2", role: "user",
-    content: "Can you summarise the key points from this PDF?",
-    timestamp: "9:42 AM",
-    attachments: [{ id: "a1", name: "Q3_Report.pdf", size: "2.4 MB", type: "pdf" }],
-  },
-  {
-    id: "3", role: "assistant",
-    content: "I've reviewed the PDF. Here are the key takeaways:\n\n**Revenue** grew 24% YoY, reaching $4.2M in Q3.\n\n**Top performing channels** were organic search (38%) and direct (27%).\n\n**Churn** decreased from 5.1% to 3.8%, attributed to the onboarding improvements shipped in July.\n\n**Recommended actions** from the report:\n1. Double down on SEO investment\n2. Expand the customer success team\n3. Launch referral programme in Q4",
-    timestamp: "9:42 AM",
-  },
-  {
-    id: "4", role: "user",
-    content: "Great! Can you also help me draft a follow-up email to the team?",
-    timestamp: "9:43 AM",
-  },
-  {
-    id: "5", role: "assistant",
-    content: "Sure! Here's a draft:\n\n---\n\n**Subject:** Q3 Results — Strong Quarter, Clear Path Forward\n\nHi team,\n\nJust a quick note to share the Q3 highlights. Revenue hit $4.2M (up 24% YoY) and churn dropped to 3.8% — both are direct results of your hard work.\n\nHeading into Q4 we'll be investing more in SEO, growing the CS team, and launching our referral programme.\n\nMore details in the full report linked below. Thank you all!\n\n---\n\nWant me to adjust the tone or add anything?",
-    timestamp: "9:43 AM",
-  },
-]
+const FILE_EXT: Record<AttachmentType, string> = {
+  image: "IMG", pdf: "PDF", doc: "DOC", csv: "CSV",
+}
 
-const SUGGESTED_PROMPTS = [
-  { icon: <Sparkles size={13} />, label: "Summarise a document" },
-  { icon: <Code2 size={13} />, label: "Write a code snippet" },
-  { icon: <FileText size={13} />, label: "Draft an email" },
-  { icon: <Hash size={13} />, label: "Explain a concept" },
-]
-
-function useTypewriter(text: string, active: boolean, speed = 18) {
+function useTypewriter(text: string, active: boolean, speed = 12) {
   const [displayed, setDisplayed] = useState("")
-  const [done, setDone] = useState(false)
   React.useEffect(() => {
-    if (!active) { setDisplayed(text); setDone(true); return }
+    if (!active) { setDisplayed(text); return }
     setDisplayed("")
-    setDone(false)
     let i = 0
     const id = setInterval(() => {
       i++
       setDisplayed(text.slice(0, i))
-      if (i >= text.length) { clearInterval(id); setDone(true) }
+      if (i >= text.length) clearInterval(id)
     }, speed)
     return () => clearInterval(id)
   }, [text, active, speed])
-  return { displayed, done }
+  return displayed
 }
 
-function AttachmentChip({ a, onRemove }: { a: Attachment; onRemove?: () => void }) {
-  return (
-    <div className={cn("inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium", ATTACHMENT_COLOR[a.type])}>
-      {ATTACHMENT_ICON[a.type]}
-      <span className="max-w-[120px] truncate">{a.name}</span>
-      <span className="text-[10px] opacity-60 shrink-0">{a.size}</span>
-      {onRemove && (
-        <button onClick={onRemove} aria-label={`Remove ${a.name}`} className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity">
-          <X size={11} aria-hidden="true" />
-        </button>
-      )}
-    </div>
-  )
+// Renders minimal markdown: **bold**, `code`, numbered/bullet lists, ---
+function renderMd(raw: string) {
+  return raw.split("\n").map((line, i) => {
+    if (line.startsWith("---")) return <hr key={i} className="border-border my-2" />
+    const isNumbered = /^\d+\.\s/.test(line)
+    const isBullet = /^[-•]\s/.test(line)
+    const content = line
+      .replace(/^\d+\.\s|^[-•]\s/, "")
+      .split(/(`[^`]+`|\*\*[^*]+\*\*)/g)
+      .map((p, j) => {
+        if (p.startsWith("**") && p.endsWith("**")) return <strong key={j} className="font-semibold">{p.slice(2,-2)}</strong>
+        if (p.startsWith("`") && p.endsWith("`")) return <code key={j} className="px-1 py-0.5 rounded bg-primary/15 text-primary text-[11px] font-mono">{p.slice(1,-1)}</code>
+        return p
+      })
+    if (isNumbered || isBullet) {
+      return <p key={i} className="flex gap-2 leading-relaxed"><span className="shrink-0 text-muted-foreground">{isNumbered ? line.match(/^\d+/)?.[0] + "." : "·"}</span><span>{content}</span></p>
+    }
+    return <p key={i} className={cn("leading-relaxed", line === "" ? "h-2" : "")}>{content}</p>
+  })
 }
 
-function MessageBubble({ msg, isLatest }: { msg: ChatMessage; isLatest: boolean }) {
-  const isUser = msg.role === "user"
-  const { displayed } = useTypewriter(msg.content, !isUser && isLatest && !!msg.streaming)
-  const content = (!isUser && isLatest && msg.streaming) ? displayed : msg.content
-  const [copied, setCopied] = useState(false)
+const MOCK_REPLIES = [
+  "Sure, here's how I'd approach that:\n\n1. Break the problem into smaller, testable pieces\n2. Write a failing test first — **red, green, refactor**\n3. Keep functions pure where possible\n\nWant me to write the first iteration?",
+  "Great question. The key insight is that `useEffect` runs **after** every render by default. You control when it re-runs using the dependency array:\n\n- Empty array `[]` → run once on mount\n- With deps → run when deps change\n- No array → run after every render",
+  "I've reviewed the document. The three most important points are:\n\n1. Revenue grew **24%** YoY to $4.2M\n2. Churn dropped from 5.1% to **3.8%**\n3. Organic search is your top acquisition channel at **38%**\n\nShould I draft an executive summary email?",
+]
 
-  function copy() {
-    navigator.clipboard.writeText(msg.content).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+const MOCK_FILES: Record<AttachmentType, Attachment> = {
+  pdf:   { id: "f1", name: "Q3_Report.pdf",    size: "2.4 MB", type: "pdf"   },
+  image: { id: "f2", name: "screenshot.png",   size: "340 KB", type: "image" },
+  doc:   { id: "f3", name: "meeting_notes.docx",size: "88 KB", type: "doc"   },
+  csv:   { id: "f4", name: "analytics.csv",    size: "210 KB", type: "csv"   },
+}
+
+const EMOJI_SET = ["👍","👏","🔥","✅","💡","😊","🎉","❤️"]
+
+const SUGGESTIONS = [
+  { icon: <Sparkles size={12} />, text: "Summarise this document" },
+  { icon: <Code2 size={12} />,    text: "Write a React component" },
+  { icon: <FileText size={12} />, text: "Draft a cold email" },
+  { icon: <Hash size={12} />,     text: "Explain async/await" },
+]
+
+// ── 1. Full-screen Chat (ChatGPT-style) ───────────────────────────────────────
+const FULLSCREEN_SEED: ChatMessage[] = [
+  { id: "s1", role: "assistant", timestamp: "now", content: "Hello! I'm your AI assistant. Ask me anything, share a file, or pick a suggestion below." },
+  { id: "s2", role: "user", timestamp: "now", content: "Can you review this report?", attachments: [MOCK_FILES.pdf] },
+  { id: "s3", role: "assistant", timestamp: "now", content: MOCK_REPLIES[2] },
+]
+
+function FullscreenChat() {
+  const [msgs, setMsgs] = useState<ChatMessage[]>(FULLSCREEN_SEED)
+  const [input, setInput] = useState("")
+  const [files, setFiles] = useState<Attachment[]>([])
+  const [streaming, setStreaming] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [showEmoji, setShowEmoji] = useState(false)
+  const [showFiles, setShowFiles] = useState(false)
+  const [copied, setCopied] = useState<string | null>(null)
+  const [model, setModel] = useState("NexAI Pro")
+  const bottomRef = React.useRef<HTMLDivElement>(null)
+  const taRef = React.useRef<HTMLTextAreaElement>(null)
+  const models = ["NexAI Pro", "NexAI Fast", "NexAI Vision"]
+
+  React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs, streaming])
+
+  function resize(el: HTMLTextAreaElement) {
+    el.style.height = "auto"
+    el.style.height = Math.min(el.scrollHeight, 160) + "px"
   }
 
-  // Minimal markdown: bold **text**, numbered lists, horizontal rule
-  function renderContent(raw: string) {
-    return raw.split("\n").map((line, i) => {
-      if (line === "---") return <hr key={i} className="border-border my-2" />
-      const parts = line.split(/(\*\*[^*]+\*\*)/g).map((p, j) =>
-        p.startsWith("**") && p.endsWith("**")
-          ? <strong key={j} className="font-semibold text-foreground">{p.slice(2, -2)}</strong>
-          : p
-      )
-      return <p key={i} className={cn("leading-relaxed", line === "" ? "mt-2" : "")}>{parts}</p>
-    })
+  async function send() {
+    const text = input.trim()
+    if (!text && !files.length) return
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: "user", content: text, attachments: files.length ? [...files] : undefined, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+    setMsgs(m => [...m, userMsg])
+    setInput(""); setFiles([])
+    if (taRef.current) taRef.current.style.height = "auto"
+    setStreaming(true)
+    const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)]
+    const botId = (Date.now() + 1).toString()
+    const botMsg: ChatMessage = { id: botId, role: "assistant", content: reply, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), streaming: true }
+    setMsgs(m => [...m, botMsg])
+    await new Promise(r => setTimeout(r, reply.length * 12 + 300))
+    setMsgs(m => m.map(x => x.id === botId ? { ...x, streaming: false } : x))
+    setStreaming(false)
   }
+
+  function copy(id: string, text: string) {
+    navigator.clipboard.writeText(text).catch(() => {})
+    setCopied(id); setTimeout(() => setCopied(null), 1600)
+  }
+
+  const canSend = input.trim().length > 0 || files.length > 0
 
   return (
-    <div className={cn("group flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
-      {/* Avatar */}
-      {!isUser ? (
-        <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0 mt-0.5">
-          <Bot size={13} className="text-primary" aria-hidden="true" />
+    <div className="flex h-[680px] w-full max-w-3xl mx-auto rounded-2xl overflow-hidden border border-border bg-background shadow-2xl">
+      {/* Slim sidebar */}
+      <div className="w-[200px] shrink-0 border-r border-border bg-card flex flex-col">
+        <div className="p-3 border-b border-border">
+          <button className="flex items-center gap-2 w-full px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-medium hover:bg-primary/15 transition-colors">
+            <Plus size={13} /> New chat
+          </button>
         </div>
-      ) : (
-        <div className="size-7 rounded-full bg-secondary border border-border flex items-center justify-center shrink-0 mt-0.5">
-          <User size={13} className="text-muted-foreground" aria-hidden="true" />
+        <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
+          {["Q3 report review", "React useEffect tips", "Cold email draft", "SQL query help"].map((t, i) => (
+            <button key={t} className={cn("w-full text-left px-3 py-2 rounded-xl text-xs truncate transition-colors", i === 0 ? "bg-secondary text-foreground font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground")}>
+              {t}
+            </button>
+          ))}
         </div>
-      )}
+        {/* Model selector at bottom */}
+        <div className="p-3 border-t border-border">
+          <div className="relative">
+            <select
+              value={model}
+              onChange={e => setModel(e.target.value)}
+              aria-label="Select model"
+              className="w-full bg-secondary border border-border rounded-lg text-[10px] text-muted-foreground px-2 py-1.5 appearance-none outline-none focus:border-primary/40 cursor-pointer"
+            >
+              {models.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+            <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          </div>
+        </div>
+      </div>
 
-      <div className={cn("flex flex-col gap-1.5 max-w-[78%]", isUser ? "items-end" : "items-start")}>
-        {/* Attachments above bubble for user */}
-        {isUser && msg.attachments && msg.attachments.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 justify-end">
-            {msg.attachments.map(a => <AttachmentChip key={a.id} a={a} />)}
+      {/* Main chat */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <Bot size={13} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground leading-none">NexUI Assistant</p>
+              <p className="text-[10px] text-green-400 mt-0.5">Online</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setMsgs(FULLSCREEN_SEED)} aria-label="Reset" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+              <RotateCcw size={13} />
+            </button>
+            <button aria-label="More options" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+              <MoreHorizontal size={13} />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-5">
+          {msgs.map((msg, idx) => {
+            const isUser = msg.role === "user"
+            const isLatest = idx === msgs.length - 1
+            const body = isLatest && msg.streaming ? msg.content : msg.content
+            return (
+              <div key={msg.id} className={cn("group flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
+                <div className={cn("size-7 rounded-full shrink-0 flex items-center justify-center mt-0.5 border", isUser ? "bg-secondary border-border" : "bg-primary/15 border-primary/25")}>
+                  {isUser ? <User size={12} className="text-muted-foreground" /> : <Bot size={12} className="text-primary" />}
+                </div>
+                <div className={cn("flex flex-col gap-1 max-w-[75%]", isUser ? "items-end" : "items-start")}>
+                  {isUser && msg.attachments?.map(a => (
+                    <div key={a.id} className={cn("inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium", FILE_COLORS[a.type])}>
+                      <span className="font-mono text-[10px] font-bold tracking-wider">{FILE_EXT[a.type]}</span>
+                      <span className="truncate max-w-[100px]">{a.name}</span>
+                      <span className="opacity-50">{a.size}</span>
+                    </div>
+                  ))}
+                  <div className={cn(
+                    "px-4 py-3 rounded-2xl text-sm",
+                    isUser
+                      ? "bg-primary text-primary-foreground rounded-tr-md"
+                      : "bg-card border border-border text-foreground rounded-tl-md"
+                  )}>
+                    {isLatest && msg.streaming
+                      ? <StreamingText text={body} />
+                      : <div className="flex flex-col gap-0.5">{renderMd(body)}</div>
+                    }
+                  </div>
+                  <div className={cn("flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-muted-foreground", isUser ? "flex-row-reverse" : "flex-row")}>
+                    <span>{msg.timestamp}</span>
+                    {!isUser && (
+                      <button onClick={() => copy(msg.id, msg.content)} className="flex items-center gap-1 hover:text-foreground transition-colors">
+                        {copied === msg.id ? <CheckCircle2 size={10} className="text-green-400" /> : <Copy size={10} />}
+                        {copied === msg.id ? "Copied" : "Copy"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+          {streaming && msgs[msgs.length - 1]?.role !== "assistant" && (
+            <div className="flex gap-3">
+              <div className="size-7 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center">
+                <Bot size={12} className="text-primary" />
+              </div>
+              <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-card border border-border flex items-center gap-1">
+                {[0,120,240].map(d => <span key={d} className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Suggestions — only before first user message */}
+        {!msgs.some(m => m.role === "user" && m.id !== "s2") && (
+          <div className="px-5 pb-2 flex flex-wrap gap-2 shrink-0">
+            {SUGGESTIONS.map(s => (
+              <button key={s.text} onClick={() => { setInput(s.text); taRef.current?.focus() }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-secondary text-xs text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all">
+                {s.icon} {s.text}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Bubble */}
-        <div className={cn(
-          "px-4 py-3 rounded-2xl text-sm leading-relaxed",
-          isUser
-            ? "bg-primary text-primary-foreground rounded-tr-sm"
-            : "bg-card border border-border text-foreground rounded-tl-sm"
-        )}>
-          {renderContent(content)}
-          {!isUser && isLatest && msg.streaming && !displayed.endsWith(msg.content) && (
-            <span className="inline-block w-1.5 h-4 bg-primary ml-0.5 animate-pulse rounded-sm align-middle" aria-label="typing" />
-          )}
-        </div>
+        {/* Pending files */}
+        {files.length > 0 && (
+          <div className="px-5 pb-2 flex flex-wrap gap-1.5 shrink-0">
+            {files.map(f => (
+              <div key={f.id} className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium", FILE_COLORS[f.type])}>
+                <span className="font-mono text-[10px] font-bold">{FILE_EXT[f.type]}</span>
+                <span className="truncate max-w-[90px]">{f.name}</span>
+                <button onClick={() => setFiles(p => p.filter(x => x.id !== f.id))} aria-label={`Remove ${f.name}`} className="opacity-60 hover:opacity-100 transition-opacity"><X size={10} /></button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* Timestamp + actions */}
-        <div className={cn("flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity", isUser ? "flex-row-reverse" : "flex-row")}>
-          <span className="text-[10px] text-muted-foreground">{msg.timestamp}</span>
-          {!isUser && (
-            <button onClick={copy} aria-label="Copy message" className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
-              {copied ? <CheckCircle2 size={10} className="text-green-400" /> : <Copy size={10} />}
-              {copied ? "Copied" : "Copy"}
-            </button>
+        {/* Input */}
+        <div className="px-4 pb-4 pt-2 border-t border-border bg-card shrink-0">
+          {recording && (
+            <div className="flex items-center gap-2 mb-2 px-3 py-1.5 rounded-xl bg-rose-400/10 border border-rose-400/20">
+              <span className="size-2 rounded-full bg-rose-400 animate-pulse" />
+              <span className="text-xs text-rose-400 font-medium flex-1">Recording — tap mic to stop</span>
+              <span className="text-xs text-rose-400 font-mono">0:04</span>
+            </div>
           )}
+          <div className="flex items-end gap-2 bg-secondary border border-border rounded-2xl px-3 py-2.5 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+            {/* Attach */}
+            <div className="relative shrink-0 self-end mb-0.5">
+              <button onClick={() => setShowFiles(v => !v)} aria-label="Attach" aria-expanded={showFiles} className="size-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-border/50 transition-colors">
+                <Paperclip size={15} />
+              </button>
+              {showFiles && (
+                <div className="absolute bottom-10 left-0 z-30 w-48 rounded-2xl border border-border bg-card shadow-2xl py-1.5 overflow-hidden">
+                  {(["pdf","image","doc","csv"] as AttachmentType[]).map(t => (
+                    <button key={t} onClick={() => { setFiles(p => [...p, { ...MOCK_FILES[t], id: Date.now().toString() }]); setShowFiles(false) }}
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+                      <span className={cn("text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md border", FILE_COLORS[t])}>{FILE_EXT[t]}</span>
+                      {MOCK_FILES[t].name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Textarea */}
+            <textarea ref={taRef} value={input}
+              onChange={e => { setInput(e.target.value); resize(e.target) }}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send() } }}
+              placeholder="Ask anything… (Enter to send)"
+              rows={1} aria-label="Message input"
+              className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none min-h-[28px] max-h-40 overflow-y-auto leading-relaxed py-0.5 self-end"
+            />
+
+            {/* Emoji */}
+            <div className="relative shrink-0 self-end mb-0.5">
+              <button onClick={() => setShowEmoji(v => !v)} aria-label="Emoji" aria-expanded={showEmoji} className="size-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-border/50 transition-colors">
+                <Smile size={15} />
+              </button>
+              {showEmoji && (
+                <div className="absolute bottom-10 right-0 z-30 p-2 rounded-2xl border border-border bg-card shadow-2xl grid grid-cols-4 gap-1">
+                  {EMOJI_SET.map(e => (
+                    <button key={e} onClick={() => { setInput(v => v + e); setShowEmoji(false); taRef.current?.focus() }} className="text-base p-1.5 rounded-xl hover:bg-secondary transition-colors">{e}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Voice */}
+            <button onClick={() => { setRecording(r => !r); if (recording) setInput(v => v + " [voice message]") }}
+              aria-label={recording ? "Stop recording" : "Voice input"}
+              className={cn("size-8 shrink-0 self-end mb-0.5 flex items-center justify-center rounded-xl border transition-all",
+                recording ? "bg-rose-400/20 border-rose-400/40 text-rose-400" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-border/50"
+              )}>
+              {recording ? <MicOff size={15} /> : <Mic size={15} />}
+            </button>
+
+            {/* Send / Stop */}
+            {streaming ? (
+              <button onClick={() => { setStreaming(false); setMsgs(m => m.map(x => x.streaming ? { ...x, streaming: false } : x)) }}
+                aria-label="Stop" className="size-8 shrink-0 self-end mb-0.5 flex items-center justify-center rounded-xl bg-rose-400/20 border border-rose-400/30 text-rose-400 hover:bg-rose-400/30 transition-all">
+                <StopCircle size={15} />
+              </button>
+            ) : (
+              <button onClick={send} disabled={!canSend} aria-label="Send"
+                className={cn("size-8 shrink-0 self-end mb-0.5 flex items-center justify-center rounded-xl transition-all",
+                  canSend ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" : "bg-secondary border border-border text-muted-foreground opacity-40 cursor-not-allowed"
+                )}>
+                <ArrowUp size={15} />
+              </button>
+            )}
+          </div>
+          <p className="text-center text-[10px] text-muted-foreground mt-1.5">AI can make mistakes — verify important information.</p>
         </div>
       </div>
     </div>
   )
 }
 
-const EMOJI_LIST = ["👍", "👏", "🔥", "✅", "💡", "😊", "🎉", "❤️"]
+// Streaming typewriter sub-component
+function StreamingText({ text }: { text: string }) {
+  const displayed = useTypewriter(text, true)
+  return (
+    <div className="flex flex-col gap-0.5">
+      {renderMd(displayed)}
+      <span className="inline-block w-1.5 h-4 bg-primary animate-pulse rounded-sm align-middle" />
+    </div>
+  )
+}
 
-function ModernChatUI() {
-  const [messages, setMessages] = useState<ChatMessage[]>(SAMPLE_CONVERSATIONS)
+// ── 2. Compact Sidebar Chat ───────────────────────────────────────────────────
+const SIDEBAR_SEED: ChatMessage[] = [
+  { id: "c1", role: "assistant", timestamp: "9:41", content: "Hi! How can I help you today?" },
+  { id: "c2", role: "user",      timestamp: "9:42", content: "What's the difference between `let` and `const`?" },
+  { id: "c3", role: "assistant", timestamp: "9:42", content: "`const` declares a **block-scoped** variable that cannot be reassigned. `let` is also block-scoped but can be reassigned. Neither is function-scoped like `var`." },
+]
+
+function SidebarChat() {
+  const [msgs, setMsgs] = useState<ChatMessage[]>(SIDEBAR_SEED)
   const [input, setInput] = useState("")
-  const [attachments, setAttachments] = useState<Attachment[]>([])
-  const [isRecording, setIsRecording] = useState(false)
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [showEmoji, setShowEmoji] = useState(false)
-  const [showAttachMenu, setShowAttachMenu] = useState(false)
+  const [streaming, setStreaming] = useState(false)
   const bottomRef = React.useRef<HTMLDivElement>(null)
-  const inputRef = React.useRef<HTMLTextAreaElement>(null)
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
-  React.useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs])
 
-  function autoResize(el: HTMLTextAreaElement) {
-    el.style.height = "auto"
-    el.style.height = Math.min(el.scrollHeight, 160) + "px"
-  }
-
-  const MOCK_REPLIES = [
-    "That's a great question! Let me think through this carefully.\n\nBased on what you've shared, I'd recommend breaking this into smaller steps and tackling the most impactful piece first.",
-    "Absolutely! Here's how I'd approach that:\n\n1. Start by defining your goal clearly\n2. Identify any constraints or requirements\n3. Build an MVP and iterate quickly\n\nWant me to go deeper on any of these?",
-    "Happy to help with that. The short answer is **yes**, it's definitely possible — and here's the most efficient way to do it.",
-  ]
-
-  async function sendMessage() {
+  async function send() {
     const text = input.trim()
-    if (!text && attachments.length === 0) return
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      role: "user",
-      content: text,
-      attachments: attachments.length > 0 ? [...attachments] : undefined,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    }
-    setMessages(m => [...m, userMsg])
+    if (!text) return
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: "user", content: text, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+    setMsgs(m => [...m, userMsg])
     setInput("")
-    setAttachments([])
-    if (inputRef.current) inputRef.current.style.height = "auto"
-
-    // Simulate AI streaming reply
-    setIsStreaming(true)
+    setStreaming(true)
     const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)]
-    const botMsg: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: reply,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      streaming: true,
-    }
-    setMessages(m => [...m, botMsg])
-    await new Promise(r => setTimeout(r, reply.length * 18 + 400))
-    setMessages(m => m.map(msg => msg.id === botMsg.id ? { ...msg, streaming: false } : msg))
-    setIsStreaming(false)
+    const botId = (Date.now()+1).toString()
+    setMsgs(m => [...m, { id: botId, role: "assistant", content: reply, timestamp: new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }), streaming: true }])
+    await new Promise(r => setTimeout(r, reply.length * 12 + 200))
+    setMsgs(m => m.map(x => x.id === botId ? { ...x, streaming: false } : x))
+    setStreaming(false)
   }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage() }
-  }
-
-  function mockAttach(type: AttachmentType, name: string, size: string) {
-    setAttachments(a => [...a, { id: Date.now().toString(), name, size, type }])
-    setShowAttachMenu(false)
-  }
-
-  function toggleRecording() {
-    setIsRecording(r => !r)
-    if (isRecording) {
-      setInput(v => v + (v ? " " : "") + "Voice message transcribed here...")
-      if (inputRef.current) autoResize(inputRef.current)
-    }
-  }
-
-  const canSend = input.trim().length > 0 || attachments.length > 0
 
   return (
-    <div className="flex flex-col w-full max-w-2xl mx-auto h-[620px] rounded-2xl border border-border bg-background overflow-hidden shadow-xl">
+    <div className="flex flex-col w-[340px] h-[520px] mx-auto rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card shrink-0">
-        <div className="relative">
-          <div className="size-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-            <Bot size={16} className="text-primary" aria-hidden="true" />
+      <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <div className="size-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <Bot size={13} className="text-primary" />
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-green-400 border-2 border-card" />
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-green-400 border-2 border-card" aria-label="Online" />
+          <div>
+            <p className="text-xs font-semibold text-foreground">NexAI</p>
+            <p className="text-[10px] text-muted-foreground">Always ready</p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">NexUI Assistant</p>
-          <p className="text-[10px] text-green-400 font-medium">Online · Ready to help</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setMessages(SAMPLE_CONVERSATIONS)}
-            aria-label="Reset conversation"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            <RotateCcw size={14} aria-hidden="true" />
+        <div className="flex gap-1">
+          <button onClick={() => setMsgs(SIDEBAR_SEED)} aria-label="Reset" className="size-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <RotateCcw size={12} />
           </button>
-          <button aria-label="Voice call" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-            <Volume2 size={14} aria-hidden="true" />
+          <button aria-label="Close" className="size-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <X size={12} />
           </button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 scroll-smooth">
-        {messages.map((msg, i) => (
-          <MessageBubble key={msg.id} msg={msg} isLatest={i === messages.length - 1} />
-        ))}
-        {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex gap-3 items-end">
-            <div className="size-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-              <Bot size={13} className="text-primary" />
-            </div>
-            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-card border border-border">
-              <div className="flex gap-1 items-center h-4">
-                {[0, 150, 300].map(d => (
-                  <span key={d} className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: `${d}ms` }} />
-                ))}
+      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+        {msgs.map((msg, idx) => {
+          const isUser = msg.role === "user"
+          const isLatest = idx === msgs.length - 1
+          return (
+            <div key={msg.id} className={cn("flex gap-2", isUser ? "flex-row-reverse" : "flex-row")}>
+              {!isUser && (
+                <div className="size-6 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot size={10} className="text-primary" />
+                </div>
+              )}
+              <div className={cn("flex flex-col gap-0.5 max-w-[82%]", isUser ? "items-end" : "items-start")}>
+                <div className={cn(
+                  "px-3 py-2 rounded-2xl text-xs",
+                  isUser ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-background border border-border text-foreground rounded-tl-sm"
+                )}>
+                  {isLatest && msg.streaming
+                    ? <StreamingText text={msg.content} />
+                    : <div className="flex flex-col gap-0.5">{renderMd(msg.content)}</div>
+                  }
+                </div>
+                <span className="text-[9px] text-muted-foreground px-1">{msg.timestamp}</span>
               </div>
+            </div>
+          )
+        })}
+        {streaming && msgs[msgs.length-1]?.role !== "assistant" && (
+          <div className="flex gap-2">
+            <div className="size-6 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center">
+              <Bot size={10} className="text-primary" />
+            </div>
+            <div className="px-3 py-2 rounded-2xl rounded-tl-sm bg-background border border-border flex gap-1 items-center">
+              {[0,100,200].map(d => <span key={d} className="size-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggested prompts — shown when no user messages yet or after reset */}
-      {messages.filter(m => m.role === "user").length === 0 && (
-        <div className="px-4 pb-2 flex flex-wrap gap-2 shrink-0">
-          {SUGGESTED_PROMPTS.map(p => (
-            <button
-              key={p.label}
-              onClick={() => { setInput(p.label); inputRef.current?.focus() }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-secondary text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
-            >
-              {p.icon}{p.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Pending attachments */}
-      {attachments.length > 0 && (
-        <div className="px-4 pb-2 flex flex-wrap gap-1.5 shrink-0">
-          {attachments.map(a => (
-            <AttachmentChip key={a.id} a={a} onRemove={() => setAttachments(prev => prev.filter(x => x.id !== a.id))} />
-          ))}
-        </div>
-      )}
-
-      {/* Input area */}
-      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-border bg-card">
-        {/* Recording indicator */}
-        {isRecording && (
-          <div className="flex items-center gap-2 mb-2 px-3 py-1.5 rounded-lg bg-red-400/10 border border-red-400/20">
-            <span className="size-2 rounded-full bg-red-400 animate-pulse" />
-            <span className="text-xs text-red-400 font-medium">Recording… tap mic to stop</span>
-          </div>
-        )}
-
-        <div className="flex items-end gap-2">
-          {/* Emoji picker toggle */}
-          <div className="relative shrink-0">
-            <button
-              onClick={() => setShowEmoji(v => !v)}
-              aria-label="Emoji picker"
-              aria-expanded={showEmoji}
-              className="size-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary border border-border transition-colors"
-            >
-              <Smile size={16} aria-hidden="true" />
-            </button>
-            {showEmoji && (
-              <div className="absolute bottom-11 left-0 z-20 p-2 rounded-xl border border-border bg-card shadow-xl grid grid-cols-4 gap-1">
-                {EMOJI_LIST.map(e => (
-                  <button
-                    key={e}
-                    onClick={() => { setInput(v => v + e); setShowEmoji(false); inputRef.current?.focus() }}
-                    className="text-base p-1.5 rounded-lg hover:bg-secondary transition-colors"
-                    aria-label={e}
-                  >
-                    {e}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Attach menu */}
-          <div className="relative shrink-0">
-            <button
-              onClick={() => setShowAttachMenu(v => !v)}
-              aria-label="Attach file"
-              aria-expanded={showAttachMenu}
-              className="size-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary border border-border transition-colors"
-            >
-              <Paperclip size={16} aria-hidden="true" />
-            </button>
-            {showAttachMenu && (
-              <div className="absolute bottom-11 left-0 z-20 w-44 rounded-xl border border-border bg-card shadow-xl py-1 overflow-hidden">
-                {([
-                  { type: "pdf" as AttachmentType, label: "Upload PDF", name: "document.pdf", size: "1.2 MB" },
-                  { type: "image" as AttachmentType, label: "Upload image", name: "screenshot.png", size: "340 KB" },
-                  { type: "doc" as AttachmentType, label: "Upload document", name: "notes.docx", size: "88 KB" },
-                  { type: "csv" as AttachmentType, label: "Upload spreadsheet", name: "data.csv", size: "210 KB" },
-                ] as const).map(item => (
-                  <button
-                    key={item.type}
-                    onClick={() => mockAttach(item.type, item.name, item.size)}
-                    className="flex items-center gap-2 w-full px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                  >
-                    {ATTACHMENT_ICON[item.type]}
-                    {item.label}
-                  </button>
-                ))}
-                <div className="border-t border-border mx-2 my-1" />
-                <button
-                  onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false) }}
-                  className="flex items-center gap-2 w-full px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                >
-                  <Upload size={12} /> Browse files
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Text input */}
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => { setInput(e.target.value); autoResize(e.target) }}
-            onKeyDown={handleKeyDown}
-            placeholder="Message NexUI Assistant… (Enter to send, Shift+Enter for newline)"
-            rows={1}
-            aria-label="Chat input"
-            className="flex-1 resize-none bg-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/15 transition-all min-h-[40px] max-h-40 overflow-y-auto leading-relaxed"
-            style={{ height: "auto" }}
-          />
-
-          {/* Voice button */}
-          <button
-            onClick={toggleRecording}
-            aria-label={isRecording ? "Stop recording" : "Start voice input"}
-            className={cn(
-              "size-9 shrink-0 flex items-center justify-center rounded-xl border transition-all",
-              isRecording
-                ? "bg-red-400/20 border-red-400/40 text-red-400 hover:bg-red-400/30"
-                : "bg-secondary border-border text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-            )}
-          >
-            {isRecording ? <MicOff size={15} aria-hidden="true" /> : <Mic size={15} aria-hidden="true" />}
+      {/* Input */}
+      <div className="p-3 border-t border-border bg-card shrink-0">
+        <div className="flex items-center gap-2 bg-background border border-border rounded-xl px-3 py-2 focus-within:border-primary/40 transition-all">
+          <input value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && send()}
+            placeholder="Type a message…" aria-label="Message"
+            className="flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none" />
+          <button onClick={send} disabled={!input.trim()} aria-label="Send"
+            className={cn("size-6 flex items-center justify-center rounded-lg transition-all",
+              input.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground opacity-40 cursor-not-allowed"
+            )}>
+            <ArrowUp size={12} />
           </button>
-
-          {/* Send / Stop */}
-          {isStreaming ? (
-            <button
-              onClick={() => { setIsStreaming(false); setMessages(m => m.map(msg => msg.streaming ? { ...msg, streaming: false } : msg)) }}
-              aria-label="Stop generating"
-              className="size-9 shrink-0 flex items-center justify-center rounded-xl bg-red-400/20 border border-red-400/30 text-red-400 hover:bg-red-400/30 transition-all"
-            >
-              <StopCircle size={16} aria-hidden="true" />
-            </button>
-          ) : (
-            <button
-              onClick={sendMessage}
-              disabled={!canSend}
-              aria-label="Send message"
-              className={cn(
-                "size-9 shrink-0 flex items-center justify-center rounded-xl border transition-all",
-                canSend
-                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 shadow-sm"
-                  : "bg-secondary border-border text-muted-foreground opacity-50 cursor-not-allowed"
-              )}
-            >
-              <ArrowUp size={16} aria-hidden="true" />
-            </button>
-          )}
         </div>
-
-        <input ref={fileInputRef} type="file" className="hidden" aria-hidden="true" tabIndex={-1} />
-        <p className="text-center text-[10px] text-muted-foreground mt-2">
-          AI can make mistakes. Verify important information.
-        </p>
       </div>
     </div>
   )
 }
 
-// ─── Chat registry entries ────────────────────────────────────────────────────
+// ── 3. Floating Chat Widget ───────────────────────────────────────────────────
+function FloatingChatWidget() {
+  const [open, setOpen] = useState(true)
+  const [msgs, setMsgs] = useState<ChatMessage[]>([
+    { id: "w1", role: "assistant", timestamp: "now", content: "Hi there! Got a question? I'm here to help." },
+  ])
+  const [input, setInput] = useState("")
+  const [streaming, setStreaming] = useState(false)
+  const [unread, setUnread] = useState(0)
+  const bottomRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }) }, [msgs])
+
+  async function send() {
+    const text = input.trim()
+    if (!text) return
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: "user", content: text, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+    setMsgs(m => [...m, userMsg])
+    setInput("")
+    setStreaming(true)
+    const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)]
+    const botId = (Date.now()+1).toString()
+    setMsgs(m => [...m, { id: botId, role: "assistant", content: reply, timestamp: new Date().toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }), streaming: true }])
+    await new Promise(r => setTimeout(r, reply.length * 12 + 200))
+    setMsgs(m => m.map(x => x.id === botId ? { ...x, streaming: false } : x))
+    setStreaming(false)
+    if (!open) setUnread(n => n + 1)
+  }
+
+  return (
+    <div className="relative w-full flex items-end justify-end h-[480px] bg-secondary/40 rounded-2xl border border-border overflow-hidden p-4">
+      {/* Mock page background */}
+      <div className="absolute inset-0 p-6">
+        <div className="flex flex-col gap-3">
+          <div className="h-4 w-32 bg-border/60 rounded-full" />
+          <div className="h-3 w-64 bg-border/40 rounded-full" />
+          <div className="h-3 w-48 bg-border/40 rounded-full" />
+          <div className="grid grid-cols-3 gap-3 mt-4">
+            {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl bg-border/30" />)}
+          </div>
+          <div className="h-3 w-56 bg-border/40 rounded-full mt-2" />
+          <div className="h-3 w-40 bg-border/40 rounded-full" />
+        </div>
+      </div>
+
+      {/* Chat panel */}
+      {open && (
+        <div className="absolute bottom-20 right-4 w-72 flex flex-col rounded-2xl border border-border bg-card shadow-2xl overflow-hidden z-10" style={{ maxHeight: 320 }}>
+          <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="size-7 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                <Bot size={12} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold leading-none">NexAI Support</p>
+                <p className="text-[10px] opacity-70 mt-0.5">Typically replies instantly</p>
+              </div>
+            </div>
+            <button onClick={() => setOpen(false)} aria-label="Close chat" className="opacity-70 hover:opacity-100 transition-opacity">
+              <X size={14} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2" style={{ minHeight: 160 }}>
+            {msgs.map((msg, idx) => {
+              const isUser = msg.role === "user"
+              const isLatest = idx === msgs.length - 1
+              return (
+                <div key={msg.id} className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+                  <div className={cn("max-w-[85%] px-3 py-2 rounded-2xl text-xs",
+                    isUser ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-background border border-border text-foreground rounded-tl-sm"
+                  )}>
+                    {isLatest && msg.streaming
+                      ? <StreamingText text={msg.content} />
+                      : <div>{renderMd(msg.content)}</div>
+                    }
+                  </div>
+                </div>
+              )
+            })}
+            <div ref={bottomRef} />
+          </div>
+          <div className="p-2 border-t border-border bg-card shrink-0">
+            <div className="flex items-center gap-1.5 bg-background border border-border rounded-xl px-3 py-1.5 focus-within:border-primary/40 transition-all">
+              <input value={input} onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && send()}
+                placeholder="Type a message…" aria-label="Message"
+                className="flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none" />
+              <button onClick={send} disabled={!input.trim()} aria-label="Send"
+                className={cn("size-5 flex items-center justify-center rounded-lg transition-all",
+                  input.trim() ? "bg-primary text-primary-foreground" : "text-muted-foreground opacity-40 cursor-not-allowed"
+                )}>
+                <ArrowUp size={10} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FAB */}
+      <button
+        onClick={() => { setOpen(o => !o); setUnread(0) }}
+        aria-label={open ? "Close chat" : "Open chat"}
+        className="relative z-10 size-12 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all"
+      >
+        {open ? <X size={18} /> : <MessageSquare size={18} />}
+        {!open && unread > 0 && (
+          <span className="absolute -top-1 -right-1 size-5 rounded-full bg-rose-400 border-2 border-card text-[10px] font-bold text-white flex items-center justify-center">
+            {unread}
+          </span>
+        )}
+      </button>
+    </div>
+  )
+}
+
+// ── 4. Voice Chat UI ──────────────────────────────────────────────────────────
+type VoiceState = "idle" | "listening" | "processing" | "speaking"
+
+function VoiceChatUI() {
+  const [state, setState] = useState<VoiceState>("idle")
+  const [transcript, setTranscript] = useState("")
+  const [msgs, setMsgs] = useState<{ role: ChatRole; text: string }[]>([
+    { role: "assistant", text: "Hello! Tap the microphone and start speaking." },
+  ])
+
+  const labels: Record<VoiceState, string> = {
+    idle:       "Tap to speak",
+    listening:  "Listening…",
+    processing: "Processing…",
+    speaking:   "Speaking…",
+  }
+
+  const colors: Record<VoiceState, string> = {
+    idle:       "bg-primary/20 border-primary/30 text-primary",
+    listening:  "bg-rose-400/20 border-rose-400/40 text-rose-400",
+    processing: "bg-yellow-400/20 border-yellow-400/40 text-yellow-400",
+    speaking:   "bg-green-400/20 border-green-400/40 text-green-400",
+  }
+
+  const SAMPLE_PHRASES = [
+    "What's the weather today?",
+    "Explain recursion simply.",
+    "Draft a short apology email.",
+  ]
+
+  async function handleMic() {
+    if (state !== "idle") return
+    setState("listening")
+    await new Promise(r => setTimeout(r, 1800))
+    const phrase = SAMPLE_PHRASES[Math.floor(Math.random() * SAMPLE_PHRASES.length)]
+    setTranscript(phrase)
+    setState("processing")
+    await new Promise(r => setTimeout(r, 900))
+    setMsgs(m => [...m, { role: "user", text: phrase }])
+    setTranscript("")
+    setState("speaking")
+    const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)]
+    await new Promise(r => setTimeout(r, 1600))
+    setMsgs(m => [...m, { role: "assistant", text: reply }])
+    setState("idle")
+  }
+
+  return (
+    <div className="w-full max-w-md mx-auto flex flex-col items-center gap-6 py-8 px-6 rounded-2xl border border-border bg-card">
+      {/* Live transcript */}
+      <div className="w-full min-h-[40px] flex items-center justify-center">
+        {transcript ? (
+          <p className="text-sm text-foreground font-medium text-center italic">"{transcript}"</p>
+        ) : (
+          <p className="text-xs text-muted-foreground text-center">{labels[state]}</p>
+        )}
+      </div>
+
+      {/* Visualiser bars */}
+      <div className="flex items-center gap-1 h-12" aria-hidden="true">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className={cn("w-1 rounded-full transition-all duration-100", state === "listening" || state === "speaking" ? "bg-primary" : "bg-border")}
+            style={{
+              height: (state === "listening" || state === "speaking")
+                ? `${20 + Math.abs(Math.sin(i * 0.6) * 28)}px`
+                : "6px",
+              animationDelay: `${i * 40}ms`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Mic button */}
+      <button
+        onClick={handleMic}
+        disabled={state !== "idle"}
+        aria-label={state === "idle" ? "Start recording" : labels[state]}
+        className={cn(
+          "size-20 rounded-full border-2 flex items-center justify-center transition-all duration-300",
+          colors[state],
+          state === "idle" ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-not-allowed",
+          (state === "listening" || state === "speaking") && "animate-pulse"
+        )}
+      >
+        {state === "idle" && <Mic size={28} />}
+        {state === "listening" && <Mic size={28} />}
+        {state === "processing" && <Loader2 size={28} className="animate-spin" />}
+        {state === "speaking" && <Volume2 size={28} />}
+      </button>
+
+      <p className="text-xs text-muted-foreground">{labels[state]}</p>
+
+      {/* Conversation history */}
+      <div className="w-full flex flex-col gap-2 max-h-40 overflow-y-auto">
+        {msgs.slice(-4).map((m, i) => (
+          <div key={i} className={cn("flex gap-2", m.role === "user" ? "flex-row-reverse" : "flex-row")}>
+            <div className={cn("size-5 rounded-full shrink-0 mt-0.5 flex items-center justify-center", m.role === "assistant" ? "bg-primary/15" : "bg-secondary")}>
+              {m.role === "assistant" ? <Bot size={9} className="text-primary" /> : <User size={9} className="text-muted-foreground" />}
+            </div>
+            <div className={cn("px-3 py-2 rounded-2xl text-xs max-w-[80%]", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-secondary text-foreground rounded-tl-sm border border-border")}>
+              {m.text.length > 80 ? m.text.slice(0, 80) + "…" : m.text}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Chat registry ────────────────────────────────────────────────────────────
 const CHAT_REGISTRY: ComponentEntry[] = [
   {
-    name: "Modern Chat UI",
-    description: "Full-featured AI chat interface with streaming typewriter replies, file attachments (PDF, image, doc, CSV), voice recording toggle, emoji picker, stop generation, copy message, and suggested prompts. Zero dependencies.",
+    name: "Full-screen Chat",
+    description: "ChatGPT-style full-screen chat with conversation sidebar, model selector, file attachments (PDF/image/doc/CSV), emoji picker, voice recording, streaming typewriter replies, stop generation, and copy-on-hover.",
     category: "Chat",
-    tags: ["chat", "ai", "voice", "attachments", "streaming", "emoji", "modern"],
+    tags: ["chat", "ai", "full-screen", "sidebar", "attachments", "streaming", "voice", "emoji"],
     fullWidth: true,
-    preview: <ModernChatUI />,
-    code: `"use client"
-// Full source available in lib/components-registry.tsx
-// Key features:
-//   • Streaming typewriter effect for AI replies
-//   • File attachment menu (PDF, image, doc, CSV, browse)
-//   • Voice recording toggle with indicator
-//   • Emoji picker grid
-//   • Stop generation button while streaming
-//   • Copy message on hover
-//   • Suggested prompt chips
-//   • Auto-resizing textarea (Shift+Enter for newline)
-//   • Fully accessible (aria-labels, roles, keyboard nav)
-`,
+    preview: <FullscreenChat />,
+    code: `"use client"\n// Full-screen chat — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Sidebar Chat",
+    description: "Compact 340px chat panel designed for sidebars and drawers. Online indicator, streaming bubbles with typewriter effect, and minimal send input.",
+    category: "Chat",
+    tags: ["chat", "sidebar", "compact", "ai", "streaming"],
+    preview: <SidebarChat />,
+    code: `"use client"\n// Sidebar chat — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Floating Chat Widget",
+    description: "Fixed-position FAB that toggles a compact support chat panel. Includes unread badge, primary-colored header, streaming replies, and a mock page backdrop.",
+    category: "Chat",
+    tags: ["chat", "widget", "floating", "support", "fab", "bubble"],
+    fullWidth: true,
+    preview: <FloatingChatWidget />,
+    code: `"use client"\n// Floating chat widget — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Voice Chat UI",
+    description: "Voice-first interface with animated waveform bars, four-state mic button (idle → listening → processing → speaking), live transcript, and a rolling conversation history.",
+    category: "Chat",
+    tags: ["chat", "voice", "mic", "audio", "waveform", "ai"],
+    preview: <VoiceChatUI />,
+    code: `"use client"\n// Voice chat UI — see lib/components-registry.tsx`,
   },
 ]
 
