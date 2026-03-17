@@ -53,17 +53,17 @@ export function Hero() {
             href="#installation"
             className="flex items-center gap-2 border border-border text-foreground px-5 py-2.5 rounded-md text-sm font-medium hover:bg-secondary transition-colors"
           >
-            How it works
+            Get started
           </a>
         </div>
 
         {/* Stats row */}
         <div className="flex flex-wrap justify-center gap-8 pt-4">
           {[
-            { value: "50+", label: "Components" },
-            { value: "0", label: "npm installs" },
-            { value: "100%", label: "Custom-built" },
-            { value: "MIT", label: "License" },
+            { value: "50+",  label: "Components" },
+            { value: "0 KB", label: "Bundle size" },
+            { value: "100%", label: "Yours to edit" },
+            { value: "MIT",  label: "License" },
           ].map((s) => (
             <div key={s.label} className="flex flex-col items-center gap-0.5">
               <span className="text-2xl font-semibold text-foreground">{s.value}</span>
@@ -78,31 +78,36 @@ export function Hero() {
             <div className="w-3 h-3 rounded-full bg-border" />
             <div className="w-3 h-3 rounded-full bg-border" />
             <div className="w-3 h-3 rounded-full bg-border" />
-            <span className="ml-3 text-xs text-muted-foreground font-mono">components/button.tsx</span>
+            <span className="ml-3 text-xs text-muted-foreground font-mono">terminal</span>
             <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-              no dependencies
+              www.nexui.dev
             </span>
           </div>
-          <pre className="text-left overflow-x-auto p-6 text-sm font-mono leading-relaxed text-muted-foreground bg-[var(--code-bg)]">
+          <pre className="text-left overflow-x-auto p-6 text-sm font-mono leading-relaxed bg-[var(--code-bg)]">
             <code>
-              <span className="text-primary">import</span>
-              {" { cn } "}
-              <span className="text-primary">from</span>
-              {' "@/lib/utils"\n\n'}
-              <span className="text-foreground">{"export function Button({ variant = \"default\", className, ...props }) {\n"}</span>
-              {"  "}
-              <span className="text-primary">return</span>
-              {" (\n    <"}
-              <span className="text-[oklch(0.7_0.15_160)]">button</span>
-              {"\n      className={cn("}
-              <span className="text-[oklch(0.75_0.18_85)]">&quot;px-4 py-2 rounded-md font-medium&quot;</span>
-              {",\n        variants[variant], className)}\n      {..."}
-              <span className="text-foreground">props</span>
-              {"}\n    />\n  )\n}"}
+              <span className="text-muted-foreground">{"# 1. Initialize (once per project)\n"}</span>
+              <span className="text-foreground">{"$ "}</span>
+              <span className="text-primary">{"pnpm dlx nexui@latest init\n"}</span>
+              <span className="text-muted-foreground/60">{"  Writing nexui.config.ts\n"}</span>
+              <span className="text-muted-foreground/60">{"  Writing lib/utils.ts\n"}</span>
+              <span className="text-muted-foreground/60">{"  Updating globals.css\n\n"}</span>
+
+              <span className="text-muted-foreground">{"# 2. Add any component\n"}</span>
+              <span className="text-foreground">{"$ "}</span>
+              <span className="text-primary">{"pnpm dlx nexui@latest add button card badge\n"}</span>
+              <span className="text-muted-foreground/60">{"  Writing components/ui/button.tsx\n"}</span>
+              <span className="text-muted-foreground/60">{"  Writing components/ui/card.tsx\n"}</span>
+              <span className="text-muted-foreground/60">{"  Writing components/ui/badge.tsx\n\n"}</span>
+
+              <span className="text-muted-foreground">{"# 3. Import and use — it's just your code\n"}</span>
+              <span className="text-[oklch(0.7_0.15_160)]">{'import '}</span>
+              <span className="text-foreground">{'{ Button } '}</span>
+              <span className="text-[oklch(0.7_0.15_160)]">{'from '}</span>
+              <span className="text-[oklch(0.75_0.18_85)]">{'"@/components/ui/button"'}</span>
             </code>
           </pre>
           <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-background/50">
-            <span className="text-xs text-muted-foreground">Live preview</span>
+            <span className="text-xs text-muted-foreground font-mono">github.com/jessinsam/nexui</span>
             <div className="flex items-center gap-3">
               <button className="text-xs px-4 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
                 Default

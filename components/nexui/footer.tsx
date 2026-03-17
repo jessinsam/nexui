@@ -50,9 +50,16 @@ export function Footer() {
           {/* Links — Components */}
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Components</p>
-            {["Button", "Badge", "Card", "Input", "Avatar", "Tabs"].map((l) => (
-              <a key={l} href="#components" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {l}
+            {[
+              { label: "Button",   href: "/components?category=Button"  },
+              { label: "Badge",    href: "/components?category=Badge"   },
+              { label: "Card",     href: "/components?category=Card"    },
+              { label: "Input",    href: "/components?category=Form"    },
+              { label: "Avatar",   href: "/components?category=Avatar"  },
+              { label: "Tabs",     href: "/components?category=Navigation" },
+            ].map((l) => (
+              <a key={l.label} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {l.label}
               </a>
             ))}
           </div>
@@ -60,9 +67,15 @@ export function Footer() {
           {/* Links — Docs */}
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Documentation</p>
-            {["Getting started", "Installation", "Theming", "Accessibility", "Changelog"].map((l) => (
-              <a key={l} href="#installation" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {l}
+            {[
+              { label: "Getting started", href: "#installation"  },
+              { label: "Installation",    href: "#installation"  },
+              { label: "CLI reference",   href: "#cli"           },
+              { label: "Theming",         href: "#theming"       },
+              { label: "Accessibility",   href: "#installation"  },
+            ].map((l) => (
+              <a key={l.label} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {l.label}
               </a>
             ))}
           </div>

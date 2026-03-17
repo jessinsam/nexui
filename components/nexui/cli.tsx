@@ -1,19 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Package, List, Zap } from "@/components/nexui/icons"
+import { Check, Copy, Package, List, Zap, SlidersHorizontal } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 import { PackageManagerBlock } from "@/components/nexui/package-manager-block"
 
 function CopyButton({ value, className }: { value: string; className?: string }) {
   const [copied, setCopied] = useState(false)
-
   function copy() {
     navigator.clipboard.writeText(value)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
   return (
     <button
       onClick={copy}
@@ -29,47 +27,49 @@ function CopyButton({ value, className }: { value: string; className?: string })
   )
 }
 
-const commands = [
+const COMMANDS = [
   {
     id: "init",
     icon: Zap,
-    label: "Initialize",
+    label: "init",
     title: "nexui init",
     description:
-      "Scaffolds a nexui.config.ts, installs the utils helper, and sets up CSS variables in your project. Run this once.",
+      "Scaffolds nexui.config.ts, writes the cn utility to lib/utils.ts, and injects CSS variables into globals.css. Run once per project.",
     command: "npx nexui@latest init",
     output: [
-      "  Detecting project...",
-      "  Writing nexui.config.ts",
-      "  Adding CSS variables to globals.css",
-      "  Installing dependencies...",
+      "  Detecting project type...",
+      "  Framework: Next.js (App Router)",
       "",
-      "  Done. Your project is ready.",
+      "  Writing nexui.config.ts",
+      "  Writing lib/utils.ts",
+      "  Updating app/globals.css",
+      "",
+      "  NexUI initialized. Run 'nexui add' to add components.",
     ],
   },
   {
     id: "add",
     icon: Package,
-    label: "Add component",
+    label: "add",
     title: "nexui add [component]",
     description:
-      "Downloads a single component directly into your components/ui folder. The file is yours — edit it freely.",
+      "Copies a single component file into your components/ui directory. The file is yours immediately — edit, rename, or delete it freely.",
     command: "npx nexui@latest add button",
     output: [
       "  Resolving button...",
       "  Writing components/ui/button.tsx",
-      "  Writing lib/utils.ts",
       "",
-      "  Added button. Import from @/components/ui/button.",
+      "  button added.",
+      "  Import: @/components/ui/button",
     ],
   },
   {
-    id: "add-multiple",
+    id: "add-many",
     icon: Package,
-    label: "Add multiple",
-    title: "nexui add [component...]",
+    label: "add (multiple)",
+    title: "nexui add [...components]",
     description:
-      "Add several components at once by listing their names separated by spaces.",
+      "Add several components in one command by listing their names separated by spaces. Dependencies shared between components are written only once.",
     command: "npx nexui@latest add button badge input card dialog",
     output: [
       "  Resolving 5 components...",
@@ -79,39 +79,67 @@ const commands = [
       "  Writing components/ui/card.tsx",
       "  Writing components/ui/dialog.tsx",
       "",
-      "  Added 5 components.",
+      "  5 components added.",
     ],
   },
   {
     id: "list",
     icon: List,
-    label: "List components",
+    label: "list",
     title: "nexui list",
     description:
-      "Prints all available components so you know exactly what you can add.",
+      "Prints all available components with their categories so you know exactly what you can add to your project.",
     command: "npx nexui@latest list",
     output: [
-      "  Available components:",
+      "  Available components (nexui@latest):",
       "",
-      "  accordion      alert         avatar",
-      "  badge          button        card",
-      "  checkbox       combobox      command",
-      "  dialog         dropdown      input",
-      "  popover        select        separator",
-      "  sheet          skeleton      slider",
-      "  switch         table         tabs",
-      "  textarea       toast         tooltip",
+      "  Forms     button  input  select  checkbox  radio",
+      "            slider  switch  textarea  combobox",
+      "",
+      "  Display   card  badge  avatar  separator  skeleton",
+      "            tooltip  popover  alert  callout",
+      "",
+      "  Overlay   dialog  sheet  drawer  dropdown  command",
+      "",
+      "  Data      table  data-table  pagination  tabs",
+      "",
+      "  Blocks    auth-panel  chat  view-switcher  chart",
+    ],
+  },
+  {
+    id: "config",
+    icon: SlidersHorizontal,
+    label: "config",
+    title: "nexui.config.ts",
+    description:
+      "The config file controls where component files are written, which utility file to use, the default style variant, and TypeScript preference.",
+    command: "npx nexui@latest init --yes",
+    output: [
+      "  Using defaults:",
+      "  outputDir  → components/ui",
+      "  utils      → lib/utils.ts",
+      "  style      → minimal",
+      "  typescript → true",
+      "",
+      "  nexui.config.ts written.",
     ],
   },
 ]
 
-const configExample = `// nexui.config.ts
+const CONFIG_EXAMPLE = `// nexui.config.ts
 import type { NexUIConfig } from "nexui"
 
 export default {
+  // Directory where component files are written
   outputDir: "components/ui",
+
+  // Path to your cn() utility
   utils: "lib/utils.ts",
-  style: "minimal",          // "minimal" | "rounded" | "sharp"
+
+  // Component style variant: "minimal" | "rounded" | "sharp"
+  style: "minimal",
+
+  // Write TypeScript (.tsx) or JavaScript (.jsx)
   typescript: true,
 } satisfies NexUIConfig`
 
@@ -121,22 +149,25 @@ export function CLI() {
   return (
     <section id="cli" className="py-24 px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
+
         {/* Header */}
         <div className="mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">CLI</p>
           <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
             One command away.
           </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-            Use the NexUI CLI to initialize your project and pull any component straight into your codebase — no copy-paste required.
+          <p className="mt-3 text-muted-foreground max-w-xl leading-relaxed">
+            The NexUI CLI initializes your project and pulls any component
+            straight into your codebase. No registries, no runtime, no wrappers.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_1fr] gap-12 items-start">
-          {/* Left: command picker */}
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+
+          {/* Left: command picker + config */}
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
-              {commands.map((cmd, i) => {
+              {COMMANDS.map((cmd, i) => {
                 const Icon = cmd.icon
                 return (
                   <button
@@ -151,13 +182,13 @@ export function CLI() {
                   >
                     <div className="flex items-center gap-3">
                       <Icon
-                        size={14}
+                        size={13}
                         aria-hidden="true"
                         className={cn(active === i ? "text-primary" : "text-muted-foreground")}
                       />
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-medium font-mono">{cmd.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed line-clamp-1">
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 leading-relaxed">
                           {cmd.description}
                         </p>
                       </div>
@@ -167,64 +198,65 @@ export function CLI() {
               })}
             </div>
 
-            {/* Config preview */}
+            {/* Config file preview */}
             <div>
-              <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-widest">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
                 Config file
               </p>
               <div className="rounded-lg border border-border overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/60">
                   <span className="text-xs text-muted-foreground font-mono">nexui.config.ts</span>
-                  <CopyButton value={configExample} />
+                  <CopyButton value={CONFIG_EXAMPLE} />
                 </div>
                 <pre className="p-4 bg-[var(--code-bg)] text-xs font-mono leading-relaxed text-muted-foreground overflow-x-auto">
-                  <code>{configExample}</code>
+                  <code>{CONFIG_EXAMPLE}</code>
                 </pre>
               </div>
             </div>
           </div>
 
-          {/* Right: terminal output */}
+          {/* Right: terminal output + extras */}
           <div className="flex flex-col gap-4">
             <div>
               <h3 className="text-base font-semibold text-foreground font-mono">
-                {commands[active].title}
+                {COMMANDS[active].title}
               </h3>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                {commands[active].description}
+                {COMMANDS[active].description}
               </p>
             </div>
 
             <PackageManagerBlock
-              command={commands[active].command}
-              output={commands[active].output}
+              command={COMMANDS[active].command}
+              output={COMMANDS[active].output}
             />
 
-            {/* Quick tip */}
+            {/* Interactive picker tip */}
             <div className="rounded-lg border border-border bg-secondary/40 px-4 py-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
                 <span className="text-foreground font-medium">Tip — </span>
-                You can also run{" "}
+                Run{" "}
                 <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">
                   npx nexui@latest add
                 </code>{" "}
-                with no arguments and the CLI will show an interactive picker.
+                with no arguments to open an interactive component picker in your terminal.
               </p>
             </div>
 
-            {/* Comparison table */}
+            {/* Comparison */}
             <div className="rounded-lg border border-border overflow-hidden">
-              <div className="px-4 py-3 border-b border-border bg-background/60">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
-                  CLI vs Manual
+              <div className="px-4 py-2.5 border-b border-border bg-background/60">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  CLI vs manual copy-paste
                 </p>
               </div>
               <div className="divide-y divide-border">
                 {[
-                  { label: "Add a component", cli: "npx nexui add button", manual: "Copy button.tsx" },
-                  { label: "Init project", cli: "npx nexui init", manual: "Set up manually" },
-                  { label: "Code ownership", cli: "Full — file is yours", manual: "Full — file is yours" },
-                  { label: "Works offline", cli: "After first fetch", manual: "Always" },
+                  { label: "Add a component",   cli: "npx nexui add button",    manual: "Copy button.tsx from nexui.dev" },
+                  { label: "Init project",       cli: "npx nexui init",          manual: "Create utils + CSS vars manually" },
+                  { label: "Code ownership",     cli: "Full — file is yours",    manual: "Full — file is yours" },
+                  { label: "Dependency install", cli: "Auto (peer deps only)",   manual: "Manual" },
+                  { label: "Works offline",      cli: "After first fetch",       manual: "Always" },
                 ].map((row) => (
                   <div key={row.label} className="grid grid-cols-[1fr_1fr_1fr] text-xs">
                     <span className="px-4 py-3 text-muted-foreground">{row.label}</span>
