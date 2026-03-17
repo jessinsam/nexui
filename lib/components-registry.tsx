@@ -6387,8 +6387,8 @@ function BottomTabBar() {
   const [active, setActive] = useState("Home")
 
   return (
-    <div className="w-full max-w-sm mx-auto">
-      {/* Mock phone screen — flex column so tab bar always anchors at bottom */}
+    <div className="w-full max-w-xs mx-auto">
+      {/* Mock phone screen */}
       <div className="flex flex-col rounded-[28px] border border-border bg-card overflow-hidden" style={{ height: 420 }}>
         {/* Scrollable content area */}
         <div className="flex-1 overflow-hidden p-5 flex flex-col gap-3">
@@ -6405,9 +6405,10 @@ function BottomTabBar() {
           </div>
         </div>
 
-        {/* Tab bar — always at bottom */}
+        {/* Tab bar */}
         <nav
-          className="shrink-0 flex items-center border-t border-border bg-card/95 backdrop-blur-sm h-16"
+          className="shrink-0 flex items-stretch border-t border-border bg-card/95 backdrop-blur-sm"
+          style={{ height: 60 }}
           aria-label="Bottom navigation"
         >
           {BOTTOM_TABS.map(tab => (
@@ -6417,22 +6418,22 @@ function BottomTabBar() {
               aria-label={tab.label}
               aria-current={active === tab.label ? "page" : undefined}
               className={cn(
-                "relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-colors",
+                "relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors",
                 active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {active === tab.label && (
-                <span className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-[2px] rounded-full bg-primary" />
+                <span className="absolute top-0 inset-x-0 mx-auto w-6 h-[2px] rounded-full bg-primary" />
               )}
               {tab.badge ? (
-                <span className="relative">
+                <span className="relative inline-flex">
                   {tab.icon}
                   <span className="absolute -top-1.5 -right-2 size-4 rounded-full bg-rose-400 border-2 border-card text-[8px] font-bold text-white flex items-center justify-center">
                     {tab.badge}
                   </span>
                 </span>
               ) : tab.icon}
-              <span className={cn("text-[9px] font-medium leading-none", active === tab.label ? "text-primary" : "")}>
+              <span className="text-[10px] font-medium leading-none mt-0.5">
                 {tab.label}
               </span>
             </button>
