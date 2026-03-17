@@ -24,9 +24,9 @@ export function Hero() {
 
       <div className="relative max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 text-primary text-xs px-3 py-1 rounded-full font-medium">
-          <Star size={10} strokeWidth={2.5} aria-hidden="true" />
-          Inspired by shadcn/ui — built from scratch. Own every line.
+        <div className="inline-flex items-center gap-1.5 border border-primary/30 bg-primary/10 text-primary text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap">
+          <Star size={9} strokeWidth={2.5} aria-hidden="true" />
+          Inspired by shadcn/ui — own every line.
         </div>
 
         {/* Headline */}
