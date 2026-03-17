@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Search, ArrowUpRight, X, SlidersHorizontal, Copy, Check, Code2, Eye } from "lucide-react"
+import { useState, useMemo, Suspense } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, COMPONENTS } from "@/lib/components-registry"
 import type { ComponentEntry } from "@/lib/components-registry"
+import {
+  Search, ArrowUpRight, X, SlidersHorizontal, Copy, Check, Code2, Eye,
+} from "@/components/nexui/icons"
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
@@ -40,7 +42,9 @@ function Sidebar({
             <span
               className={cn(
                 "text-[10px] font-mono px-1.5 py-0.5 rounded-md",
-                activeCategory === cat ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
+                activeCategory === cat
+                  ? "bg-primary/20 text-primary"
+                  : "bg-secondary text-muted-foreground"
               )}
             >
               {count}
@@ -66,7 +70,7 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
 
   return (
     <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 flex flex-col">
-      {/* Card header: name, toggle, actions */}
+      {/* Card header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border gap-3 rounded-t-xl overflow-hidden">
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-sm font-semibold text-foreground truncate">{comp.name}</span>
@@ -86,14 +90,15 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
               <ArrowUpRight size={13} aria-hidden="true" />
             </a>
           )}
-          {/* Preview / Code toggle */}
           <div className="flex items-center rounded-lg border border-border overflow-hidden bg-secondary">
             <button
               onClick={() => setTab("preview")}
               aria-label="Show preview"
               className={cn(
                 "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors",
-                tab === "preview" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
+                tab === "preview"
+                  ? "bg-card text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Eye size={12} aria-hidden="true" />
@@ -104,26 +109,29 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
               aria-label="Show code"
               className={cn(
                 "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors",
-                tab === "code" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
+                tab === "code"
+                  ? "bg-card text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Code2 size={12} aria-hidden="true" />
               <span className="hidden sm:inline">Code</span>
             </button>
           </div>
-          {/* Copy button */}
           <button
             onClick={copy}
             aria-label={copied ? "Copied" : "Copy code"}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border bg-secondary text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            {copied ? <Check size={12} aria-hidden="true" className="text-emerald-400" /> : <Copy size={12} aria-hidden="true" />}
+            {copied
+              ? <Check size={12} aria-hidden="true" className="text-emerald-400" />
+              : <Copy size={12} aria-hidden="true" />}
             <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
           </button>
         </div>
       </div>
 
-      {/* Content area */}
+      {/* Content */}
       {tab === "preview" ? (
         <div className="flex items-center justify-center bg-background/40 p-8 md:p-12">
           <div className="w-full max-w-5xl">{comp.preview}</div>
@@ -136,10 +144,64 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
         </div>
       )}
 
-      {/* Footer: description */}
+      {/* Footer */}
       <div className="px-4 py-2.5 border-t border-border rounded-b-xl overflow-hidden">
         <p className="text-xs text-muted-foreground leading-relaxed">{comp.description}</p>
       </div>
+    </div>
+  )
+}
+
+// ─── Grid (lives inside the Suspense boundary) ────────────────────────────────
+
+function ComponentGrid({
+  filtered,
+  query,
+  onClear,
+}: {
+  filtered: ComponentEntry[]
+  query: string
+  onClear: () => void
+}) {
+  if (filtered.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
+          <Search size={20} className="text-muted-foreground" aria-hidden="true" />
+        </div>
+        <p className="text-sm font-medium text-foreground">No results</p>
+        <p className="text-xs text-muted-foreground mt-1">Try a different search term or category.</p>
+        <button
+          onClick={onClear}
+          className="mt-4 text-xs text-primary hover:text-primary/80 transition-colors"
+        >
+          Clear filters
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {filtered.map((comp) => (
+        <ComponentCard key={comp.name} comp={comp} />
+      ))}
+    </div>
+  )
+}
+
+// ─── Skeleton shown while suspended ──────────────────────────────────────────
+
+function GridSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" aria-hidden="true">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-xl border border-border bg-card animate-pulse"
+          style={{ height: 280 }}
+        />
+      ))}
     </div>
   )
 }
@@ -172,12 +234,16 @@ export default function ComponentsPage() {
     })
   }, [activeCategory, query])
 
+  function clearFilters() {
+    setQuery("")
+    setActiveCategory("All")
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Top bar */}
+      {/* Fixed header — always renders immediately */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NexUI home">
             <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -192,9 +258,12 @@ export default function ComponentsPage() {
             </span>
           </Link>
 
-          {/* Search */}
           <div className="flex-1 max-w-md relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden="true" />
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+              aria-hidden="true"
+            />
             <input
               type="search"
               value={query}
@@ -214,7 +283,6 @@ export default function ComponentsPage() {
             )}
           </div>
 
-          {/* Mobile sidebar toggle */}
           <button
             className="md:hidden flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => setMobileSidebarOpen((v) => !v)}
@@ -224,11 +292,24 @@ export default function ComponentsPage() {
             Filter
           </button>
 
-          {/* Right nav */}
           <nav className="hidden md:flex items-center gap-4" aria-label="Top navigation">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Home</Link>
-            <a href="https://github.com/jessinsam/nexui" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">GitHub</a>
-            <Link href="/create-account" className="text-sm bg-primary text-primary-foreground px-3.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors font-medium">Get started</Link>
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Home
+            </Link>
+            <a
+              href="https://github.com/jessinsam/nexui"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              GitHub
+            </a>
+            <Link
+              href="/create-account"
+              className="text-sm bg-primary text-primary-foreground px-3.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors font-medium"
+            >
+              Get started
+            </Link>
           </nav>
         </div>
       </header>
@@ -236,19 +317,38 @@ export default function ComponentsPage() {
       {/* Mobile sidebar drawer */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-40 flex md:hidden">
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setMobileSidebarOpen(false)} />
+          <div
+            className="absolute inset-0 bg-background/60 backdrop-blur-sm"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
           <div className="relative z-10 w-64 bg-background border-r border-border h-full pt-20 px-4 flex flex-col gap-1 overflow-y-auto">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">Categories</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">
+              Categories
+            </p>
             {CATEGORIES.map((cat) => {
               const count = cat === "All" ? COMPONENTS.length : (counts[cat] ?? 0)
               return (
                 <button
                   key={cat}
                   onClick={() => { setActiveCategory(cat); setMobileSidebarOpen(false) }}
-                  className={cn("flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left", activeCategory === cat ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left",
+                    activeCategory === cat
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
                 >
                   <span>{cat}</span>
-                  <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded-md", activeCategory === cat ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground")}>{count}</span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-mono px-1.5 py-0.5 rounded-md",
+                      activeCategory === cat
+                        ? "bg-primary/20 text-primary"
+                        : "bg-secondary text-muted-foreground"
+                    )}
+                  >
+                    {count}
+                  </span>
                 </button>
               )
             })}
@@ -256,9 +356,9 @@ export default function ComponentsPage() {
         </div>
       )}
 
-      {/* Body */}
+      {/* Page body */}
       <div className="max-w-7xl mx-auto px-6 pt-24 pb-20">
-        {/* Page header */}
+        {/* Above-the-fold header — always paints first */}
         <div className="mb-10">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Library</p>
           <h1 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">Components</h1>
@@ -268,14 +368,12 @@ export default function ComponentsPage() {
         </div>
 
         <div className="flex gap-10">
-          {/* Sidebar — desktop */}
           <div className="hidden md:block">
             <Sidebar activeCategory={activeCategory} onCategory={setActiveCategory} counts={counts} />
           </div>
 
-          {/* Grid area */}
           <div className="flex-1 min-w-0">
-            {/* Result count + active filters */}
+            {/* Meta row — lightweight, outside the Suspense boundary */}
             <div className="flex items-center justify-between mb-5">
               <p className="text-sm text-muted-foreground">
                 {filtered.length === 0
@@ -289,7 +387,7 @@ export default function ComponentsPage() {
               </p>
               {(query || activeCategory !== "All") && (
                 <button
-                  onClick={() => { setQuery(""); setActiveCategory("All") }}
+                  onClick={clearFilters}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                 >
                   <X size={11} aria-hidden="true" /> Clear filters
@@ -297,27 +395,10 @@ export default function ComponentsPage() {
               )}
             </div>
 
-            {filtered.length > 0 ? (
-              <div className="flex flex-col gap-6">
-                {filtered.map((comp) => (
-                  <ComponentCard key={comp.name} comp={comp} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
-                  <Search size={20} className="text-muted-foreground" aria-hidden="true" />
-                </div>
-                <p className="text-sm font-medium text-foreground">No results</p>
-                <p className="text-xs text-muted-foreground mt-1">Try a different search term or category.</p>
-                <button
-                  onClick={() => { setQuery(""); setActiveCategory("All") }}
-                  className="mt-4 text-xs text-primary hover:text-primary/80 transition-colors"
-                >
-                  Clear filters
-                </button>
-              </div>
-            )}
+            {/* Suspense boundary around the large component list */}
+            <Suspense fallback={<GridSkeleton />}>
+              <ComponentGrid filtered={filtered} query={query} onClear={clearFilters} />
+            </Suspense>
           </div>
         </div>
       </div>
