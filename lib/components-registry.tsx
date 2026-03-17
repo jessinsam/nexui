@@ -3976,7 +3976,7 @@ function ContactForm() {
   )
 }
 
-// ── Feedback Form ────────────────────���────────────────────────────────────────
+// ── Feedback Form ─────────────────���──���────────────────────────────────────────
 function FeedbackForm() {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
@@ -5945,4 +5945,773 @@ const LOADING_REGISTRY: ComponentEntry[] = [
 ]
 
 COMPONENTS.push(...LOADING_REGISTRY)
+
+// ─── Advanced Navigation components ──────────────────────────────────────────
+
+// ── 1. Top Navbar with mega-menu ─────────────────────────────────────────────
+const NAV_ITEMS = [
+  {
+    label: "Products",
+    mega: true,
+    sections: [
+      {
+        title: "Platform",
+        items: [
+          { icon: <Zap size={14} />, label: "NexUI Core", desc: "Foundational component primitives" },
+          { icon: <Layers size={14} />, label: "NexUI Pro", desc: "Advanced patterns & templates" },
+          { icon: <Globe size={14} />, label: "NexUI Cloud", desc: "Hosted design infrastructure" },
+        ],
+      },
+      {
+        title: "Tools",
+        items: [
+          { icon: <Code2 size={14} />, label: "CLI", desc: "One-command component setup" },
+          { icon: <SlidersHorizontal size={14} />, label: "Theming Studio", desc: "Visual token editor" },
+          { icon: <Server size={14} />, label: "API", desc: "Headless component API" },
+        ],
+      },
+    ],
+  },
+  { label: "Docs", mega: false },
+  { label: "Pricing", mega: false },
+  { label: "Blog", mega: false },
+]
+
+function TopNavbar() {
+  const [open, setOpen] = useState<string | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  return (
+    <div className="w-full max-w-3xl mx-auto">
+      <nav className="relative flex items-center justify-between px-5 py-3 rounded-2xl border border-border bg-card shadow-lg" aria-label="Main navigation">
+        {/* Logo */}
+        <div className="flex items-center gap-2 text-primary">
+          <NexLogo size={22} />
+          <span className="text-sm font-bold text-foreground tracking-tight">NexUI</span>
+        </div>
+
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-1">
+          {NAV_ITEMS.map(item => (
+            <div key={item.label} className="relative">
+              <button
+                onMouseEnter={() => item.mega ? setOpen(item.label) : setOpen(null)}
+                onMouseLeave={() => setOpen(null)}
+                className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm transition-colors",
+                  open === item.label ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                )}
+                aria-haspopup={item.mega ? "true" : undefined}
+                aria-expanded={item.mega ? open === item.label : undefined}
+              >
+                {item.label}
+                {item.mega && <ChevronDown size={12} className={cn("transition-transform", open === item.label && "rotate-180")} />}
+              </button>
+
+              {/* Mega menu */}
+              {item.mega && open === item.label && (
+                <div
+                  onMouseEnter={() => setOpen(item.label)}
+                  onMouseLeave={() => setOpen(null)}
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[480px] rounded-2xl border border-border bg-card shadow-2xl p-4 z-50 grid grid-cols-2 gap-4"
+                >
+                  {item.sections?.map(sec => (
+                    <div key={sec.title}>
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">{sec.title}</p>
+                      <div className="flex flex-col gap-1">
+                        {sec.items.map(si => (
+                          <button key={si.label} className="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-left group">
+                            <span className="mt-0.5 text-primary opacity-70 group-hover:opacity-100 transition-opacity">{si.icon}</span>
+                            <div>
+                              <p className="text-xs font-medium text-foreground">{si.label}</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{si.desc}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="hidden md:flex items-center gap-2">
+          <button className="text-sm text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-xl hover:bg-secondary transition-colors">Sign in</button>
+          <button className="text-sm bg-primary text-primary-foreground px-4 py-1.5 rounded-xl hover:bg-primary/90 transition-colors font-medium">Get started</button>
+        </div>
+
+        {/* Mobile hamburger */}
+        <button className="md:hidden p-2 rounded-xl hover:bg-secondary transition-colors text-muted-foreground" onClick={() => setMobileOpen(v => !v)} aria-label="Toggle menu" aria-expanded={mobileOpen}>
+          {mobileOpen ? <X size={16} /> : <MoreHorizontal size={16} />}
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="mt-2 rounded-2xl border border-border bg-card p-3 flex flex-col gap-1">
+          {NAV_ITEMS.map(item => (
+            <button key={item.label} className="text-sm text-muted-foreground hover:text-foreground hover:bg-secondary px-4 py-2.5 rounded-xl text-left transition-colors">{item.label}</button>
+          ))}
+          <div className="border-t border-border mt-1 pt-2 flex flex-col gap-1">
+            <button className="text-sm text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-xl text-left hover:bg-secondary transition-colors">Sign in</button>
+            <button className="text-sm bg-primary text-primary-foreground px-4 py-2.5 rounded-xl font-medium">Get started</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── 2. Breadcrumb ────────────────────────────────────────────────────────────
+function BreadcrumbNav() {
+  const paths = [
+    [
+      { label: "Home" },
+      { label: "Products" },
+      { label: "Components" },
+      { label: "Breadcrumb", current: true },
+    ],
+    [
+      { label: "Dashboard" },
+      { label: "Settings" },
+      { label: "Profile", current: true },
+    ],
+  ]
+
+  return (
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
+      {paths.map((crumbs, pi) => (
+        <nav key={pi} aria-label="Breadcrumb" className="flex items-center gap-1 flex-wrap">
+          {crumbs.map((crumb, ci) => (
+            <React.Fragment key={crumb.label}>
+              {ci > 0 && <ChevronRight size={12} className="text-muted-foreground shrink-0" aria-hidden="true" />}
+              {crumb.current ? (
+                <span className="text-sm text-foreground font-medium" aria-current="page">{crumb.label}</span>
+              ) : (
+                <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</button>
+              )}
+            </React.Fragment>
+          ))}
+        </nav>
+      ))}
+
+      {/* Pill variant */}
+      <nav aria-label="Breadcrumb pill variant" className="flex items-center gap-1 flex-wrap bg-secondary border border-border rounded-xl px-3 py-1.5 w-fit">
+        {["Dashboard", "Analytics", "Revenue"].map((label, ci, arr) => (
+          <React.Fragment key={label}>
+            {ci > 0 && <span className="text-muted-foreground text-xs" aria-hidden="true">/</span>}
+            <button className={cn("text-xs transition-colors px-1", ci === arr.length - 1 ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground")}>
+              {label}
+            </button>
+          </React.Fragment>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+// ── 3. Pagination ─────────────────────────────────────────────────────────────
+function PaginationNav() {
+  const [page, setPage] = useState(4)
+  const total = 12
+
+  function pages() {
+    const all: (number | "...")[] = []
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+    all.push(1)
+    if (page > 3) all.push("...")
+    for (let i = Math.max(2, page - 1); i <= Math.min(total - 1, page + 1); i++) all.push(i)
+    if (page < total - 2) all.push("...")
+    all.push(total)
+    return all
+  }
+
+  return (
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-6">
+      {/* Default */}
+      <nav aria-label="Pagination" className="flex items-center gap-1 justify-center">
+        <button
+          onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+          aria-label="Previous page"
+          className="size-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronLeft size={14} />
+        </button>
+        {pages().map((p, i) => (
+          <button key={i} onClick={() => typeof p === "number" && setPage(p)} disabled={p === "..."}
+            aria-label={typeof p === "number" ? `Page ${p}` : "More pages"}
+            aria-current={p === page ? "page" : undefined}
+            className={cn(
+              "size-9 flex items-center justify-center rounded-xl text-sm font-medium transition-all",
+              p === page ? "bg-primary text-primary-foreground shadow-sm" : p === "..." ? "text-muted-foreground cursor-default" : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )}
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          onClick={() => setPage(p => Math.min(total, p + 1))} disabled={page === total}
+          aria-label="Next page"
+          className="size-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronRight size={14} />
+        </button>
+      </nav>
+
+      {/* Compact with page info */}
+      <div className="flex items-center justify-between w-full">
+        <p className="text-xs text-muted-foreground">Page <span className="text-foreground font-medium">{page}</span> of <span className="text-foreground font-medium">{total}</span></p>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+            <ChevronLeft size={12} /> Prev
+          </button>
+          <button onClick={() => setPage(p => Math.min(total, p + 1))} disabled={page === total}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+            Next <ChevronRight size={12} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 4. Vertical Sidebar Navigation ───────────────────────────────────────────
+const SIDEBAR_GROUPS = [
+  {
+    label: "Main",
+    items: [
+      { icon: <LayoutGrid size={14} />, label: "Dashboard", badge: null, active: true },
+      { icon: <MessageSquare size={14} />, label: "Messages", badge: "12", active: false },
+      { icon: <Star size={14} />, label: "Starred", badge: null, active: false },
+    ],
+  },
+  {
+    label: "Workspace",
+    items: [
+      { icon: <Layers size={14} />, label: "Projects", badge: null, active: false },
+      { icon: <Table size={14} />, label: "Reports", badge: null, active: false },
+      { icon: <Globe size={14} />, label: "Integrations", badge: "New", active: false },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { icon: <User size={14} />, label: "Profile", badge: null, active: false },
+      { icon: <SlidersHorizontal size={14} />, label: "Settings", badge: null, active: false },
+    ],
+  },
+]
+
+function SidebarNav() {
+  const [active, setActive] = useState("Dashboard")
+  const [collapsed, setCollapsed] = useState(false)
+
+  return (
+    <div className="flex gap-3 w-full max-w-2xl mx-auto">
+      {/* Sidebar */}
+      <nav
+        className={cn("flex flex-col rounded-2xl border border-border bg-card transition-all duration-300", collapsed ? "w-14" : "w-52")}
+        aria-label="Sidebar navigation"
+      >
+        {/* Logo row */}
+        <div className={cn("flex items-center gap-2.5 px-3 py-4 border-b border-border", collapsed && "justify-center px-2")}>
+          <span className="text-primary shrink-0"><NexLogo size={20} /></span>
+          {!collapsed && <span className="text-sm font-bold text-foreground">NexUI</span>}
+        </div>
+
+        {/* Groups */}
+        <div className="flex-1 p-2 flex flex-col gap-4 overflow-y-auto">
+          {SIDEBAR_GROUPS.map(group => (
+            <div key={group.label} className="flex flex-col gap-0.5">
+              {!collapsed && (
+                <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground px-3 mb-1">{group.label}</p>
+              )}
+              {group.items.map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => setActive(item.label)}
+                  aria-current={active === item.label ? "page" : undefined}
+                  title={collapsed ? item.label : undefined}
+                  className={cn(
+                    "flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-all",
+                    collapsed && "justify-center",
+                    active === item.label
+                      ? "bg-primary/15 text-primary border border-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  <span className="shrink-0">{item.icon}</span>
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {item.badge && (
+                        <span className={cn(
+                          "text-[9px] font-bold px-1.5 py-0.5 rounded-full",
+                          item.badge === "New" ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
+                        )}>{item.badge}</span>
+                      )}
+                    </>
+                  )}
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Collapse toggle */}
+        <div className="p-2 border-t border-border">
+          <button
+            onClick={() => setCollapsed(v => !v)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="w-full flex items-center justify-center gap-2 px-2.5 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+          >
+            {collapsed ? <ChevronRight size={13} /> : <><ChevronLeft size={13} /><span>Collapse</span></>}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mock content area */}
+      <div className="flex-1 rounded-2xl border border-border bg-card p-4 flex flex-col gap-3">
+        <p className="text-sm font-semibold text-foreground">{active}</p>
+        <div className="flex flex-col gap-2">
+          {[80, 60, 70, 50].map((w, i) => (
+            <div key={i} className="h-3 rounded-full bg-secondary" style={{ width: `${w}%` }} />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-1">
+          {[0, 1].map(i => <div key={i} className="h-16 rounded-xl bg-secondary" />)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 5. Multi-step Stepper ────────────────────────────────────────────────────
+const STEPS = [
+  { label: "Account", desc: "Create credentials" },
+  { label: "Profile", desc: "Personal details" },
+  { label: "Plan",    desc: "Choose your tier" },
+  { label: "Confirm", desc: "Review & finish" },
+]
+
+function StepperNav() {
+  const [current, setCurrent] = useState(1)
+
+  return (
+    <div className="w-full max-w-lg mx-auto flex flex-col gap-8">
+      {/* Horizontal stepper */}
+      <div className="flex items-start gap-0">
+        {STEPS.map((step, i) => {
+          const done = i < current
+          const active = i === current
+          return (
+            <React.Fragment key={step.label}>
+              <div className="flex flex-col items-center gap-1.5 flex-1">
+                <button
+                  onClick={() => setCurrent(i)}
+                  aria-label={`Step ${i + 1}: ${step.label}`}
+                  aria-current={active ? "step" : undefined}
+                  className={cn(
+                    "size-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all",
+                    done  ? "bg-primary border-primary text-primary-foreground" :
+                    active ? "bg-card border-primary text-primary" :
+                             "bg-card border-border text-muted-foreground"
+                  )}
+                >
+                  {done ? <Check size={13} /> : i + 1}
+                </button>
+                <div className="flex flex-col items-center">
+                  <p className={cn("text-[11px] font-semibold", active ? "text-foreground" : done ? "text-foreground" : "text-muted-foreground")}>{step.label}</p>
+                  <p className="text-[9px] text-muted-foreground text-center">{step.desc}</p>
+                </div>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div className={cn("flex-1 h-0.5 mt-4 rounded-full transition-all", i < current ? "bg-primary" : "bg-border")} />
+              )}
+            </React.Fragment>
+          )
+        })}
+      </div>
+
+      {/* Controls */}
+      <div className="flex justify-between">
+        <button
+          onClick={() => setCurrent(p => Math.max(0, p - 1))} disabled={current === 0}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronLeft size={14} /> Back
+        </button>
+        <button
+          onClick={() => setCurrent(p => Math.min(STEPS.length - 1, p + 1))} disabled={current === STEPS.length - 1}
+          className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+        >
+          {current === STEPS.length - 2 ? "Finish" : "Continue"} <ChevronRight size={14} />
+        </button>
+      </div>
+
+      {/* Vertical stepper variant */}
+      <div className="flex flex-col gap-0">
+        {STEPS.map((step, i) => {
+          const done = i < current
+          const active = i === current
+          return (
+            <div key={step.label} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={() => setCurrent(i)}
+                  aria-label={`Step ${i + 1}: ${step.label}`}
+                  aria-current={active ? "step" : undefined}
+                  className={cn(
+                    "size-7 rounded-full flex items-center justify-center text-[11px] font-bold border-2 shrink-0 transition-all",
+                    done  ? "bg-primary border-primary text-primary-foreground" :
+                    active ? "bg-card border-primary text-primary" :
+                             "bg-card border-border text-muted-foreground"
+                  )}
+                >
+                  {done ? <Check size={11} /> : i + 1}
+                </button>
+                {i < STEPS.length - 1 && <div className={cn("w-0.5 flex-1 min-h-[28px] my-1 rounded-full transition-all", i < current ? "bg-primary" : "bg-border")} />}
+              </div>
+              <div className="pb-5">
+                <p className={cn("text-xs font-semibold mt-0.5", active ? "text-foreground" : done ? "text-foreground" : "text-muted-foreground")}>{step.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{step.desc}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── 6. Bottom Tab Bar (mobile) ────────────────────────────────────────────────
+const BOTTOM_TABS = [
+  { icon: <LayoutGrid size={18} />, label: "Home" },
+  { icon: <Search size={18} />, label: "Search" },
+  { icon: <MessageSquare size={18} />, label: "Chat", badge: 3 },
+  { icon: <Star size={18} />, label: "Saved" },
+  { icon: <User size={18} />, label: "Profile" },
+]
+
+function BottomTabBar() {
+  const [active, setActive] = useState("Home")
+
+  return (
+    <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
+      {/* Mock phone screen */}
+      <div className="rounded-[28px] border border-border bg-card overflow-hidden" style={{ height: 340 }}>
+        <div className="p-5 flex flex-col gap-3">
+          <p className="text-sm font-semibold text-foreground">{active}</p>
+          <div className="flex flex-col gap-2">
+            {[90,70,80,55].map((w,i) => <div key={i} className="h-3 rounded-full bg-secondary" style={{ width: `${w}%` }} />)}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[0,1,2,3].map(i => <div key={i} className="h-20 rounded-2xl bg-secondary" />)}
+          </div>
+        </div>
+
+        {/* Tab bar */}
+        <nav
+          className="absolute bottom-0 inset-x-0 flex items-stretch border-t border-border bg-card/95 backdrop-blur-sm px-1 pb-safe"
+          aria-label="Bottom navigation"
+          style={{ position: "relative" }}
+        >
+          {BOTTOM_TABS.map(tab => (
+            <button
+              key={tab.label}
+              onClick={() => setActive(tab.label)}
+              aria-label={tab.label}
+              aria-current={active === tab.label ? "page" : undefined}
+              className={cn(
+                "relative flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors",
+                active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.badge ? (
+                <span className="relative">
+                  {tab.icon}
+                  <span className="absolute -top-1.5 -right-2 size-4 rounded-full bg-rose-400 border-2 border-card text-[8px] font-bold text-white flex items-center justify-center">{tab.badge}</span>
+                </span>
+              ) : tab.icon}
+              <span className={cn("text-[9px] font-medium", active === tab.label ? "text-primary" : "")}>{tab.label}</span>
+              {active === tab.label && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary" />
+              )}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  )
+}
+
+// ── 7. Command Palette ────────────────────────────────────────────────────────
+const CMD_ITEMS = [
+  { group: "Navigation", items: [
+    { icon: <LayoutGrid size={13} />, label: "Go to Dashboard", shortcut: "G D" },
+    { icon: <MessageSquare size={13} />, label: "Open Messages", shortcut: "G M" },
+    { icon: <Star size={13} />, label: "Starred items", shortcut: "G S" },
+  ]},
+  { group: "Actions", items: [
+    { icon: <Plus size={13} />, label: "New project", shortcut: "⌘ N" },
+    { icon: <Upload size={13} />, label: "Import file", shortcut: "⌘ I" },
+    { icon: <Copy size={13} />, label: "Duplicate", shortcut: "⌘ D" },
+  ]},
+  { group: "Theme", items: [
+    { icon: <Sun size={13} />, label: "Switch to light mode", shortcut: null },
+    { icon: <Moon size={13} />, label: "Switch to dark mode", shortcut: null },
+  ]},
+]
+
+function CommandPalette() {
+  const [query, setQuery] = useState("")
+  const [sel, setSel] = useState<string | null>("Go to Dashboard")
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const filtered = query.trim()
+    ? CMD_ITEMS.map(g => ({
+        ...g,
+        items: g.items.filter(it => it.label.toLowerCase().includes(query.toLowerCase())),
+      })).filter(g => g.items.length > 0)
+    : CMD_ITEMS
+
+  const allItems = filtered.flatMap(g => g.items)
+
+  function move(dir: 1 | -1) {
+    const idx = allItems.findIndex(it => it.label === sel)
+    const next = allItems[(idx + dir + allItems.length) % allItems.length]
+    setSel(next?.label ?? null)
+  }
+
+  return (
+    <div className="w-full max-w-lg mx-auto">
+      <div
+        className="rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
+        onKeyDown={e => {
+          if (e.key === "ArrowDown") { e.preventDefault(); move(1) }
+          if (e.key === "ArrowUp")   { e.preventDefault(); move(-1) }
+        }}
+      >
+        {/* Search input */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+          <Search size={14} className="text-muted-foreground shrink-0" />
+          <input
+            ref={inputRef}
+            autoFocus
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search commands, pages, actions…"
+            aria-label="Command search"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+          />
+          <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-secondary border border-border text-[10px] text-muted-foreground font-mono">
+            <Command size={9} /> K
+          </kbd>
+        </div>
+
+        {/* Results */}
+        <div className="max-h-64 overflow-y-auto py-2" role="listbox" aria-label="Search results">
+          {filtered.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No results for "{query}"</p>
+          ) : (
+            filtered.map(group => (
+              <div key={group.group}>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground px-4 py-1.5">{group.group}</p>
+                {group.items.map(item => (
+                  <button
+                    key={item.label}
+                    role="option"
+                    aria-selected={sel === item.label}
+                    onClick={() => setSel(item.label)}
+                    onMouseEnter={() => setSel(item.label)}
+                    className={cn(
+                      "flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors",
+                      sel === item.label ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className={cn("shrink-0", sel === item.label ? "text-primary" : "")}>{item.icon}</span>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {item.shortcut && (
+                      <kbd className="text-[10px] font-mono text-muted-foreground bg-secondary border border-border px-1.5 py-0.5 rounded-md">{item.shortcut}</kbd>
+                    )}
+                    {sel === item.label && <ChevronRight size={11} className="text-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center gap-3 px-4 py-2.5 border-t border-border bg-secondary/30">
+          {[
+            { keys: ["↑", "↓"], label: "navigate" },
+            { keys: ["↵"], label: "select" },
+            { keys: ["esc"], label: "close" },
+          ].map(hint => (
+            <div key={hint.label} className="flex items-center gap-1">
+              {hint.keys.map(k => <kbd key={k} className="text-[9px] font-mono text-muted-foreground bg-secondary border border-border px-1 py-0.5 rounded">{k}</kbd>)}
+              <span className="text-[10px] text-muted-foreground">{hint.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 8. Dock (macOS-style) ─────────────────────────────────────────────────────
+const DOCK_APPS = [
+  { icon: <LayoutGrid size={18} />, label: "Dashboard" },
+  { icon: <MessageSquare size={18} />, label: "Messages", dot: true },
+  { icon: <Search size={18} />, label: "Search" },
+  { icon: <Star size={18} />, label: "Starred" },
+  { icon: <Globe size={18} />, label: "Browser" },
+  { icon: <Code2 size={18} />, label: "Editor" },
+  { icon: <User size={18} />, label: "Profile" },
+]
+
+function DockNav() {
+  const [hovered, setHovered] = useState<string | null>(null)
+  const [active, setActive] = useState("Dashboard")
+
+  function scale(label: string) {
+    if (!hovered) return 1
+    const idx = DOCK_APPS.findIndex(a => a.label === label)
+    const hIdx = DOCK_APPS.findIndex(a => a.label === hovered)
+    const dist = Math.abs(idx - hIdx)
+    return dist === 0 ? 1.5 : dist === 1 ? 1.25 : dist === 2 ? 1.1 : 1
+  }
+
+  return (
+    <div className="w-full flex flex-col items-center gap-6 py-4">
+      {/* Mock screen */}
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-4 flex flex-col gap-2" style={{ height: 140 }}>
+        <p className="text-sm font-semibold text-foreground">{active}</p>
+        <div className="flex flex-col gap-2">
+          {[70, 50, 60].map((w, i) => <div key={i} className="h-3 rounded-full bg-secondary" style={{ width: `${w}%` }} />)}
+        </div>
+      </div>
+
+      {/* Dock */}
+      <nav
+        aria-label="Dock navigation"
+        className="flex items-end gap-2 px-4 py-3 rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-xl"
+      >
+        {DOCK_APPS.map(app => (
+          <div key={app.label} className="relative flex flex-col items-center" style={{ transformOrigin: "bottom center" }}>
+            {/* Tooltip */}
+            {hovered === app.label && (
+              <div className="absolute -top-9 left-1/2 -translate-x-1/2 px-2 py-1 rounded-lg bg-card border border-border text-[10px] text-foreground whitespace-nowrap shadow-lg">
+                {app.label}
+              </div>
+            )}
+            <button
+              onClick={() => setActive(app.label)}
+              onMouseEnter={() => setHovered(app.label)}
+              onMouseLeave={() => setHovered(null)}
+              aria-label={app.label}
+              aria-current={active === app.label ? "page" : undefined}
+              style={{ transform: `scale(${scale(app.label)})`, transition: "transform 0.15s ease" }}
+              className={cn(
+                "size-11 rounded-2xl flex items-center justify-center transition-all origin-bottom",
+                active === app.label
+                  ? "bg-primary/20 border border-primary/30 text-primary"
+                  : "bg-secondary border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+              )}
+            >
+              {app.icon}
+            </button>
+            {/* Active dot */}
+            {active === app.label && (
+              <span className="absolute -bottom-1.5 size-1 rounded-full bg-primary" />
+            )}
+            {/* Notification dot */}
+            {app.dot && active !== app.label && (
+              <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-rose-400 border border-card" />
+            )}
+          </div>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
+// ─── Navigation registry ──────────────────────────────────────────────────────
+const NAV_REGISTRY: ComponentEntry[] = [
+  {
+    name: "Top Navbar with Mega Menu",
+    description: "Responsive top navigation bar with a hover-triggered two-column mega menu, CTA buttons, and a mobile hamburger drawer.",
+    category: "Navigation",
+    tags: ["navbar", "mega-menu", "responsive", "header", "navigation"],
+    fullWidth: true,
+    preview: <TopNavbar />,
+    code: `// TopNavbar — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Breadcrumb",
+    description: "Two text-based breadcrumb variants (chevron-separated and slash-separated pill) with current-page aria annotation.",
+    category: "Navigation",
+    tags: ["breadcrumb", "path", "navigation", "hierarchy"],
+    preview: <BreadcrumbNav />,
+    code: `// BreadcrumbNav — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Pagination",
+    description: "Smart pagination with ellipsis truncation, previous/next buttons, and a compact page-info row variant. Fully keyboard and aria accessible.",
+    category: "Navigation",
+    tags: ["pagination", "pages", "navigation", "table"],
+    preview: <PaginationNav />,
+    code: `// PaginationNav — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Vertical Sidebar",
+    description: "Collapsible sidebar with grouped nav items, active state, badge counts, collapse toggle, and a live content area preview.",
+    category: "Navigation",
+    tags: ["sidebar", "navigation", "collapsible", "groups", "menu"],
+    fullWidth: true,
+    preview: <SidebarNav />,
+    code: `// SidebarNav — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Multi-step Stepper",
+    description: "Horizontal and vertical stepper variants with completed/active/pending states, connecting progress lines, and back/continue controls.",
+    category: "Navigation",
+    tags: ["stepper", "steps", "wizard", "onboarding", "progress"],
+    preview: <StepperNav />,
+    code: `// StepperNav — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Bottom Tab Bar",
+    description: "Mobile-style bottom navigation bar with active indicator line, notification badge, and label. Rendered inside a phone-screen mock.",
+    category: "Navigation",
+    tags: ["tabs", "mobile", "bottom-nav", "tab-bar", "app"],
+    preview: <BottomTabBar />,
+    code: `// BottomTabBar — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Command Palette",
+    description: "Spotlight-style command palette with live search filtering, grouped results, keyboard shortcut hints, arrow-key navigation, and a footer legend.",
+    category: "Navigation",
+    tags: ["command", "palette", "search", "spotlight", "keyboard"],
+    fullWidth: true,
+    preview: <CommandPalette />,
+    code: `// CommandPalette — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Dock",
+    description: "macOS-style app dock with magnification scaling on hover, active dot indicator, notification badge, and tooltip labels.",
+    category: "Navigation",
+    tags: ["dock", "app", "macos", "toolbar", "icons"],
+    fullWidth: true,
+    preview: <DockNav />,
+    code: `// DockNav — see lib/components-registry.tsx`,
+  },
+]
+
+COMPONENTS.push(...NAV_REGISTRY)
 
