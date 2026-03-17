@@ -12,10 +12,10 @@ import { ChartLegend, AreaChart, BarChart, LineChart, PieChart, RadarChart, Radi
 function ButtonPreview() {
   return (
     <div className="flex flex-wrap gap-2">
-      <button className="text-xs px-4 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">Default</button>
-      <button className="text-xs px-4 py-1.5 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors font-medium">Secondary</button>
-      <button className="text-xs px-4 py-1.5 rounded-md border border-border text-foreground hover:bg-secondary transition-colors font-medium">Outline</button>
-      <button className="text-xs px-4 py-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium">Ghost</button>
+      <button className="text-xs px-4 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">Default</button>
+      <button className="text-xs px-4 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors font-medium">Secondary</button>
+      <button className="text-xs px-4 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary transition-colors font-medium">Outline</button>
+      <button className="text-xs px-4 py-1.5 rounded-lg bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-colors font-medium">Destructive</button>
     </div>
   )
 }
@@ -87,7 +87,7 @@ function AvatarPreview() {
   const items = [
     { initials: "AC", cls: "bg-primary" },
     { initials: "BJ", cls: "bg-[oklch(0.7_0.15_160)]" },
-    { initials: "CK", cls: "bg-[oklch(0.65_0.22_300)]" },
+    { initials: "CK", cls: "bg-[oklch(0.72_0.17_200)]" },
     { initials: "DL", cls: "bg-[oklch(0.75_0.18_85)]" },
   ]
   return (
@@ -171,11 +171,10 @@ function CheckboxPreview() {
 function SelectPreview() {
   const [val, setVal] = useState("Next.js")
   return (
-    <div className="flex flex-col gap-3 w-full max-w-xs">
+    <div className="w-full max-w-xs">
       <select value={val} onChange={(e) => setVal(e.target.value)} className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
         {["Next.js", "Remix", "Astro", "SvelteKit"].map((f) => <option key={f}>{f}</option>)}
       </select>
-      <p className="text-xs text-muted-foreground">Selected: <span className="text-foreground font-medium">{val}</span></p>
     </div>
   )
 }
@@ -633,7 +632,7 @@ function CalendarRange() {
   )
 }
 
-// ─── 3. Calendar With Events ──────────────────────────────────────────────────
+// ─── 3. Calendar With Events ──────────────────────────────────────────────��───
 
 const SAMPLE_EVENTS: Record<number, { label: string; color: string }[]> = {
   3: [{ label: "Team standup", color: "bg-primary" }],
@@ -2150,7 +2149,7 @@ function ViewTable() {
   )
 }
 
-// ─── All Views Switcher (master showcase) ─────────────────────────────────�����───
+// ─── All Views Switcher (master showcase) ──────────────────────────────��──�����───
 
 type ViewMode = "kanban" | "board" | "cards" | "list" | "table"
 
@@ -6410,7 +6409,7 @@ function BottomTabBar() {
 
         {/* Tab bar — always at bottom */}
         <nav
-          className="shrink-0 flex items-stretch border-t border-border bg-card/95 backdrop-blur-sm px-1"
+          className="shrink-0 flex items-stretch justify-around border-t border-border bg-card/95 backdrop-blur-sm px-1"
           aria-label="Bottom navigation"
         >
           {BOTTOM_TABS.map(tab => (
@@ -6420,7 +6419,7 @@ function BottomTabBar() {
               aria-label={tab.label}
               aria-current={active === tab.label ? "page" : undefined}
               className={cn(
-                "relative flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors",
+                "relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-w-0 transition-colors",
                 active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -6435,7 +6434,7 @@ function BottomTabBar() {
                   </span>
                 </span>
               ) : tab.icon}
-              <span className={cn("text-[9px] font-medium", active === tab.label ? "text-primary" : "")}>
+              <span className={cn("text-[9px] font-medium leading-none", active === tab.label ? "text-primary" : "")}>
                 {tab.label}
               </span>
             </button>
@@ -7000,7 +6999,7 @@ function ScatterChartDemo() {
   const yS = (v: number) => PAD.t + H - (v / 100) * H
   const groups = [
     { data: SCATTER_DATA_A, color: C.primary,   label: "Segment A" },
-    { data: SCATTER_DATA_B, color: C.secondary, label: "Segment B" },
+    { data: SCATTER_DATA_B, color: C.tertiary,  label: "Segment B" },
   ]
   const ticks = [0, 25, 50, 75, 100]
   return (
@@ -7790,7 +7789,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ─────────────────────��──��────────────����───────────────────
+// ── 15. Bubble Chart ──────────��──────────��──��────────────����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
