@@ -11,7 +11,7 @@ const snippets = [
     code: `"use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, ArrowRight, Github } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, Github } from "@/components/nexui/icons"
 
 export function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
@@ -117,7 +117,7 @@ export function SignIn() {
     code: `"use client"
 
 import { useState } from "react"
-import { Eye, EyeOff, ArrowRight, Github, Check } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, Github, Check } from "@/components/nexui/icons"
 
 const passwordRules = [
   { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
@@ -269,7 +269,7 @@ export function SignUp() {
     code: `"use client"
 
 import { useState } from "react"
-import { ArrowRight, Github, Building2, User, Code2 } from "lucide-react"
+import { ArrowRight, Github, Building2, User, Code2 } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const accountTypes = [

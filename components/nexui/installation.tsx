@@ -61,7 +61,7 @@ const steps = [
     step: "03",
     title: "Use it",
     description: "Import the component and use it anywhere in your app. It's plain TypeScript and Tailwind — rename it, restyle it, delete what you don't need.",
-    command: `import { Button } from "@/components/ui/button"
+    command: `import { Button } from "@/components/nexui/button"
 
 export default function Page() {
   return (

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Eye, EyeOff, ArrowRight, Github, Check } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, Github, Check } from "@/components/nexui/icons"
 import { AuthPanel } from "@/components/nexui/auth-panel"
 
 const passwordRules = [

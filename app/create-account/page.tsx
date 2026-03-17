@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowRight, Github, Building2, User, Code2 } from "lucide-react"
+import { ArrowRight, Github, Building2, User, Code2 } from "@/components/nexui/icons"
 import { AuthPanel } from "@/components/nexui/auth-panel"
 import { cn } from "@/lib/utils"
 
