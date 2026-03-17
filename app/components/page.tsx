@@ -199,7 +199,7 @@ function ComponentGrid({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {filtered.map((comp) => (
         <ComponentCard key={comp.name} comp={comp} />
       ))}
@@ -211,12 +211,12 @@ function ComponentGrid({
 
 function GridSkeleton() {
   return (
-    <div className="flex flex-col gap-6" aria-hidden="true">
+    <div className="flex flex-col gap-4" aria-hidden="true">
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-xl border border-border bg-card animate-pulse"
-          style={{ height: 280 }}
+          className="rounded-lg border border-border bg-card animate-pulse"
+          style={{ height: 220 }}
         />
       ))}
     </div>
@@ -274,7 +274,7 @@ export default function ComponentsPage() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Fixed header — always renders immediately */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NexUI home">
             <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -388,27 +388,27 @@ export default function ComponentsPage() {
       )}
 
       {/* Page body */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-16 sm:pb-20">
-        {/* Above-the-fold header — always paints first */}
-        <div className="mb-8 sm:mb-10">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Library</p>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">Components</h1>
-          <p className="mt-2 text-muted-foreground max-w-lg leading-relaxed text-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-12 sm:pb-16">
+        {/* Page header */}
+        <div className="mb-5 sm:mb-6">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-primary mb-1">Library</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground text-balance">Components</h1>
+          <p className="mt-1.5 text-muted-foreground max-w-lg leading-relaxed text-xs sm:text-sm">
             {COMPONENTS.length} accessible, dark-mode-ready components built with Tailwind CSS. Copy the code and own it.
           </p>
         </div>
 
-        <div className="flex gap-10">
+        <div className="flex gap-7">
           <div className="hidden md:block">
             <Sidebar activeCategory={activeCategory} onCategory={handleCategory} counts={counts} />
           </div>
 
           <div className="flex-1 min-w-0">
-            {/* Scroll anchor — category clicks jump here */}
-            <div ref={gridTopRef} style={{ scrollMarginTop: "5rem" }} />
-            {/* Meta row — lightweight, outside the Suspense boundary */}
-            <div id="component-grid-top" className="flex items-center justify-between mb-5">
-              <p className="text-sm text-muted-foreground">
+            {/* Scroll anchor */}
+            <div ref={gridTopRef} style={{ scrollMarginTop: "4rem" }} />
+            {/* Meta row */}
+            <div id="component-grid-top" className="flex items-center justify-between mb-3">
+              <p className="text-xs text-muted-foreground">
                 {filtered.length === 0
                   ? "No components found"
                   : `${filtered.length} component${filtered.length !== 1 ? "s" : ""}`}
@@ -428,7 +428,7 @@ export default function ComponentsPage() {
               )}
             </div>
 
-            {/* Suspense boundary around the large component list */}
+            {/* Component list */}
             <Suspense fallback={<GridSkeleton />}>
               <ComponentGrid filtered={filtered} query={query} onClear={clearFilters} />
             </Suspense>
