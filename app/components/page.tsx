@@ -133,8 +133,11 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
 
       {/* Content */}
       {tab === "preview" ? (
-        <div className="flex items-center justify-center bg-background/40 p-8 md:p-12">
-          <div className="w-full max-w-5xl">{comp.preview}</div>
+        <div className={cn(
+          "flex items-center justify-center bg-background/40 overflow-hidden",
+          comp.fullWidth ? "p-4 md:p-6" : "p-6 md:p-10"
+        )}>
+          <div className={cn("w-full", comp.fullWidth ? "max-w-full" : "max-w-xl")}>{comp.preview}</div>
         </div>
       ) : (
         <div className="relative bg-[var(--code-bg)]">
