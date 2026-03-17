@@ -1,7 +1,15 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from "react"
+import React, { useState, useRef, useCallback, useEffect } from "react"
 import { cn } from "@/lib/utils"
+
+/** Renders nothing on the server; only mounts on the client after hydration.
+ *  Prevents any SVG coordinate mismatch between SSR and client. */
+function useMounted() {
+  const [mounted, setMounted] = React.useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  return mounted
+}
 
 // ─── Shared types ──────────────────────────────────────────────────────────────
 
@@ -107,6 +115,7 @@ export interface AreaChartProps {
 }
 
 export function AreaChart({ data, xKey, series, stacked = false, yFormatter = nice, className, height = 224 }: AreaChartProps) {
+  const mounted = useMounted()
   const [tooltip, setTooltip] = useState<{ x: number; y: number; data: ChartTooltipData } | null>(null)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -170,6 +179,7 @@ export function AreaChart({ data, xKey, series, stacked = false, yFormatter = ni
     })
   }, [data, series, xKey, yFormatter, PAD.l, PAD.r, PAD.t, numericData])
 
+  if (!mounted) return <div className={cn("relative w-full select-none", className)} style={{ height }} />
   return (
     <div className={cn("relative w-full select-none", className)} style={{ height }}>
       <svg
@@ -257,6 +267,7 @@ export interface BarChartProps {
 }
 
 export function BarChart({ data, xKey, series, stacked = false, horizontal = false, yFormatter = nice, className, height = 224 }: BarChartProps) {
+  const mounted = useMounted()
   const [tooltip, setTooltip] = useState<{ x: number; y: number; data: ChartTooltipData } | null>(null)
   const [hoverGroup, setHoverGroup] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -303,6 +314,7 @@ export function BarChart({ data, xKey, series, stacked = false, horizontal = fal
     })
   }
 
+  if (!mounted) return <div className={cn("relative w-full select-none", className)} style={{ height }} />
   return (
     <div className={cn("relative w-full select-none", className)} style={{ height }}>
       <svg
@@ -410,6 +422,7 @@ export interface LineChartProps {
 }
 
 export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice, className, height = 224, step = false }: LineChartProps) {
+  const mounted = useMounted()
   const [tooltip, setTooltip] = useState<{ x: number; y: number; data: ChartTooltipData } | null>(null)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -460,6 +473,7 @@ export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice
     })
   }, [data, series, xKey, yFormatter, PAD.l, PAD.r, PAD.t, numericData])
 
+  if (!mounted) return <div className={cn("relative w-full select-none", className)} style={{ height }} />
   return (
     <div className={cn("relative w-full select-none", className)} style={{ height }}>
       <svg
@@ -633,6 +647,7 @@ export interface RadarChartProps {
 }
 
 export function RadarChart({ data, labelKey, series, domain = [0, 100], size = 280, className }: RadarChartProps) {
+  const mounted = useMounted()
   const [tooltip, setTooltip] = useState<{ x: number; y: number; data: ChartTooltipData } | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
