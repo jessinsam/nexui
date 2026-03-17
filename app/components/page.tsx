@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, Suspense } from "react"
+import { useState, useMemo, Suspense, useEffect } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, COMPONENTS } from "@/lib/components-registry"
@@ -212,6 +212,11 @@ export default function ComponentsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All")
   const [query, setQuery] = useState("")
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  // Always scroll to top when the page mounts so the above-the-fold header is visible
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" })
+  }, [])
 
   const counts = useMemo(() => {
     const map: Record<string, number> = {}
