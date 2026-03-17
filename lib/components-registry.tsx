@@ -5934,7 +5934,7 @@ const LOADING_REGISTRY: ComponentEntry[] = [
 
 COMPONENTS.push(...LOADING_REGISTRY)
 
-// ─── Advanced Navigation components ──────────────────────────────────────────
+// ─── Advanced Navigation components ────────────────��─────────────────────────
 
 // ── 1. Top Navbar with mega-menu ─────────────────────────────────────────────
 const NAV_ITEMS = [
@@ -6409,7 +6409,7 @@ function BottomTabBar() {
 
         {/* Tab bar — always at bottom */}
         <nav
-          className="shrink-0 flex items-center justify-around border-t border-border bg-card/95 backdrop-blur-sm px-2 h-16"
+          className="shrink-0 flex items-center border-t border-border bg-card/95 backdrop-blur-sm h-16"
           aria-label="Bottom navigation"
         >
           {BOTTOM_TABS.map(tab => (
@@ -6419,7 +6419,7 @@ function BottomTabBar() {
               aria-label={tab.label}
               aria-current={active === tab.label ? "page" : undefined}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 py-2 w-12 transition-colors",
+                "relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-colors",
                 active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
