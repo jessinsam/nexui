@@ -130,7 +130,7 @@ export function Gallery() {
           {/* Preview area */}
           <div className="grid md:grid-cols-2 min-h-[560px]">
             {/* Left — form */}
-            <div className="flex items-center justify-center bg-[#0a0a0a] px-8 sm:px-14 py-12 border-b md:border-b-0 md:border-r border-border">
+            <div className="flex items-center justify-center bg-[#0a0a0a] px-4 sm:px-10 md:px-14 py-8 sm:py-12 border-b md:border-b-0 md:border-r border-border">
               <div className="w-full max-w-sm">
                 <AuthPreview />
               </div>

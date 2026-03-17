@@ -505,27 +505,30 @@ export function CodeSnippets() {
   }
 
   return (
-    <section id="docs" className="py-24 px-6 border-t border-border">
+    <section id="docs" className="py-14 sm:py-24 px-4 sm:px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-12">
+        <div className="mb-8 sm:mb-12">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Code</p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">
             Copy. Paste. Ship.
           </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-lg leading-relaxed">
             Every component is a single file. No abstractions, no magic — just clean TypeScript you can read and modify.
           </p>
         </div>
 
         <div className="rounded-xl border border-border overflow-hidden">
-          {/* Tabs */}
-          <div className="flex overflow-x-auto border-b border-border bg-background/50 scrollbar-none">
+          {/* Tabs — horizontal scroll on mobile */}
+          <div
+            className="flex overflow-x-auto border-b border-border bg-background/50"
+            style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+          >
             {snippets.map((s, i) => (
               <button
                 key={s.title}
                 onClick={() => setActive(i)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-3 text-xs font-medium shrink-0 border-b-2 transition-colors",
+                  "flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium shrink-0 border-b-2 transition-colors",
                   active === i
                     ? "border-primary text-foreground bg-[var(--code-bg)]"
                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
@@ -546,7 +549,7 @@ export function CodeSnippets() {
               {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
               {copied ? "Copied!" : "Copy"}
             </button>
-            <pre className="overflow-x-auto p-6 bg-[var(--code-bg)] text-sm font-mono leading-relaxed text-muted-foreground max-h-[480px] overflow-y-auto">
+            <pre className="overflow-x-auto p-4 sm:p-6 bg-[var(--code-bg)] text-xs sm:text-sm font-mono leading-relaxed text-muted-foreground max-h-[480px] overflow-y-auto">
               <code>{snippets[active].code}</code>
             </pre>
           </div>

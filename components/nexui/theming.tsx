@@ -102,19 +102,19 @@ export function Theming() {
   const [activeTheme, setActiveTheme] = useState(0)
 
   return (
-    <section id="theming" className="py-24 px-6 border-t border-border">
+    <section id="theming" className="py-14 sm:py-24 px-4 sm:px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-12">
+        <div className="mb-8 sm:mb-12">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Theming</p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">
             Make it yours.
           </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-lg leading-relaxed">
             All components use CSS custom properties — no theming library, no provider, no context. Swap your accent color, tweak the radius, and the entire system updates instantly.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-10 items-start">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-10 items-start">
           {/* Theme picker */}
           <div className="flex flex-col gap-4">
             <p className="text-xs uppercase font-semibold tracking-widest text-muted-foreground">Preset themes</p>
@@ -137,7 +137,7 @@ export function Theming() {
                 <span className="w-2.5 h-2.5 rounded-full bg-border" />
                 <span className="ml-3 text-xs font-mono text-muted-foreground">globals.css</span>
               </div>
-              <pre className="p-5 overflow-x-auto bg-[var(--code-bg)] text-sm font-mono leading-relaxed text-muted-foreground">
+              <pre className="p-4 sm:p-5 overflow-x-auto bg-[var(--code-bg)] text-xs sm:text-sm font-mono leading-relaxed text-muted-foreground">
                 <code>{themeCode}</code>
               </pre>
             </div>

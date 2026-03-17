@@ -151,7 +151,7 @@ export function CLI() {
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="mb-14">
+        <div className="mb-8 sm:mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">CLI</p>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">
             One command away.
@@ -162,11 +162,34 @@ export function CLI() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
 
           {/* Left: command picker + config */}
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1">
+            {/* Mobile: horizontal scroll tabs */}
+            <div className="flex lg:hidden gap-1 overflow-x-auto pb-1" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+              {COMMANDS.map((cmd, i) => {
+                const Icon = cmd.icon
+                return (
+                  <button
+                    key={cmd.id}
+                    onClick={() => setActive(i)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-mono font-medium whitespace-nowrap shrink-0 transition-all",
+                      active === i
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    )}
+                  >
+                    <Icon size={11} aria-hidden="true" />
+                    {cmd.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Desktop: vertical list */}
+            <div className="hidden lg:flex flex-col gap-1">
               {COMMANDS.map((cmd, i) => {
                 const Icon = cmd.icon
                 return (
@@ -186,7 +209,7 @@ export function CLI() {
                         aria-hidden="true"
                         className={cn(active === i ? "text-primary" : "text-muted-foreground")}
                       />
-                    <div className="min-w-0 overflow-hidden">
+                      <div className="min-w-0 overflow-hidden">
                         <p className="text-sm font-medium font-mono truncate">{cmd.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 leading-relaxed">
                           {cmd.description}
@@ -231,7 +254,7 @@ export function CLI() {
               output={COMMANDS[active].output}
             />
 
-            {/* Interactive picker tip */}
+            {/* Tip */}
             <div className="rounded-lg border border-border bg-secondary/40 px-4 py-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
                 <span className="text-foreground font-medium">Tip — </span>
@@ -243,9 +266,9 @@ export function CLI() {
               </p>
             </div>
 
-            {/* Comparison */}
-            <div className="rounded-lg border border-border overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-border bg-background/60 flex items-center justify-between">
+            {/* Comparison — hidden on mobile to keep it clean */}
+            <div className="hidden sm:block rounded-lg border border-border overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-border bg-background/60">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   CLI vs manual copy-paste
                 </p>
@@ -258,10 +281,10 @@ export function CLI() {
                   { label: "Dependency install", cli: "Auto (peer deps only)",   manual: "Manual" },
                   { label: "Works offline",      cli: "After first fetch",       manual: "Always" },
                 ].map((row) => (
-                  <div key={row.label} className="flex flex-col sm:grid sm:grid-cols-[1fr_1fr_1fr] text-xs">
-                    <span className="px-4 pt-3 pb-1 sm:py-3 text-muted-foreground font-medium">{row.label}</span>
-                    <span className="px-4 pb-1 sm:py-3 text-primary font-mono sm:border-x sm:border-border">{row.cli}</span>
-                    <span className="px-4 pb-3 sm:py-3 text-muted-foreground hidden sm:block">{row.manual}</span>
+                  <div key={row.label} className="grid grid-cols-[1fr_1fr_1fr] text-xs">
+                    <span className="px-4 py-3 text-muted-foreground font-medium">{row.label}</span>
+                    <span className="px-4 py-3 text-primary font-mono border-x border-border">{row.cli}</span>
+                    <span className="px-4 py-3 text-muted-foreground">{row.manual}</span>
                   </div>
                 ))}
               </div>
