@@ -6376,71 +6376,89 @@ function StepperNav() {
 
 // ── 6. Bottom Tab Bar (mobile) ────────────────────────────────────────────────
 const BOTTOM_TABS = [
-  { icon: <LayoutGrid size={18} />, label: "Home" },
-  { icon: <Search size={18} />, label: "Search" },
-  { icon: <MessageSquare size={18} />, label: "Chat", badge: 3 },
-  { icon: <Star size={18} />, label: "Saved" },
-  { icon: <User size={18} />, label: "Profile" },
-]
+  { icon: LayoutGrid, label: "Home" },
+  { icon: Search,      label: "Search" },
+  { icon: MessageSquare, label: "Chat", badge: 3 },
+  { icon: Star,        label: "Saved" },
+  { icon: User,        label: "Profile" },
+] as const
 
 function BottomTabBar() {
   const [active, setActive] = useState("Home")
 
   return (
-    <div className="w-full" style={{ maxWidth: 360 }}>
-      {/* Mock phone screen */}
-      <div className="flex flex-col rounded-[28px] border border-border bg-card overflow-hidden" style={{ height: 420 }}>
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-hidden p-5 flex flex-col gap-3">
+    <div className="mx-auto" style={{ width: 360 }}>
+      {/* Phone mock */}
+      <div
+        className="flex flex-col rounded-[28px] border border-border bg-card overflow-hidden"
+        style={{ height: 440 }}
+      >
+        {/* Content area */}
+        <div className="flex-1 p-5 flex flex-col gap-3 overflow-hidden">
           <p className="text-sm font-semibold text-foreground">{active}</p>
           <div className="flex flex-col gap-2">
-            {[90, 70, 80, 55].map((w, i) => (
-              <div key={i} className="h-3 rounded-full bg-secondary" style={{ width: `${w}%` }} />
+            {[88, 68, 78, 52].map((w, i) => (
+              <div key={i} className="h-2.5 rounded-full bg-secondary" style={{ width: `${w}%` }} />
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 flex-1">
             {[0, 1, 2, 3].map(i => (
-              <div key={i} className="h-20 rounded-2xl bg-secondary" />
+              <div key={i} className="rounded-2xl bg-secondary" />
             ))}
           </div>
         </div>
 
-        {/* Tab bar */}
+        {/* Tab bar — 5 equal columns, no absolute positioning */}
         <nav
-          className="shrink-0 grid border-t border-border bg-card/95"
-          style={{ height: 64, gridTemplateColumns: "repeat(5, 1fr)" }}
+          className="shrink-0 border-t border-border bg-card"
+          style={{ height: 64 }}
           aria-label="Bottom navigation"
         >
-          {BOTTOM_TABS.map(tab => {
-            const isActive = active === tab.label
-            return (
-              <button
-                key={tab.label}
-                onClick={() => setActive(tab.label)}
-                aria-label={tab.label}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "w-full h-full flex flex-col items-center justify-center gap-1 pt-1.5 pb-1 transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {/* Active indicator — rendered in flow, centered by items-center */}
-                <span className={cn("w-6 h-[2px] rounded-full -mb-0.5", isActive ? "bg-primary" : "bg-transparent")} />
-                {/* Icon wrapper — fixed size so badge doesn't shift icon */}
-                <span className="relative flex items-center justify-center w-6 h-6">
-                  {tab.icon}
-                  {tab.badge && (
-                    <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 rounded-full bg-rose-400 border border-card text-[8px] font-bold text-white flex items-center justify-center px-0.5">
-                      {tab.badge}
-                    </span>
+          <div className="flex h-full">
+            {BOTTOM_TABS.map(({ icon: Icon, label, badge }) => {
+              const isActive = active === label
+              return (
+                <button
+                  key={label}
+                  onClick={() => setActive(label)}
+                  aria-label={label}
+                  aria-current={isActive ? "page" : undefined}
+                  style={{ flex: "1 1 0", minWidth: 0 }}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-[3px] transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground"
                   )}
-                </span>
-                <span className="text-[9px] font-medium leading-none">
-                  {tab.label}
-                </span>
-              </button>
-            )
-          })}
+                >
+                  {/* Top indicator pip */}
+                  <span
+                    className="rounded-full transition-all"
+                    style={{
+                      width: 24,
+                      height: 2,
+                      marginBottom: 1,
+                      background: isActive ? "var(--color-primary)" : "transparent",
+                    }}
+                  />
+                  {/* Icon with optional badge */}
+                  <span className="relative" style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Icon size={18} />
+                    {badge != null && (
+                      <span
+                        className="absolute bg-rose-500 text-white font-bold rounded-full border-2 border-card flex items-center justify-center"
+                        style={{ fontSize: 8, minWidth: 15, height: 15, top: -6, right: -8, lineHeight: 1, padding: "0 3px" }}
+                      >
+                        {badge}
+                      </span>
+                    )}
+                  </span>
+                  {/* Label */}
+                  <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, lineHeight: 1 }}>
+                    {label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </nav>
       </div>
     </div>
@@ -7583,7 +7601,7 @@ COMPONENTS.push(...CHARTS_REGISTRY)
 
 // ���─��� Advanced Charts (custom — no shadcn, pure Recharts + SVG) ───────────────
 
-// Shared custom tooltip ────────────────────────────────────────────────────────
+// Shared custom tooltip ──────────────────────────────────��─────────────────────
 function ChartTip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
