@@ -7103,9 +7103,8 @@ const FUNNEL_DATA = [
   { name: "Converted",  value: 890,   fill: C.quaternary },
   { name: "Retained",   value: 340,   fill: C.quinary },
 ]
-const funnelConfig: ChartConfig = {}
-
 function FunnelChartDemo() {
+  const max = FUNNEL_DATA[0].value
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="px-1">
@@ -7113,15 +7112,18 @@ function FunnelChartDemo() {
         <p className="text-xs text-muted-foreground">Visitor → Retention</p>
       </div>
       <div className="flex items-center gap-4">
-        <ChartContainer config={funnelConfig} className="h-52 flex-1">
-          <FunnelChart>
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} formatter={(v, n) => [Number(v).toLocaleString(), n]} />
-            <Funnel dataKey="value" data={FUNNEL_DATA} isAnimationActive>
-              {FUNNEL_DATA.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.85} />)}
-              <LabelList dataKey="value" position="center" fill={C.text} fontSize={11} fontWeight={700} formatter={(v: number) => v.toLocaleString()} />
-            </Funnel>
-          </FunnelChart>
-        </ChartContainer>
+        <div className="flex flex-col items-center gap-1.5 flex-1 py-2">
+          {FUNNEL_DATA.map((d, i) => (
+            <div key={d.name} className="w-full flex justify-center">
+              <div
+                className="h-9 flex items-center justify-center rounded-md text-xs font-bold text-white transition-all"
+                style={{ width: `${(d.value / max) * 100}%`, background: d.fill, opacity: 0.88 }}
+              >
+                {d.value.toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </div>
         <div className="flex flex-col gap-2 w-32 shrink-0">
           {FUNNEL_DATA.map((d, i) => {
             const rate = i === 0 ? 100 : Math.round(d.value / FUNNEL_DATA[0].value * 100)
@@ -7489,7 +7491,7 @@ const CHARTS_REGISTRY: ComponentEntry[] = [
   },
   {
     name: "Bar Chart",
-    description: "Grouped and stacked bar chart with a vertical/horizontal orientation toggle. Three-series quarterly data with shadcn ChartContainer.",
+    description: "Grouped and stacked bar chart with a vertical/horizontal orientation toggle. Three-series quarterly data with NexUI BarChart.",
     category: "Charts",
     tags: ["chart", "bar", "grouped", "stacked", "horizontal", "recharts"],
     fullWidth: true,
@@ -7788,7 +7790,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ─────────────────────────────────────���───────────────────
+// ── 15. Bubble Chart ─────────────────────────────────────����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
