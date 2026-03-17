@@ -3976,7 +3976,7 @@ function ContactForm() {
   )
 }
 
-// ── Feedback Form ─────────────────���──���────────────────────────────────────────
+// ── Feedback Form ─────────────────�����──���────────────────────────────────────────
 function FeedbackForm() {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
@@ -6401,24 +6401,28 @@ function BottomTabBar() {
   const [active, setActive] = useState("Home")
 
   return (
-    <div className="w-full max-w-sm mx-auto flex flex-col gap-3">
-      {/* Mock phone screen */}
-      <div className="rounded-[28px] border border-border bg-card overflow-hidden" style={{ height: 340 }}>
-        <div className="p-5 flex flex-col gap-3">
+    <div className="w-full max-w-sm mx-auto">
+      {/* Mock phone screen — flex column so tab bar always anchors at bottom */}
+      <div className="flex flex-col rounded-[28px] border border-border bg-card overflow-hidden" style={{ height: 420 }}>
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-hidden p-5 flex flex-col gap-3">
           <p className="text-sm font-semibold text-foreground">{active}</p>
           <div className="flex flex-col gap-2">
-            {[90,70,80,55].map((w,i) => <div key={i} className="h-3 rounded-full bg-secondary" style={{ width: `${w}%` }} />)}
+            {[90, 70, 80, 55].map((w, i) => (
+              <div key={i} className="h-3 rounded-full bg-secondary" style={{ width: `${w}%` }} />
+            ))}
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {[0,1,2,3].map(i => <div key={i} className="h-20 rounded-2xl bg-secondary" />)}
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="h-20 rounded-2xl bg-secondary" />
+            ))}
           </div>
         </div>
 
-        {/* Tab bar */}
+        {/* Tab bar — always at bottom */}
         <nav
-          className="absolute bottom-0 inset-x-0 flex items-stretch border-t border-border bg-card/95 backdrop-blur-sm px-1 pb-safe"
+          className="shrink-0 flex items-stretch border-t border-border bg-card/95 backdrop-blur-sm px-1"
           aria-label="Bottom navigation"
-          style={{ position: "relative" }}
         >
           {BOTTOM_TABS.map(tab => (
             <button
@@ -6427,20 +6431,24 @@ function BottomTabBar() {
               aria-label={tab.label}
               aria-current={active === tab.label ? "page" : undefined}
               className={cn(
-                "relative flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors",
+                "relative flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors",
                 active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {tab.badge ? (
-                <span className="relative">
-                  {tab.icon}
-                  <span className="absolute -top-1.5 -right-2 size-4 rounded-full bg-rose-400 border-2 border-card text-[8px] font-bold text-white flex items-center justify-center">{tab.badge}</span>
-                </span>
-              ) : tab.icon}
-              <span className={cn("text-[9px] font-medium", active === tab.label ? "text-primary" : "")}>{tab.label}</span>
               {active === tab.label && (
                 <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary" />
               )}
+              {tab.badge ? (
+                <span className="relative">
+                  {tab.icon}
+                  <span className="absolute -top-1.5 -right-2 size-4 rounded-full bg-rose-400 border-2 border-card text-[8px] font-bold text-white flex items-center justify-center">
+                    {tab.badge}
+                  </span>
+                </span>
+              ) : tab.icon}
+              <span className={cn("text-[9px] font-medium", active === tab.label ? "text-primary" : "")}>
+                {tab.label}
+              </span>
             </button>
           ))}
         </nav>
