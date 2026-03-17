@@ -5435,18 +5435,10 @@ function VoiceChatUI() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col items-center gap-6 py-8 px-6 rounded-2xl border border-border bg-card">
-      {/* Live transcript */}
-      <div className="w-full min-h-[40px] flex items-center justify-center">
-        {transcript ? (
-          <p className="text-sm text-foreground font-medium text-center italic">"{transcript}"</p>
-        ) : (
-          <p className="text-xs text-muted-foreground text-center">{labels[state]}</p>
-        )}
-      </div>
+    <div className="w-full max-w-md mx-auto flex flex-col items-center gap-5 py-8 px-6 rounded-2xl border border-border bg-card">
 
       {/* Visualiser bars */}
-      <div className="flex items-center gap-1 h-12" aria-hidden="true">
+      <div className="flex items-center justify-center gap-1 h-10 w-full" aria-hidden="true">
         {Array.from({ length: 20 }).map((_, i) => (
           <div
             key={i}
@@ -5479,7 +5471,13 @@ function VoiceChatUI() {
         {state === "speaking" && <Volume2 size={28} />}
       </button>
 
-      <p className="text-xs text-muted-foreground">{labels[state]}</p>
+      {/* Status label — single, centered */}
+      <div className="h-5 flex items-center justify-center w-full">
+        {transcript
+          ? <p className="text-sm text-foreground font-medium text-center italic">"{transcript}"</p>
+          : <p className="text-xs text-muted-foreground text-center">{labels[state]}</p>
+        }
+      </div>
 
       {/* Conversation history */}
       <div className="w-full flex flex-col gap-2 max-h-40 overflow-y-auto">
@@ -7979,7 +7977,7 @@ function Stacked100BarDemo() {
   )
 }
 
-// ── 19. Step / Staircase Line Chart ──────────────────────────────────────────
+// ── 19. Step / Staircase Line Chart ────────────────────���─────────────────────
 const STEP_DATA = [
   { t: "00:00", price: 100 },
   { t: "04:00", price: 100 },
