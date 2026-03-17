@@ -502,6 +502,43 @@ export const Hash = icon(
   </>
 )
 
+export const Heart = icon(
+  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+)
+
+export const Play = icon(
+  <polygon points="5 3 19 12 5 21 5 3" />
+)
+
+export const Pause = icon(
+  <>
+    <rect x="6" y="4" width="4" height="16" />
+    <rect x="14" y="4" width="4" height="16" />
+  </>
+)
+
+export const ArrowLeft = icon(
+  <>
+    <path d="m12 19-7-7 7-7" />
+    <path d="M19 12H5" />
+  </>
+)
+
+export const Quote = icon(
+  <>
+    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 2v7c0 1.25.75 2 2 2h3c0 0 0 4-4 4v1z" />
+    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 2v7c0 1.25.75 2 2 2h3c0 0 0 4-4 4v1z" />
+  </>
+)
+
+export const ExternalLink = icon(
+  <>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </>
+)
+
 export const AtSign = icon(
   <>
     <circle cx="12" cy="12" r="4" />

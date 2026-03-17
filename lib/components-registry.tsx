@@ -2,7 +2,7 @@
 
 
 import React, { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign } from "@/components/nexui/icons"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign, Heart, Play, Pause, ArrowLeft, Quote, ExternalLink } from "@/components/nexui/icons"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { ChartLegend, AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialProgress } from "@/components/nexui/charts"
@@ -8377,4 +8377,654 @@ const EXTRA_CHARTS_REGISTRY: ComponentEntry[] = [
 ]
 
 COMPONENTS.push(...EXTRA_CHARTS_REGISTRY)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CAROUSEL DEMOS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Shared hook: arrow-key + drag/swipe navigation ───────────────────────────
+function useCarousel(count: number, loop = true) {
+  const [idx, setIdx] = React.useState(0)
+  const [dragging, setDragging] = React.useState(false)
+  const dragStart = React.useRef(0)
+
+  const prev = React.useCallback(() =>
+    setIdx(i => loop ? (i - 1 + count) % count : Math.max(0, i - 1)), [count, loop])
+  const next = React.useCallback(() =>
+    setIdx(i => loop ? (i + 1) % count : Math.min(count - 1, i + 1)), [count, loop])
+  const go  = React.useCallback((n: number) => setIdx(n), [])
+
+  const onKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft")  { e.preventDefault(); prev() }
+    if (e.key === "ArrowRight") { e.preventDefault(); next() }
+  }, [prev, next])
+
+  const pointerDown = (x: number) => { setDragging(true); dragStart.current = x }
+  const pointerUp   = (x: number) => {
+    if (!dragging) return
+    setDragging(false)
+    const delta = dragStart.current - x
+    if (Math.abs(delta) > 40) delta > 0 ? next() : prev()
+  }
+
+  return { idx, prev, next, go, dragging, onKeyDown, pointerDown, pointerUp }
+}
+
+// ── 1. Basic Image Carousel ───────────────────────────────────────────────────
+const SLIDES_BASIC = [
+  { bg: "oklch(0.18 0.06 250)", label: "Aurora Peaks",    sub: "Norwegian highlands at dusk" },
+  { bg: "oklch(0.18 0.06 300)", label: "Violet Tide",     sub: "Pacific coastline at sunset" },
+  { bg: "oklch(0.18 0.06 170)", label: "Emerald Basin",   sub: "Rainforest canopy, Borneo" },
+  { bg: "oklch(0.18 0.06 40)",  label: "Amber Flats",     sub: "Saharan dunes, golden hour" },
+  { bg: "oklch(0.18 0.06 340)", label: "Crimson Cliffs",  sub: "Utah canyon country" },
+]
+
+function CarouselBasic() {
+  const { idx, prev, next, go, onKeyDown, pointerDown, pointerUp } = useCarousel(SLIDES_BASIC.length)
+  const [auto, setAuto] = React.useState(true)
+
+  React.useEffect(() => {
+    if (!auto) return
+    const t = setInterval(() => next(), 3200)
+    return () => clearInterval(t)
+  }, [auto, next])
+
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm font-semibold text-foreground">Image Carousel</p>
+        <button
+          onClick={() => setAuto(v => !v)}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={auto ? "Pause autoplay" : "Start autoplay"}
+        >
+          {auto ? <Pause size={12} /> : <Play size={12} />}
+          {auto ? "Pause" : "Play"}
+        </button>
+      </div>
+
+      {/* Track */}
+      <div
+        className="relative w-full overflow-hidden rounded-2xl select-none"
+        style={{ aspectRatio: "16/7" }}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label="Image carousel"
+        onMouseDown={e => pointerDown(e.clientX)}
+        onMouseUp={e => pointerUp(e.clientX)}
+        onTouchStart={e => pointerDown(e.touches[0].clientX)}
+        onTouchEnd={e => pointerUp(e.changedTouches[0].clientX)}
+      >
+        <div
+          className="flex h-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          style={{ transform: `translateX(-${idx * 100}%)`, width: `${SLIDES_BASIC.length * 100}%` }}
+        >
+          {SLIDES_BASIC.map((s, i) => (
+            <div key={i} className="relative h-full flex items-end p-6" style={{ width: `${100 / SLIDES_BASIC.length}%`, background: s.bg }}>
+              {/* Subtle grid texture */}
+              <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+                <defs><pattern id={`g${i}`} width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="0.5"/></pattern></defs>
+                <rect width="100%" height="100%" fill={`url(#g${i})`}/>
+              </svg>
+              <div className="relative z-10">
+                <p className="text-xl font-bold text-white drop-shadow-sm">{s.label}</p>
+                <p className="text-sm text-white/60 mt-0.5">{s.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Arrows */}
+        <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Previous slide">
+          <ChevronLeft size={16} />
+        </button>
+        <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Next slide">
+          <ChevronRight size={16} />
+        </button>
+
+        {/* Slide counter */}
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-xs text-white/80 tabular-nums">
+          {idx + 1} / {SLIDES_BASIC.length}
+        </div>
+      </div>
+
+      {/* Dot nav */}
+      <div className="flex items-center justify-center gap-1.5" role="tablist" aria-label="Slide indicators">
+        {SLIDES_BASIC.map((_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === idx}
+            onClick={() => go(i)}
+            className={cn(
+              "rounded-full transition-all duration-300",
+              i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground"
+            )}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── 2. Cards Carousel (peek effect) ──────────────────────────────────────────
+const CARDS_DATA = [
+  { title: "Design System",     desc: "Unified token-based design language across all platforms.",  icon: Layers,   color: "oklch(0.55 0.21 250)" },
+  { title: "Component Library", desc: "Over 120 production-ready accessible React components.",     icon: Code2,    color: "oklch(0.52 0.18 300)" },
+  { title: "Performance",       desc: "Sub-50ms interaction budgets enforced by CI benchmarks.",    icon: Zap,      color: "oklch(0.55 0.18 170)" },
+  { title: "Edge Runtime",      desc: "Deploy instantly to 100+ global edge locations.",            icon: Server,   color: "oklch(0.60 0.20 40)"  },
+  { title: "Analytics",         desc: "Real-time insights without compromising user privacy.",      icon: TrendingUp, color: "oklch(0.55 0.15 340)" },
+  { title: "Search",            desc: "Full-text search with typo-tolerance out of the box.",       icon: Search,   color: "oklch(0.55 0.21 250)" },
+]
+
+function CarouselCards() {
+  const { idx, prev, next, go, onKeyDown, pointerDown, pointerUp } = useCarousel(CARDS_DATA.length)
+
+  return (
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Feature Cards</p>
+          <p className="text-xs text-muted-foreground">Peek carousel with side previews</p>
+        </div>
+        <div className="flex gap-1">
+          <button onClick={prev} className="w-7 h-7 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Previous">
+            <ChevronLeft size={14} />
+          </button>
+          <button onClick={next} className="w-7 h-7 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Next">
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="relative w-full overflow-hidden select-none"
+        style={{ height: 200 }}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label="Feature cards carousel"
+        onMouseDown={e => pointerDown(e.clientX)}
+        onMouseUp={e => pointerUp(e.clientX)}
+        onTouchStart={e => pointerDown(e.touches[0].clientX)}
+        onTouchEnd={e => pointerUp(e.changedTouches[0].clientX)}
+      >
+        {CARDS_DATA.map((card, i) => {
+          const offset = i - idx
+          // Show -1, 0, +1 only
+          const visible = Math.abs(offset) <= 1
+          const scale  = offset === 0 ? 1 : 0.88
+          const x      = offset * 82  // % offset
+          const opacity = offset === 0 ? 1 : 0.45
+          const zIndex = offset === 0 ? 10 : 5
+          const Icon   = card.icon
+
+          return (
+            <div
+              key={i}
+              aria-hidden={!visible}
+              className="absolute inset-y-0 w-[72%] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              style={{
+                left: "14%",
+                transform: `translateX(${x}%) scale(${scale})`,
+                opacity,
+                zIndex,
+              }}
+            >
+              <div className="w-full h-full rounded-2xl border border-border overflow-hidden flex flex-col p-6 gap-4" style={{ background: `${card.color}18` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${card.color}30` }}>
+                  <Icon size={18} style={{ color: card.color }} aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-foreground">{card.title}</p>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{card.desc}</p>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Dots */}
+      <div className="flex items-center justify-center gap-1.5" role="tablist">
+        {CARDS_DATA.map((_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === idx}
+            onClick={() => go(i)}
+            className={cn("rounded-full transition-all duration-300", i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground")}
+            aria-label={`Go to card ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── 3. Testimonials Carousel ──────────────────────────────────────────────────
+const TESTIMONIALS = [
+  { name: "Sarah Okonkwo",  role: "Staff Eng, Vercel",      initials: "SO", color: "oklch(0.62 0.21 250)", rating: 5, text: "NexUI cut our design-to-production time in half. The components are thoughtfully built — every edge case handled, every accessibility concern addressed." },
+  { name: "Mateo Rivera",   role: "CTO, Pulse Analytics",   initials: "MR", color: "oklch(0.55 0.18 300)", rating: 5, text: "We migrated an entire product to NexUI in two sprints. The consistency across components is remarkable and the dark-mode support is flawless." },
+  { name: "Jin-Ho Park",    role: "Lead Designer, Linear",  initials: "JP", color: "oklch(0.60 0.18 170)", rating: 5, text: "Finally a component library that doesn't fight your design system. The token architecture maps perfectly onto our brand guidelines." },
+  { name: "Amara Diallo",   role: "Indie Hacker",           initials: "AD", color: "oklch(0.65 0.20 40)",  rating: 4, text: "Shipped my SaaS MVP in 3 weeks. NexUI handled all the UI heavy lifting so I could focus on the product. Absolutely worth it." },
+]
+
+function CarouselTestimonials() {
+  const { idx, prev, next, go, onKeyDown } = useCarousel(TESTIMONIALS.length)
+  const t = TESTIMONIALS[idx]
+
+  return (
+    <div
+      className="w-full flex flex-col gap-4 focus:outline-none"
+      onKeyDown={onKeyDown}
+      tabIndex={0}
+      role="region"
+      aria-label="Testimonials carousel"
+    >
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm font-semibold text-foreground">Testimonials</p>
+        <span className="text-xs text-muted-foreground tabular-nums">{idx + 1} / {TESTIMONIALS.length}</span>
+      </div>
+
+      {/* Card */}
+      <div className="relative rounded-2xl border border-border bg-card p-6 overflow-hidden min-h-[180px] flex flex-col justify-between gap-4">
+        {/* Big quote mark */}
+        <Quote size={48} className="absolute top-4 right-4 text-primary/8" aria-hidden="true" />
+
+        <div className="relative z-10 flex flex-col gap-3">
+          {/* Stars */}
+          <div className="flex gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} size={13} className={i < t.rating ? "text-amber-400" : "text-border"} aria-hidden="true" />
+            ))}
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+        </div>
+
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: t.color }}>
+              {t.initials}
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-foreground">{t.name}</p>
+              <p className="text-xs text-muted-foreground">{t.role}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-1">
+            <button onClick={prev} className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Previous testimonial">
+              <ChevronLeft size={14} />
+            </button>
+            <button onClick={next} className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Next testimonial">
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Dots */}
+      <div className="flex items-center justify-center gap-1.5" role="tablist">
+        {TESTIMONIALS.map((_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === idx}
+            onClick={() => go(i)}
+            className={cn("rounded-full transition-all duration-300", i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground")}
+            aria-label={`Go to testimonial ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── 4. Product Showcase Carousel ──────────────────────────────────────────────
+const PRODUCTS = [
+  { name: "Arc Pro Headphones",  price: "$349",  badge: "New",     stars: 4.9, reviews: 1248, color: "oklch(0.22 0.05 250)", accent: "oklch(0.62 0.21 250)" },
+  { name: "Studio Monitor XL",   price: "$899",  badge: "Popular", stars: 4.7, reviews: 867,  color: "oklch(0.22 0.05 300)", accent: "oklch(0.55 0.18 300)" },
+  { name: "Compact Desk Speaker", price: "$199", badge: "Sale",    stars: 4.5, reviews: 2031, color: "oklch(0.22 0.05 170)", accent: "oklch(0.60 0.18 170)" },
+  { name: "Wireless Earbuds Max", price: "$249", badge: "Limited", stars: 4.8, reviews: 512,  color: "oklch(0.22 0.05 40)",  accent: "oklch(0.65 0.20 40)"  },
+]
+
+function CarouselProduct() {
+  const { idx, prev, next, go, onKeyDown, pointerDown, pointerUp } = useCarousel(PRODUCTS.length)
+  const [liked, setLiked] = React.useState<Set<number>>(new Set())
+  const p = PRODUCTS[idx]
+
+  return (
+    <div
+      className="w-full flex flex-col gap-4 focus:outline-none"
+      onKeyDown={onKeyDown}
+      tabIndex={0}
+      role="region"
+      aria-label="Product carousel"
+    >
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm font-semibold text-foreground">Product Showcase</p>
+        <div className="flex gap-1">
+          <button onClick={prev} className="w-7 h-7 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Previous product">
+            <ChevronLeft size={14} />
+          </button>
+          <button onClick={next} className="w-7 h-7 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Next product">
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="w-full rounded-2xl border border-border overflow-hidden select-none"
+        onMouseDown={e => pointerDown(e.clientX)}
+        onMouseUp={e => pointerUp(e.clientX)}
+        onTouchStart={e => pointerDown(e.touches[0].clientX)}
+        onTouchEnd={e => pointerUp(e.changedTouches[0].clientX)}
+      >
+        {/* Visual pane */}
+        <div className="relative flex items-center justify-center" style={{ height: 180, background: p.color }}>
+          {/* Abstract product silhouette */}
+          <svg viewBox="0 0 120 80" className="w-40 opacity-60" aria-hidden="true">
+            <ellipse cx="60" cy="70" rx="46" ry="6" fill="black" fillOpacity="0.3" />
+            <rect x="20" y="20" width="80" height="46" rx="12" fill={p.accent} fillOpacity="0.9" />
+            <rect x="34" y="34" width="52" height="20" rx="6" fill="white" fillOpacity="0.12" />
+            <circle cx="60" cy="44" r="7" fill="white" fillOpacity="0.18" />
+          </svg>
+          {/* Badge */}
+          <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-xs font-bold text-white" style={{ background: p.accent }}>
+            {p.badge}
+          </span>
+          {/* Like */}
+          <button
+            onClick={() => setLiked(s => { const n = new Set(s); n.has(idx) ? n.delete(idx) : n.add(idx); return n })}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-black/40"
+            aria-label={liked.has(idx) ? "Unlike" : "Like"}
+          >
+            <Heart size={14} className={cn("transition-colors", liked.has(idx) ? "text-red-400" : "text-white/70")} />
+          </button>
+          {/* Slide pip nav */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {PRODUCTS.map((_, i) => (
+              <button key={i} onClick={() => go(i)} className={cn("rounded-full transition-all duration-300", i === idx ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/30")} aria-label={`Product ${i + 1}`} />
+            ))}
+          </div>
+        </div>
+
+        {/* Info pane */}
+        <div className="p-5 flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-foreground">{p.name}</p>
+            <div className="flex items-center gap-1.5">
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} size={11} className={i < Math.round(p.stars) ? "text-amber-400" : "text-border"} aria-hidden="true" />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">{p.stars} ({p.reviews.toLocaleString()})</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-lg font-bold text-foreground">{p.price}</span>
+            <button className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors">
+              Add to cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 5. Filmstrip / Thumbnail Carousel ────────────────────────────────────────
+const FILM_SLIDES = [
+  { label: "Chapter 01",  title: "The Beginning",      duration: "3:42", color: "oklch(0.20 0.07 250)" },
+  { label: "Chapter 02",  title: "Rising Action",      duration: "5:18", color: "oklch(0.20 0.07 280)" },
+  { label: "Chapter 03",  title: "The Conflict",       duration: "4:55", color: "oklch(0.20 0.07 310)" },
+  { label: "Chapter 04",  title: "Dark Night",         duration: "6:02", color: "oklch(0.20 0.07 170)" },
+  { label: "Chapter 05",  title: "The Revelation",     duration: "4:10", color: "oklch(0.20 0.07 40)"  },
+  { label: "Chapter 06",  title: "Resolution",         duration: "5:33", color: "oklch(0.20 0.07 340)" },
+]
+
+function CarouselFilmstrip() {
+  const [active, setActive] = React.useState(0)
+  const [playing, setPlaying] = React.useState(false)
+  const thumbsRef = React.useRef<HTMLDivElement>(null)
+  const { idx: carouselIdx, prev, next } = useCarousel(FILM_SLIDES.length)
+  const s = FILM_SLIDES[active]
+
+  // Scroll active thumb into view
+  React.useEffect(() => {
+    const el = thumbsRef.current?.children[active] as HTMLElement | undefined
+    el?.scrollIntoView({ inline: "nearest", behavior: "smooth" })
+  }, [active])
+
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm font-semibold text-foreground">Filmstrip Carousel</p>
+        <span className="text-xs text-muted-foreground">{active + 1} / {FILM_SLIDES.length}</span>
+      </div>
+
+      {/* Main view */}
+      <div className="relative rounded-2xl overflow-hidden flex items-center justify-center" style={{ height: 200, background: s.color }}>
+        <svg viewBox="0 0 160 100" className="w-32 opacity-30 absolute" aria-hidden="true">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <rect key={i} x={i * 34} y="0" width="28" height="100" rx="3" fill="white" />
+          ))}
+        </svg>
+        <div className="relative z-10 flex flex-col items-center gap-2">
+          <button
+            onClick={() => setPlaying(v => !v)}
+            className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/25 transition-colors"
+            aria-label={playing ? "Pause" : "Play"}
+          >
+            {playing
+              ? <Pause size={22} className="text-white" />
+              : <Play size={22} className="text-white translate-x-0.5" />
+            }
+          </button>
+        </div>
+        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+          <div>
+            <p className="text-xs text-white/50 font-medium">{s.label}</p>
+            <p className="text-base font-bold text-white">{s.title}</p>
+          </div>
+          <div className="flex items-center gap-1 text-white/60">
+            <Clock size={11} aria-hidden="true" />
+            <span className="text-xs tabular-nums">{s.duration}</span>
+          </div>
+        </div>
+        {/* Prev/next */}
+        <button onClick={() => setActive(i => (i - 1 + FILM_SLIDES.length) % FILM_SLIDES.length)} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Previous">
+          <ChevronLeft size={15} />
+        </button>
+        <button onClick={() => setActive(i => (i + 1) % FILM_SLIDES.length)} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Next">
+          <ChevronRight size={15} />
+        </button>
+      </div>
+
+      {/* Filmstrip thumbnails */}
+      <div ref={thumbsRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="tablist" aria-label="Chapter list">
+        {FILM_SLIDES.map((f, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === active}
+            onClick={() => setActive(i)}
+            className={cn(
+              "shrink-0 relative rounded-xl overflow-hidden transition-all duration-200",
+              "w-20 h-14 border-2",
+              i === active ? "border-primary scale-100 opacity-100" : "border-transparent opacity-50 hover:opacity-75"
+            )}
+            style={{ background: f.color }}
+            aria-label={f.title}
+          >
+            <span className="absolute bottom-1 left-1 right-1 text-center text-[9px] text-white/80 font-medium truncate">{f.title}</span>
+            {i === active && (
+              <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-primary flex items-center justify-center">
+                <Play size={6} className="text-white translate-x-px" aria-hidden="true" />
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── 6. Stacked / 3D Perspective Carousel ─────────────────────────────────────
+const STACK_SLIDES = [
+  { title: "Onboarding",      step: "01", desc: "Set up your workspace in minutes with our guided flow.", color: "oklch(0.62 0.21 250)" },
+  { title: "Invite Team",     step: "02", desc: "Add teammates with role-based permissions and SSO support.", color: "oklch(0.55 0.18 300)" },
+  { title: "Import Data",     step: "03", desc: "Connect your existing tools via 200+ native integrations.", color: "oklch(0.60 0.18 170)" },
+  { title: "Launch",          step: "04", desc: "Ship to production with one click. Rollbacks included.", color: "oklch(0.65 0.20 40)"  },
+]
+
+function CarouselStacked() {
+  const { idx, next, go, onKeyDown, pointerDown, pointerUp } = useCarousel(STACK_SLIDES.length, false)
+
+  return (
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Stacked Cards</p>
+          <p className="text-xs text-muted-foreground">Tap to advance through steps</p>
+        </div>
+        <span className="text-xs tabular-nums text-muted-foreground">{idx + 1} / {STACK_SLIDES.length}</span>
+      </div>
+
+      {/* Stack */}
+      <div
+        className="relative w-full select-none"
+        style={{ height: 210 }}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label="Stacked cards carousel"
+        onMouseDown={e => pointerDown(e.clientX)}
+        onMouseUp={e => pointerUp(e.clientX)}
+        onTouchStart={e => pointerDown(e.touches[0].clientX)}
+        onTouchEnd={e => pointerUp(e.changedTouches[0].clientX)}
+      >
+        {STACK_SLIDES.map((s, i) => {
+          const offset = i - idx
+          if (offset < 0 || offset > 2) return null
+          const yOff = offset * 10
+          const scale = 1 - offset * 0.04
+          const zIdx = STACK_SLIDES.length - offset
+          const opacity = offset > 2 ? 0 : 1 - offset * 0.2
+
+          return (
+            <div
+              key={i}
+              className="absolute inset-x-0 rounded-2xl border border-border overflow-hidden cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              style={{
+                top: yOff,
+                transform: `scale(${scale})`,
+                transformOrigin: "top center",
+                zIndex: zIdx,
+                opacity,
+                background: `${s.color}18`,
+              }}
+              onClick={() => offset > 0 && next()}
+              aria-hidden={i !== idx}
+            >
+              <div className="flex flex-col justify-between p-6" style={{ height: 180 }}>
+                <div className="flex items-start justify-between">
+                  <span className="text-4xl font-black text-foreground/10 leading-none">{s.step}</span>
+                  <div className="w-8 h-8 rounded-xl border border-border flex items-center justify-center" style={{ background: `${s.color}25` }}>
+                    <ArrowRight size={14} style={{ color: s.color }} aria-hidden="true" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-foreground">{s.title}</p>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{s.desc}</p>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Step indicators */}
+      <div className="flex items-center gap-2 px-1" role="tablist">
+        {STACK_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            role="tab"
+            aria-selected={i === idx}
+            onClick={() => go(i)}
+            className={cn(
+              "flex-1 h-1 rounded-full transition-all duration-300",
+              i < idx ? "bg-primary" : i === idx ? "bg-primary/70" : "bg-border"
+            )}
+            aria-label={`Step ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Registry entries ──────────────────────────────────────────────────────────
+const CAROUSEL_REGISTRY: ComponentDef[] = [
+  {
+    name: "Carousel — Basic",
+    description: "Auto-playing image carousel with smooth slide transitions, arrow controls, drag-to-swipe, dot navigation, and a play/pause toggle.",
+    category: "Carousel",
+    tags: ["carousel", "slider", "image", "autoplay", "swipe"],
+    fullWidth: true,
+    preview: <CarouselBasic />,
+    code: `// CarouselBasic — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Carousel — Cards Peek",
+    description: "Feature-card carousel with a peek effect showing partial adjacent cards, scale-and-fade depth, and icon-led content cards.",
+    category: "Carousel",
+    tags: ["carousel", "cards", "peek", "slide", "feature"],
+    fullWidth: true,
+    preview: <CarouselCards />,
+    code: `// CarouselCards — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Carousel — Testimonials",
+    description: "Single-slide testimonial carousel with star ratings, avatar initials, giant decorative quote mark, and directional controls.",
+    category: "Carousel",
+    tags: ["carousel", "testimonial", "review", "quote", "stars"],
+    fullWidth: true,
+    preview: <CarouselTestimonials />,
+    code: `// CarouselTestimonials — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Carousel — Product",
+    description: "E-commerce product carousel with drag-to-swipe, badge overlay, likeable heart toggle, star ratings, and add-to-cart action.",
+    category: "Carousel",
+    tags: ["carousel", "product", "ecommerce", "shop", "swipe"],
+    fullWidth: true,
+    preview: <CarouselProduct />,
+    code: `// CarouselProduct — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Carousel — Filmstrip",
+    description: "Video chapter carousel with a large main stage, play/pause toggle, duration badge, and a scrollable filmstrip thumbnail track.",
+    category: "Carousel",
+    tags: ["carousel", "filmstrip", "video", "thumbnail", "chapters"],
+    fullWidth: true,
+    preview: <CarouselFilmstrip />,
+    code: `// CarouselFilmstrip — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Carousel — Stacked",
+    description: "Stacked perspective card carousel for step-by-step flows — tap any back card to advance, progress bar shows completion.",
+    category: "Carousel",
+    tags: ["carousel", "stacked", "3d", "steps", "onboarding"],
+    fullWidth: true,
+    preview: <CarouselStacked />,
+    code: `// CarouselStacked — see lib/components-registry.tsx`,
+  },
+]
+
+COMPONENTS.push(...CAROUSEL_REGISTRY)
 
