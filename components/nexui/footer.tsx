@@ -34,10 +34,10 @@ export function Footer() {
                 </svg>
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/iamnexui"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="X / Twitter"
+                aria-label="X (formerly Twitter) — @iamnexui"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

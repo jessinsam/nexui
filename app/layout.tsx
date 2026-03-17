@@ -89,8 +89,8 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    site: '@nexui_dev',
-    creator: '@nexui_dev',
+    site: '@iamnexui',
+    creator: '@iamnexui',
     title: 'NexUI — Beautifully designed React components',
     description:
       'Copy-paste UI components built with Tailwind CSS and React. Open source. Inspired by shadcn/ui.',
@@ -141,6 +141,7 @@ export default function RootLayout({
               },
               sameAs: [
                 'https://github.com/jessinsam/nexui',
+                'https://x.com/iamnexui',
               ],
             }),
           }}
