@@ -7157,8 +7157,8 @@ interface GanttTask {
 const GANTT_TASKS: GanttTask[] = [
   { id:"t1", label:"Discovery",       group:"Research",    start:0,  end:6,  color:C.primary,    progress:100 },
   { id:"t2", label:"Requirements",    group:"Research",    start:3,  end:9,  color:C.primary,    progress:80  },
-  { id:"t3", label:"UI Design",       group:"Design",      start:8,  end:16, color:C.secondary,  progress:60, deps:["t2"] },
-  { id:"t4", label:"Prototyping",     group:"Design",      start:13, end:20, color:C.secondary,  progress:30  },
+  { id:"t3", label:"UI Design",       group:"Design",      start:8,  end:16, color:C.tertiary,   progress:60, deps:["t2"] },
+  { id:"t4", label:"Prototyping",     group:"Design",      start:13, end:20, color:C.tertiary,   progress:30  },
   { id:"t5", label:"API Setup",       group:"Dev",         start:10, end:18, color:C.tertiary,   progress:55, deps:["t2"] },
   { id:"t6", label:"Frontend",        group:"Dev",         start:16, end:27, color:C.tertiary,   progress:20, deps:["t3","t5"] },
   { id:"t7", label:"Backend",         group:"Dev",         start:14, end:25, color:C.tertiary,   progress:35, deps:["t5"] },
@@ -7172,16 +7172,25 @@ const LABEL_W = 100
 const ROW_H = 32
 const HEADER_H = 36
 const CHART_PAD = 8
+const DAY_COL = 18   // px per day in day-view
+const WEEK_COL = 40  // px per week in week-view
 
 function GanttChartDemo() {
   const [hovered, setHovered] = useState<string | null>(null)
   const [zoom, setZoom] = useState<"day"|"week">("day")
 
   const groups = [...new Set(GANTT_TASKS.map(t => t.group))]
-  const totalH = GANTT_TASKS.length * ROW_H + HEADER_H + CHART_PAD * 2
-  const days = zoom === "day" ? TOTAL_DAYS : Math.ceil(TOTAL_DAYS / 7)
+  const totalWeeks = Math.ceil(TOTAL_DAYS / 7)
+  const colPitch = zoom === "day" ? DAY_COL : WEEK_COL
+  const cols     = zoom === "day" ? TOTAL_DAYS : totalWeeks
+  const totalW   = LABEL_W + CHART_PAD * 2 + cols * colPitch
+  const totalH   = GANTT_TASKS.length * ROW_H + HEADER_H + CHART_PAD * 2
 
-  // map task id → row index
+  // Convert a day-offset to an x pixel coordinate
+  const dayToX = (day: number) =>
+    LABEL_W + CHART_PAD + (zoom === "day" ? day * DAY_COL : (day / 7) * WEEK_COL)
+
+  // row index map
   const rowIdx = Object.fromEntries(GANTT_TASKS.map((t, i) => [t.id, i]))
 
   return (
@@ -7202,45 +7211,49 @@ function GanttChartDemo() {
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
         <svg
           width="100%"
-          viewBox={`0 0 ${LABEL_W + days * 18 + CHART_PAD * 2} ${totalH}`}
+          viewBox={`0 0 ${totalW} ${totalH}`}
           className="block min-w-[540px]"
           aria-label="Gantt chart"
           role="img"
         >
           {/* Header background */}
-          <rect x={0} y={0} width="100%" height={HEADER_H} fill={C.bg} opacity={0.6} />
+          <rect x={0} y={0} width={totalW} height={HEADER_H} fill={C.bg} opacity={0.6} />
 
-          {/* Day/Week column headers */}
-          {Array.from({ length: days }).map((_, di) => {
-            const x = LABEL_W + CHART_PAD + di * 18
+          {/* Column headers + grid lines */}
+          {Array.from({ length: cols }).map((_, di) => {
+            const x = LABEL_W + CHART_PAD + di * colPitch
             const label = zoom === "day" ? `D${di+1}` : `W${di+1}`
             return (
               <g key={di}>
                 <line x1={x} y1={HEADER_H} x2={x} y2={totalH} stroke={C.border} strokeWidth={0.5} opacity={0.5} />
-                {di % (zoom==="day" ? 5 : 1) === 0 && (
-                  <text x={x+2} y={HEADER_H-10} fontSize={8} fill={C.text} opacity={0.4}>{label}</text>
+                {(zoom === "week" || di % 5 === 0) && (
+                  <text x={x + colPitch / 2} y={HEADER_H - 10} textAnchor="middle" fontSize={8} fill={C.text} opacity={0.4}>{label}</text>
                 )}
               </g>
             )
           })}
 
-          {/* Group background rows */}
+          {/* Alternating row backgrounds */}
           {GANTT_TASKS.map((_, ri) => (
-            <rect key={ri} x={0} y={HEADER_H + CHART_PAD + ri * ROW_H} width="100%" height={ROW_H}
+            <rect key={ri} x={0} y={HEADER_H + CHART_PAD + ri * ROW_H} width={totalW} height={ROW_H}
               fill={ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"} />
           ))}
 
           {/* Dependency arrows */}
+          <defs>
+            <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill={C.muted} opacity={0.5} />
+            </marker>
+          </defs>
           {GANTT_TASKS.flatMap(task =>
             (task.deps || []).map(depId => {
               const dep = GANTT_TASKS.find(t => t.id === depId)
               if (!dep) return null
               const depRow = rowIdx[depId]
               const taskRow = rowIdx[task.id]
-              const scale = zoom === "week" ? (1/7) : 1
-              const x1 = LABEL_W + CHART_PAD + dep.end * 18 * scale
+              const x1 = dayToX(dep.end)
               const y1 = HEADER_H + CHART_PAD + depRow * ROW_H + ROW_H / 2
-              const x2 = LABEL_W + CHART_PAD + task.start * 18 * scale
+              const x2 = dayToX(task.start)
               const y2 = HEADER_H + CHART_PAD + taskRow * ROW_H + ROW_H / 2
               const mx = (x1 + x2) / 2
               return (
@@ -7253,18 +7266,10 @@ function GanttChartDemo() {
             })
           )}
 
-          {/* Arrow marker */}
-          <defs>
-            <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L6,3 z" fill={C.muted} opacity={0.5} />
-            </marker>
-          </defs>
-
           {/* Task bars */}
           {GANTT_TASKS.map((task, ri) => {
-            const scale = zoom === "week" ? (1/7) : 1
-            const x = LABEL_W + CHART_PAD + task.start * 18 * scale
-            const w = Math.max((task.end - task.start) * 18 * scale, 12)
+            const x = dayToX(task.start)
+            const w = Math.max(dayToX(task.end) - dayToX(task.start), 14)
             const y = HEADER_H + CHART_PAD + ri * ROW_H + 5
             const h = ROW_H - 10
             const isHov = hovered === task.id
@@ -7275,49 +7280,32 @@ function GanttChartDemo() {
                 onMouseLeave={() => setHovered(null)}
                 style={{ cursor: "pointer" }}
               >
-                {/* Label */}
                 <text x={LABEL_W - 6} y={y + h / 2 + 4} textAnchor="end" fontSize={9.5} fill={C.text}
                   opacity={isHov ? 1 : 0.65} fontWeight={isHov ? 700 : 400}>
                   {task.label}
                 </text>
-
-                {/* Bar background */}
                 <rect x={x} y={y} width={w} height={h} rx={4}
                   fill={task.color} fillOpacity={isHov ? 0.35 : 0.18}
                   stroke={task.color} strokeWidth={isHov ? 1.5 : 1} strokeOpacity={0.6} />
-
-                {/* Progress fill */}
                 <rect x={x} y={y} width={w * task.progress / 100} height={h} rx={4}
                   fill={task.color} fillOpacity={isHov ? 0.75 : 0.55} />
-
-                {/* Progress % label inside bar */}
                 {w > 28 && task.progress > 0 && (
                   <text x={x + 5} y={y + h / 2 + 4} fontSize={8} fill={C.text} opacity={0.9} fontWeight={600}>
                     {task.progress}%
                   </text>
                 )}
-
-                {/* Today line */}
-                {task.start <= 15 && task.end >= 15 && (
-                  <line
-                    x1={LABEL_W + CHART_PAD + 15 * 18 * scale} y1={HEADER_H}
-                    x2={LABEL_W + CHART_PAD + 15 * 18 * scale} y2={totalH}
-                    stroke={C.quaternary} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.6}
-                  />
-                )}
               </g>
             )
           })}
 
-          {/* Today label */}
+          {/* Today line + label — day 15 */}
           {(() => {
-            const scale = zoom === "week" ? (1/7) : 1
-            const x = LABEL_W + CHART_PAD + 15 * 18 * scale
+            const x = dayToX(15)
             return (
               <g>
-                <line x1={x} y1={HEADER_H} x2={x} y2={totalH} stroke={C.quaternary} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.5} />
-                <rect x={x - 12} y={4} width={24} height={14} rx={4} fill={C.quaternary} opacity={0.8} />
-                <text x={x} y={14} textAnchor="middle" fontSize={8} fill={C.bg} fontWeight={700}>Today</text>
+                <line x1={x} y1={HEADER_H} x2={x} y2={totalH} stroke={C.quaternary} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.7} />
+                <rect x={x - 14} y={4} width={28} height={16} rx={4} fill={C.quaternary} opacity={0.9} />
+                <text x={x} y={15} textAnchor="middle" fontSize={8} fill={C.bg} fontWeight={700}>Today</text>
               </g>
             )
           })()}
