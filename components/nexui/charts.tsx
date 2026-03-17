@@ -52,13 +52,24 @@ function nice(v: number): string {
   return String(v)
 }
 
-/** Round a raw max value up to a "nice" ceiling so ticks are always integers. */
+/** Round a raw max value up to a "nice" ceiling that is evenly divisible by
+ *  TICK_COUNT-1 (4), so every tick is a whole integer with no floating-point
+ *  rounding differences between SSR and client. */
+const TICK_COUNT = 5
 function niceMax(rawMax: number): number {
-  if (rawMax <= 0) return 1
-  // magnitude of the top tick step
+  if (rawMax <= 0) return 4           // divisible by 4, safe default
   const mag = Math.pow(10, Math.floor(Math.log10(rawMax)))
   const step = mag >= 5 ? mag : mag * (rawMax / mag <= 2 ? 1 : rawMax / mag <= 5 ? 2 : 5)
-  return Math.ceil(rawMax / step) * step
+  const ceil = Math.ceil(rawMax / step) * step
+  // Round up further until evenly divisible by (TICK_COUNT - 1) = 4
+  const div = TICK_COUNT - 1
+  return Math.ceil(ceil / div) * div
+}
+
+/** Generate exactly TICK_COUNT evenly-spaced integer ticks from 0 to max. */
+function makeTicks(max: number): number[] {
+  const div = TICK_COUNT - 1
+  return Array.from({ length: TICK_COUNT }, (_, i) => (max / div) * i)
 }
 
 function mono(points: [number, number][]): string {
@@ -116,8 +127,7 @@ export function AreaChart({ data, xKey, series, stacked = false, yFormatter = ni
     : Math.max(...series.flatMap((s) => numericData.map((r) => r[s.key])), 1)
   const maxY = niceMax(rawMaxY)
 
-  const TICK_COUNT = 5
-  const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => Math.round((maxY / (TICK_COUNT - 1)) * i))
+  const yTicks = makeTicks(maxY)
   const xScale = (i: number) => PAD.l + (i / (data.length - 1)) * W
   const yScale = (v: number) => PAD.t + H - (v / maxY) * H
 
@@ -267,8 +277,7 @@ export function BarChart({ data, xKey, series, stacked = false, horizontal = fal
     : Math.max(...series.flatMap((s) => numericData.map((r) => r[s.key])), 1)
   const maxVal = niceMax(rawMaxVal)
 
-  const TICK_COUNT = 5
-  const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => Math.round((maxVal / (TICK_COUNT - 1)) * i))
+  const yTicks = makeTicks(maxVal)
   const groupW = W / data.length
   const barW = stacked ? groupW * 0.5 : (groupW * 0.7) / series.length
   const gap = stacked ? 0 : groupW * 0.7 / series.length
@@ -380,7 +389,7 @@ export function BarChart({ data, xKey, series, stacked = false, horizontal = fal
   )
 }
 
-// ─── Line Chart ───────────────────────────────────────────────────────────────
+// ─── Line Chart ──────────────────────────────────────────────────────���────────
 
 export interface LineSeries {
   key: string
@@ -418,8 +427,7 @@ export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice
   const allVals = series.flatMap((s) => numericData.map((r) => r[s.key]))
   const rawMaxY = Math.max(...allVals, referenceLine?.value ?? 0, 1)
   const maxY = niceMax(rawMaxY)
-  const TICK_COUNT = 5
-  const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => Math.round((maxY / (TICK_COUNT - 1)) * i))
+  const yTicks = makeTicks(maxY)
 
   const xScale = (i: number) => PAD.l + (i / (data.length - 1)) * W
   const yScale = (v: number) => PAD.t + H - (v / maxY) * H

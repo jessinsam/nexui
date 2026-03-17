@@ -2205,7 +2205,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation", "Charts"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Carousel", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation", "Charts"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -7592,7 +7592,7 @@ const CHARTS_REGISTRY: ComponentEntry[] = [
 
 COMPONENTS.push(...CHARTS_REGISTRY)
 
-// ─── Advanced Charts (custom — no shadcn, pure Recharts + SVG) ───────────────
+// ���── Advanced Charts (custom — no shadcn, pure Recharts + SVG) ───────────────
 
 // Shared custom tooltip ────────────────────────────────────────────────────────
 function ChartTip({ active, payload, label }: any) {
@@ -7790,7 +7790,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ────────────────────────��────────────����───────────────────
+// ── 15. Bubble Chart ─────────────────────��──��────────────����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
@@ -8794,7 +8794,7 @@ function CarouselFilmstrip() {
   const [active, setActive] = React.useState(0)
   const [playing, setPlaying] = React.useState(false)
   const thumbsRef = React.useRef<HTMLDivElement>(null)
-  const { idx: carouselIdx, prev, next } = useCarousel(FILM_SLIDES.length)
+  const { prev, next } = useCarousel(FILM_SLIDES.length)
   const s = FILM_SLIDES[active]
 
   // Scroll active thumb into view
@@ -8972,7 +8972,7 @@ function CarouselStacked() {
 }
 
 // ── Registry entries ──────────────────────────────────────────────────────────
-const CAROUSEL_REGISTRY: ComponentDef[] = [
+const CAROUSEL_REGISTRY: ComponentEntry[] = [
   {
     name: "Carousel — Basic",
     description: "Auto-playing image carousel with smooth slide transitions, arrow controls, drag-to-swipe, dot navigation, and a play/pause toggle.",
