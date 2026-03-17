@@ -480,8 +480,8 @@ export function Gallery() {
           </p>
         </div>
 
-        {/* Showcase grid */}
-        <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+        {/* Showcase — single column stacked */}
+        <div className="flex flex-col gap-4 sm:gap-5">
           {SHOWCASE_ITEMS.map((item) => (
             <div
               key={item.name}
