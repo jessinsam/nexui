@@ -425,7 +425,7 @@ export function Gallery() {
             Everything you need.
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-            50+ fully custom components — no Radix, no shadcn, no third-party primitives. Copy the code straight into your project and own every line.
+            50+ fully custom components inspired by shadcn/ui — no third-party primitives. Copy the code straight into your project and own every line.
           </p>
         </div>
 

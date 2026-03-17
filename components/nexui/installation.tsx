@@ -90,7 +90,7 @@ export function Installation() {
             Up and running in seconds.
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-            No package to install. No version conflicts. No Radix. No shadcn wrappers. Copy the component file into your project and it just works.
+            No package to install. No version conflicts. Inspired by the shadcn/ui copy-paste model. Drop the component file into your project and it just works.
           </p>
         </div>
 
