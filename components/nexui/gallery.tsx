@@ -95,7 +95,7 @@ function ChatPreview() {
   }
 
   return (
-    <div className="w-full max-w-[300px] mx-auto flex flex-col rounded-xl border border-border bg-card overflow-hidden" style={{ height: 260 }}>
+    <div className="w-full max-w-sm mx-auto flex flex-col rounded-xl border border-border bg-card overflow-hidden" style={{ height: 300 }}>
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-secondary/40 shrink-0">
         <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
@@ -481,21 +481,23 @@ export function Gallery() {
         </div>
 
         {/* Showcase — single column stacked */}
-        <div className="flex flex-col gap-4 sm:gap-5">
+        <div className="flex flex-col gap-5">
           {SHOWCASE_ITEMS.map((item) => (
             <div
               key={item.name}
               className="group rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col"
             >
-              {/* Preview */}
-              <div className="flex-1 flex items-center justify-center p-4 sm:p-5 bg-background/40 min-h-[200px] overflow-x-auto">
-                {item.preview}
+              {/* Preview — tall, centred, full width */}
+              <div className="flex items-center justify-center p-8 sm:p-12 bg-background/40 min-h-[300px] sm:min-h-[360px] overflow-x-auto">
+                <div className="w-full max-w-lg">
+                  {item.preview}
+                </div>
               </div>
 
               {/* Info */}
-              <div className="px-4 py-3 border-t border-border flex items-start justify-between gap-3">
+              <div className="px-5 py-4 border-t border-border flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-sm font-semibold text-foreground">{item.name}</span>
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                       {item.tag}
