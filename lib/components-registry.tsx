@@ -2150,7 +2150,7 @@ function ViewTable() {
   )
 }
 
-// ─── All Views Switcher (master showcase) ─────────────────────────────────���───
+// ─── All Views Switcher (master showcase) ─────────────────────────────────�����───
 
 type ViewMode = "kanban" | "board" | "cards" | "list" | "table"
 
@@ -8395,31 +8395,33 @@ function useCarousel(count: number, loop = true) {
     setIdx(i => loop ? (i - 1 + count) % count : Math.max(0, i - 1)), [count, loop])
   const next = React.useCallback(() =>
     setIdx(i => loop ? (i + 1) % count : Math.min(count - 1, i + 1)), [count, loop])
-  const go  = React.useCallback((n: number) => setIdx(n), [])
+  const go = React.useCallback((n: number) => setIdx(n), [])
 
   const onKeyDown = React.useCallback((e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft")  { e.preventDefault(); prev() }
     if (e.key === "ArrowRight") { e.preventDefault(); next() }
   }, [prev, next])
 
-  const pointerDown = (x: number) => { setDragging(true); dragStart.current = x }
-  const pointerUp   = (x: number) => {
-    if (!dragging) return
+  const pointerDown = React.useCallback((x: number) => {
+    setDragging(true)
+    dragStart.current = x
+  }, [])
+  const pointerUp = React.useCallback((x: number) => {
     setDragging(false)
     const delta = dragStart.current - x
     if (Math.abs(delta) > 40) delta > 0 ? next() : prev()
-  }
+  }, [next, prev])
 
   return { idx, prev, next, go, dragging, onKeyDown, pointerDown, pointerUp }
 }
 
 // ── 1. Basic Image Carousel ───────────────────────────────────────────────────
 const SLIDES_BASIC = [
-  { bg: "oklch(0.18 0.06 250)", label: "Aurora Peaks",    sub: "Norwegian highlands at dusk" },
-  { bg: "oklch(0.18 0.06 300)", label: "Violet Tide",     sub: "Pacific coastline at sunset" },
-  { bg: "oklch(0.18 0.06 170)", label: "Emerald Basin",   sub: "Rainforest canopy, Borneo" },
-  { bg: "oklch(0.18 0.06 40)",  label: "Amber Flats",     sub: "Saharan dunes, golden hour" },
-  { bg: "oklch(0.18 0.06 340)", label: "Crimson Cliffs",  sub: "Utah canyon country" },
+  { bg: "oklch(0.18 0.06 250)", label: "Aurora Peaks",   sub: "Norwegian highlands at dusk" },
+  { bg: "oklch(0.18 0.06 300)", label: "Violet Tide",    sub: "Pacific coastline at sunset" },
+  { bg: "oklch(0.18 0.06 170)", label: "Emerald Basin",  sub: "Rainforest canopy, Borneo" },
+  { bg: "oklch(0.18 0.06 40)",  label: "Amber Flats",    sub: "Saharan dunes, golden hour" },
+  { bg: "oklch(0.18 0.06 340)", label: "Crimson Cliffs", sub: "Utah canyon country" },
 ]
 
 function CarouselBasic() {
@@ -8446,10 +8448,10 @@ function CarouselBasic() {
         </button>
       </div>
 
-      {/* Track */}
+      {/* Fixed-height track so background colours are always visible */}
       <div
         className="relative w-full overflow-hidden rounded-2xl select-none"
-        style={{ aspectRatio: "16/7" }}
+        style={{ height: 220 }}
         onKeyDown={onKeyDown}
         tabIndex={0}
         role="region"
@@ -8459,35 +8461,52 @@ function CarouselBasic() {
         onTouchStart={e => pointerDown(e.touches[0].clientX)}
         onTouchEnd={e => pointerUp(e.changedTouches[0].clientX)}
       >
+        {/* Sliding strip */}
         <div
           className="flex h-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          style={{ transform: `translateX(-${idx * 100}%)`, width: `${SLIDES_BASIC.length * 100}%` }}
+          style={{ width: `${SLIDES_BASIC.length * 100}%`, transform: `translateX(-${(idx * 100) / SLIDES_BASIC.length}%)` }}
         >
           {SLIDES_BASIC.map((s, i) => (
-            <div key={i} className="relative h-full flex items-end p-6" style={{ width: `${100 / SLIDES_BASIC.length}%`, background: s.bg }}>
-              {/* Subtle grid texture */}
-              <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
-                <defs><pattern id={`g${i}`} width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="0.5"/></pattern></defs>
-                <rect width="100%" height="100%" fill={`url(#g${i})`}/>
+            <div
+              key={i}
+              className="relative h-full flex items-end p-6 shrink-0"
+              style={{ width: `${100 / SLIDES_BASIC.length}%`, backgroundColor: s.bg }}
+            >
+              {/* Dot grid texture */}
+              <svg className="absolute inset-0 w-full h-full opacity-[0.06]" aria-hidden="true">
+                <defs>
+                  <pattern id={`dot${i}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="1" fill="white" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#dot${i})`} />
               </svg>
               <div className="relative z-10">
-                <p className="text-xl font-bold text-white drop-shadow-sm">{s.label}</p>
+                <p className="text-xl font-bold text-white drop-shadow">{s.label}</p>
                 <p className="text-sm text-white/60 mt-0.5">{s.sub}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Arrows */}
-        <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Previous slide">
+        {/* Prev / Next */}
+        <button
+          onClick={prev}
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/60 transition-colors"
+          aria-label="Previous slide"
+        >
           <ChevronLeft size={16} />
         </button>
-        <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Next slide">
+        <button
+          onClick={next}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/60 transition-colors"
+          aria-label="Next slide"
+        >
           <ChevronRight size={16} />
         </button>
 
-        {/* Slide counter */}
-        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-xs text-white/80 tabular-nums">
+        {/* Counter badge */}
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-xs text-white tabular-nums">
           {idx + 1} / {SLIDES_BASIC.length}
         </div>
       </div>
@@ -8504,7 +8523,7 @@ function CarouselBasic() {
               "rounded-full transition-all duration-300",
               i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground"
             )}
-            aria-label={`Go to slide ${i + 1}`}
+            aria-label={`Slide ${i + 1}`}
           />
         ))}
       </div>
@@ -8514,12 +8533,12 @@ function CarouselBasic() {
 
 // ── 2. Cards Carousel (peek effect) ──────────────────────────────────────────
 const CARDS_DATA = [
-  { title: "Design System",     desc: "Unified token-based design language across all platforms.",  icon: Layers,   color: "oklch(0.55 0.21 250)" },
-  { title: "Component Library", desc: "Over 120 production-ready accessible React components.",     icon: Code2,    color: "oklch(0.52 0.18 300)" },
-  { title: "Performance",       desc: "Sub-50ms interaction budgets enforced by CI benchmarks.",    icon: Zap,      color: "oklch(0.55 0.18 170)" },
-  { title: "Edge Runtime",      desc: "Deploy instantly to 100+ global edge locations.",            icon: Server,   color: "oklch(0.60 0.20 40)"  },
-  { title: "Analytics",         desc: "Real-time insights without compromising user privacy.",      icon: TrendingUp, color: "oklch(0.55 0.15 340)" },
-  { title: "Search",            desc: "Full-text search with typo-tolerance out of the box.",       icon: Search,   color: "oklch(0.55 0.21 250)" },
+  { title: "Design System",      desc: "Unified token-based design language across all platforms.",  icon: Layers,     color: "oklch(0.55 0.21 250)" },
+  { title: "Component Library",  desc: "Over 120 production-ready accessible React components.",     icon: Code2,      color: "oklch(0.52 0.18 300)" },
+  { title: "Performance",        desc: "Sub-50ms interaction budgets enforced by CI benchmarks.",    icon: Zap,        color: "oklch(0.55 0.18 170)" },
+  { title: "Edge Runtime",       desc: "Deploy instantly to 100+ global edge locations.",            icon: Server,     color: "oklch(0.60 0.20 40)"  },
+  { title: "Analytics",          desc: "Real-time insights without compromising user privacy.",      icon: TrendingUp, color: "oklch(0.55 0.15 340)" },
+  { title: "Search",             desc: "Full-text search with typo-tolerance out of the box.",       icon: Search,     color: "oklch(0.55 0.21 250)" },
 ]
 
 function CarouselCards() {
@@ -8533,18 +8552,27 @@ function CarouselCards() {
           <p className="text-xs text-muted-foreground">Peek carousel with side previews</p>
         </div>
         <div className="flex gap-1">
-          <button onClick={prev} className="w-7 h-7 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Previous">
+          <button
+            onClick={prev}
+            className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors"
+            aria-label="Previous"
+          >
             <ChevronLeft size={14} />
           </button>
-          <button onClick={next} className="w-7 h-7 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Next">
+          <button
+            onClick={next}
+            className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors"
+            aria-label="Next"
+          >
             <ChevronRight size={14} />
           </button>
         </div>
       </div>
 
+      {/* Clip wrapper — overflow-hidden prevents peek cards bleeding outside */}
       <div
         className="relative w-full overflow-hidden select-none"
-        style={{ height: 200 }}
+        style={{ height: 190 }}
         onKeyDown={onKeyDown}
         tabIndex={0}
         role="region"
@@ -8556,28 +8584,37 @@ function CarouselCards() {
       >
         {CARDS_DATA.map((card, i) => {
           const offset = i - idx
-          // Show -1, 0, +1 only
-          const visible = Math.abs(offset) <= 1
-          const scale  = offset === 0 ? 1 : 0.88
-          const x      = offset * 82  // % offset
-          const opacity = offset === 0 ? 1 : 0.45
-          const zIndex = offset === 0 ? 10 : 5
-          const Icon   = card.icon
+          const Icon = card.icon
+          // Position: active card centred; ±1 peek in from either side
+          // translateX is in px so it stays relative to the wrapper, not the card's own width
+          const translateX = offset === 0 ? "0%" : offset > 0 ? "88%" : "-88%"
+          const scale   = offset === 0 ? 1 : 0.9
+          const opacity = offset === 0 ? 1 : Math.abs(offset) === 1 ? 0.4 : 0
+          const zIndex  = offset === 0 ? 10 : Math.abs(offset) === 1 ? 5 : 0
+          const pointer = offset !== 0 ? "pointer-events-none" : ""
 
           return (
             <div
               key={i}
-              aria-hidden={!visible}
-              className="absolute inset-y-0 w-[72%] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              aria-hidden={offset !== 0}
+              className={cn("absolute inset-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]", pointer)}
               style={{
-                left: "14%",
-                transform: `translateX(${x}%) scale(${scale})`,
+                left: "8%",
+                right: "8%",
+                transform: `translateX(${translateX}) scale(${scale})`,
+                transformOrigin: offset > 0 ? "left center" : "right center",
                 opacity,
                 zIndex,
               }}
             >
-              <div className="w-full h-full rounded-2xl border border-border overflow-hidden flex flex-col p-6 gap-4" style={{ background: `${card.color}18` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${card.color}30` }}>
+              <div
+                className="w-full h-full rounded-2xl border border-border flex flex-col p-6 gap-4"
+                style={{ background: `color-mix(in oklch, ${card.color} 12%, var(--color-card))` }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: `color-mix(in oklch, ${card.color} 22%, transparent)` }}
+                >
                   <Icon size={18} style={{ color: card.color }} aria-hidden="true" />
                 </div>
                 <div>
@@ -8590,7 +8627,7 @@ function CarouselCards() {
         })}
       </div>
 
-      {/* Dots */}
+      {/* Dot nav */}
       <div className="flex items-center justify-center gap-1.5" role="tablist">
         {CARDS_DATA.map((_, i) => (
           <button
@@ -8598,8 +8635,11 @@ function CarouselCards() {
             role="tab"
             aria-selected={i === idx}
             onClick={() => go(i)}
-            className={cn("rounded-full transition-all duration-300", i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground")}
-            aria-label={`Go to card ${i + 1}`}
+            className={cn(
+              "rounded-full transition-all duration-300",
+              i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground"
+            )}
+            aria-label={`Card ${i + 1}`}
           />
         ))}
       </div>
@@ -8609,10 +8649,10 @@ function CarouselCards() {
 
 // ── 3. Testimonials Carousel ──────────────────────────────────────────────────
 const TESTIMONIALS = [
-  { name: "Sarah Okonkwo",  role: "Staff Eng, Vercel",      initials: "SO", color: "oklch(0.62 0.21 250)", rating: 5, text: "NexUI cut our design-to-production time in half. The components are thoughtfully built — every edge case handled, every accessibility concern addressed." },
-  { name: "Mateo Rivera",   role: "CTO, Pulse Analytics",   initials: "MR", color: "oklch(0.55 0.18 300)", rating: 5, text: "We migrated an entire product to NexUI in two sprints. The consistency across components is remarkable and the dark-mode support is flawless." },
-  { name: "Jin-Ho Park",    role: "Lead Designer, Linear",  initials: "JP", color: "oklch(0.60 0.18 170)", rating: 5, text: "Finally a component library that doesn't fight your design system. The token architecture maps perfectly onto our brand guidelines." },
-  { name: "Amara Diallo",   role: "Indie Hacker",           initials: "AD", color: "oklch(0.65 0.20 40)",  rating: 4, text: "Shipped my SaaS MVP in 3 weeks. NexUI handled all the UI heavy lifting so I could focus on the product. Absolutely worth it." },
+  { name: "Sarah Okonkwo", role: "Staff Eng, Vercel",     initials: "SO", color: "oklch(0.62 0.21 250)", rating: 5, text: "NexUI cut our design-to-production time in half. The components are thoughtfully built — every edge case handled, every accessibility concern addressed." },
+  { name: "Mateo Rivera",  role: "CTO, Pulse Analytics",  initials: "MR", color: "oklch(0.55 0.18 300)", rating: 5, text: "We migrated an entire product to NexUI in two sprints. The consistency across components is remarkable and the dark-mode support is flawless." },
+  { name: "Jin-Ho Park",   role: "Lead Designer, Linear", initials: "JP", color: "oklch(0.60 0.18 170)", rating: 5, text: "Finally a component library that doesn't fight your design system. The token architecture maps perfectly onto our brand guidelines." },
+  { name: "Amara Diallo",  role: "Indie Hacker",          initials: "AD", color: "oklch(0.65 0.20 40)",  rating: 4, text: "Shipped my SaaS MVP in 3 weeks. NexUI handled all the UI heavy lifting so I could focus on the product. Absolutely worth it." },
 ]
 
 function CarouselTestimonials() {
@@ -8632,13 +8672,10 @@ function CarouselTestimonials() {
         <span className="text-xs text-muted-foreground tabular-nums">{idx + 1} / {TESTIMONIALS.length}</span>
       </div>
 
-      {/* Card */}
-      <div className="relative rounded-2xl border border-border bg-card p-6 overflow-hidden min-h-[180px] flex flex-col justify-between gap-4">
-        {/* Big quote mark */}
-        <Quote size={48} className="absolute top-4 right-4 text-primary/8" aria-hidden="true" />
+      <div className="relative rounded-2xl border border-border bg-card p-6 overflow-hidden min-h-[190px] flex flex-col justify-between gap-4">
+        <Quote size={52} className="absolute top-4 right-4 opacity-[0.06] text-foreground" aria-hidden="true" />
 
         <div className="relative z-10 flex flex-col gap-3">
-          {/* Stars */}
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} size={13} className={i < t.rating ? "text-amber-400" : "text-border"} aria-hidden="true" />
@@ -8657,19 +8694,17 @@ function CarouselTestimonials() {
               <p className="text-xs text-muted-foreground">{t.role}</p>
             </div>
           </div>
-
           <div className="flex gap-1">
-            <button onClick={prev} className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Previous testimonial">
+            <button onClick={prev} className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Previous">
               <ChevronLeft size={14} />
             </button>
-            <button onClick={next} className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Next testimonial">
+            <button onClick={next} className="w-8 h-8 rounded-lg bg-secondary border border-border flex items-center justify-center hover:bg-border transition-colors" aria-label="Next">
               <ChevronRight size={14} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Dots */}
       <div className="flex items-center justify-center gap-1.5" role="tablist">
         {TESTIMONIALS.map((_, i) => (
           <button
@@ -8678,7 +8713,7 @@ function CarouselTestimonials() {
             aria-selected={i === idx}
             onClick={() => go(i)}
             className={cn("rounded-full transition-all duration-300", i === idx ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border hover:bg-muted-foreground")}
-            aria-label={`Go to testimonial ${i + 1}`}
+            aria-label={`Testimonial ${i + 1}`}
           />
         ))}
       </div>
@@ -8688,8 +8723,8 @@ function CarouselTestimonials() {
 
 // ── 4. Product Showcase Carousel ──────────────────────────────────────────────
 const PRODUCTS = [
-  { name: "Arc Pro Headphones",  price: "$349",  badge: "New",     stars: 4.9, reviews: 1248, color: "oklch(0.22 0.05 250)", accent: "oklch(0.62 0.21 250)" },
-  { name: "Studio Monitor XL",   price: "$899",  badge: "Popular", stars: 4.7, reviews: 867,  color: "oklch(0.22 0.05 300)", accent: "oklch(0.55 0.18 300)" },
+  { name: "Arc Pro Headphones",   price: "$349", badge: "New",     stars: 4.9, reviews: 1248, color: "oklch(0.22 0.05 250)", accent: "oklch(0.62 0.21 250)" },
+  { name: "Studio Monitor XL",    price: "$899", badge: "Popular", stars: 4.7, reviews: 867,  color: "oklch(0.22 0.05 300)", accent: "oklch(0.55 0.18 300)" },
   { name: "Compact Desk Speaker", price: "$199", badge: "Sale",    stars: 4.5, reviews: 2031, color: "oklch(0.22 0.05 170)", accent: "oklch(0.60 0.18 170)" },
   { name: "Wireless Earbuds Max", price: "$249", badge: "Limited", stars: 4.8, reviews: 512,  color: "oklch(0.22 0.05 40)",  accent: "oklch(0.65 0.20 40)"  },
 ]
@@ -8726,28 +8761,23 @@ function CarouselProduct() {
         onTouchStart={e => pointerDown(e.touches[0].clientX)}
         onTouchEnd={e => pointerUp(e.changedTouches[0].clientX)}
       >
-        {/* Visual pane */}
-        <div className="relative flex items-center justify-center" style={{ height: 180, background: p.color }}>
-          {/* Abstract product silhouette */}
-          <svg viewBox="0 0 120 80" className="w-40 opacity-60" aria-hidden="true">
-            <ellipse cx="60" cy="70" rx="46" ry="6" fill="black" fillOpacity="0.3" />
-            <rect x="20" y="20" width="80" height="46" rx="12" fill={p.accent} fillOpacity="0.9" />
-            <rect x="34" y="34" width="52" height="20" rx="6" fill="white" fillOpacity="0.12" />
-            <circle cx="60" cy="44" r="7" fill="white" fillOpacity="0.18" />
+        <div className="relative flex items-center justify-center" style={{ height: 180, backgroundColor: p.color }}>
+          <svg viewBox="0 0 120 80" className="w-40 opacity-70" aria-hidden="true">
+            <ellipse cx="60" cy="72" rx="44" ry="5" fill="black" fillOpacity="0.25" />
+            <rect x="20" y="18" width="80" height="48" rx="12" fill={p.accent} fillOpacity="0.95" />
+            <rect x="34" y="32" width="52" height="20" rx="6" fill="white" fillOpacity="0.1" />
+            <circle cx="60" cy="42" r="8" fill="white" fillOpacity="0.15" />
           </svg>
-          {/* Badge */}
-          <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-xs font-bold text-white" style={{ background: p.accent }}>
+          <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-xs font-bold text-white" style={{ backgroundColor: p.accent }}>
             {p.badge}
           </span>
-          {/* Like */}
           <button
             onClick={() => setLiked(s => { const n = new Set(s); n.has(idx) ? n.delete(idx) : n.add(idx); return n })}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-black/40"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/25 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-colors"
             aria-label={liked.has(idx) ? "Unlike" : "Like"}
           >
             <Heart size={14} className={cn("transition-colors", liked.has(idx) ? "text-red-400" : "text-white/70")} />
           </button>
-          {/* Slide pip nav */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
             {PRODUCTS.map((_, i) => (
               <button key={i} onClick={() => go(i)} className={cn("rounded-full transition-all duration-300", i === idx ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/30")} aria-label={`Product ${i + 1}`} />
@@ -8755,7 +8785,6 @@ function CarouselProduct() {
           </div>
         </div>
 
-        {/* Info pane */}
         <div className="p-5 flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <p className="text-sm font-semibold text-foreground">{p.name}</p>
@@ -8782,12 +8811,12 @@ function CarouselProduct() {
 
 // ── 5. Filmstrip / Thumbnail Carousel ────────────────────────────────────────
 const FILM_SLIDES = [
-  { label: "Chapter 01",  title: "The Beginning",      duration: "3:42", color: "oklch(0.20 0.07 250)" },
-  { label: "Chapter 02",  title: "Rising Action",      duration: "5:18", color: "oklch(0.20 0.07 280)" },
-  { label: "Chapter 03",  title: "The Conflict",       duration: "4:55", color: "oklch(0.20 0.07 310)" },
-  { label: "Chapter 04",  title: "Dark Night",         duration: "6:02", color: "oklch(0.20 0.07 170)" },
-  { label: "Chapter 05",  title: "The Revelation",     duration: "4:10", color: "oklch(0.20 0.07 40)"  },
-  { label: "Chapter 06",  title: "Resolution",         duration: "5:33", color: "oklch(0.20 0.07 340)" },
+  { label: "Chapter 01", title: "The Beginning",  duration: "3:42", color: "oklch(0.20 0.07 250)" },
+  { label: "Chapter 02", title: "Rising Action",  duration: "5:18", color: "oklch(0.20 0.07 280)" },
+  { label: "Chapter 03", title: "The Conflict",   duration: "4:55", color: "oklch(0.20 0.07 310)" },
+  { label: "Chapter 04", title: "Dark Night",     duration: "6:02", color: "oklch(0.20 0.07 170)" },
+  { label: "Chapter 05", title: "The Revelation", duration: "4:10", color: "oklch(0.20 0.07 40)"  },
+  { label: "Chapter 06", title: "Resolution",     duration: "5:33", color: "oklch(0.20 0.07 340)" },
 ]
 
 function CarouselFilmstrip() {
@@ -8797,7 +8826,6 @@ function CarouselFilmstrip() {
   const { prev, next } = useCarousel(FILM_SLIDES.length)
   const s = FILM_SLIDES[active]
 
-  // Scroll active thumb into view
   React.useEffect(() => {
     const el = thumbsRef.current?.children[active] as HTMLElement | undefined
     el?.scrollIntoView({ inline: "nearest", behavior: "smooth" })
@@ -8807,31 +8835,36 @@ function CarouselFilmstrip() {
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center justify-between px-1">
         <p className="text-sm font-semibold text-foreground">Filmstrip Carousel</p>
-        <span className="text-xs text-muted-foreground">{active + 1} / {FILM_SLIDES.length}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{active + 1} / {FILM_SLIDES.length}</span>
       </div>
 
-      {/* Main view */}
-      <div className="relative rounded-2xl overflow-hidden flex items-center justify-center" style={{ height: 200, background: s.color }}>
-        <svg viewBox="0 0 160 100" className="w-32 opacity-30 absolute" aria-hidden="true">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <rect key={i} x={i * 34} y="0" width="28" height="100" rx="3" fill="white" />
-          ))}
-        </svg>
-        <div className="relative z-10 flex flex-col items-center gap-2">
-          <button
-            onClick={() => setPlaying(v => !v)}
-            className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/25 transition-colors"
-            aria-label={playing ? "Pause" : "Play"}
-          >
-            {playing
-              ? <Pause size={22} className="text-white" />
-              : <Play size={22} className="text-white translate-x-0.5" />
-            }
-          </button>
+      {/* Main stage */}
+      <div
+        className="relative rounded-2xl overflow-hidden flex items-center justify-center"
+        style={{ height: 196, backgroundColor: s.color }}
+      >
+        {/* Film-strip decoration */}
+        <div className="absolute inset-y-0 left-0 w-5 flex flex-col justify-around py-2 opacity-20" aria-hidden="true">
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="w-3 h-2 rounded-sm bg-white mx-auto" />)}
         </div>
-        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+        <div className="absolute inset-y-0 right-0 w-5 flex flex-col justify-around py-2 opacity-20" aria-hidden="true">
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="w-3 h-2 rounded-sm bg-white mx-auto" />)}
+        </div>
+
+        <button
+          onClick={() => setPlaying(v => !v)}
+          className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/25 transition-colors"
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          {playing
+            ? <Pause size={22} className="text-white" />
+            : <Play size={22} className="text-white translate-x-0.5" />
+          }
+        </button>
+
+        <div className="absolute bottom-3 left-6 right-6 flex items-end justify-between">
           <div>
-            <p className="text-xs text-white/50 font-medium">{s.label}</p>
+            <p className="text-xs text-white/50">{s.label}</p>
             <p className="text-base font-bold text-white">{s.title}</p>
           </div>
           <div className="flex items-center gap-1 text-white/60">
@@ -8839,17 +8872,31 @@ function CarouselFilmstrip() {
             <span className="text-xs tabular-nums">{s.duration}</span>
           </div>
         </div>
-        {/* Prev/next */}
-        <button onClick={() => setActive(i => (i - 1 + FILM_SLIDES.length) % FILM_SLIDES.length)} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Previous">
+
+        <button
+          onClick={() => setActive(i => (i - 1 + FILM_SLIDES.length) % FILM_SLIDES.length)}
+          className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition-colors"
+          aria-label="Previous chapter"
+        >
           <ChevronLeft size={15} />
         </button>
-        <button onClick={() => setActive(i => (i + 1) % FILM_SLIDES.length)} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition-colors" aria-label="Next">
+        <button
+          onClick={() => setActive(i => (i + 1) % FILM_SLIDES.length)}
+          className="absolute right-6 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition-colors"
+          aria-label="Next chapter"
+        >
           <ChevronRight size={15} />
         </button>
       </div>
 
-      {/* Filmstrip thumbnails */}
-      <div ref={thumbsRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="tablist" aria-label="Chapter list">
+      {/* Thumbnail strip */}
+      <div
+        ref={thumbsRef}
+        className="flex gap-2 overflow-x-auto pb-1"
+        style={{ scrollbarWidth: "none" }}
+        role="tablist"
+        aria-label="Chapter list"
+      >
         {FILM_SLIDES.map((f, i) => (
           <button
             key={i}
@@ -8857,16 +8904,15 @@ function CarouselFilmstrip() {
             aria-selected={i === active}
             onClick={() => setActive(i)}
             className={cn(
-              "shrink-0 relative rounded-xl overflow-hidden transition-all duration-200",
-              "w-20 h-14 border-2",
-              i === active ? "border-primary scale-100 opacity-100" : "border-transparent opacity-50 hover:opacity-75"
+              "shrink-0 relative rounded-xl overflow-hidden transition-all duration-200 w-20 h-14 border-2",
+              i === active ? "border-primary opacity-100 scale-100" : "border-transparent opacity-50 hover:opacity-80"
             )}
-            style={{ background: f.color }}
+            style={{ backgroundColor: f.color }}
             aria-label={f.title}
           >
-            <span className="absolute bottom-1 left-1 right-1 text-center text-[9px] text-white/80 font-medium truncate">{f.title}</span>
+            <span className="absolute bottom-1 inset-x-1 text-center text-[9px] text-white/80 font-medium truncate">{f.title}</span>
             {i === active && (
-              <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-primary flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
                 <Play size={6} className="text-white translate-x-px" aria-hidden="true" />
               </span>
             )}
@@ -8877,12 +8923,12 @@ function CarouselFilmstrip() {
   )
 }
 
-// ── 6. Stacked / 3D Perspective Carousel ─────────────────────────────────────
+// ── 6. Stacked Cards Carousel ─────────────────────────────────────────────────
 const STACK_SLIDES = [
-  { title: "Onboarding",      step: "01", desc: "Set up your workspace in minutes with our guided flow.", color: "oklch(0.62 0.21 250)" },
-  { title: "Invite Team",     step: "02", desc: "Add teammates with role-based permissions and SSO support.", color: "oklch(0.55 0.18 300)" },
-  { title: "Import Data",     step: "03", desc: "Connect your existing tools via 200+ native integrations.", color: "oklch(0.60 0.18 170)" },
-  { title: "Launch",          step: "04", desc: "Ship to production with one click. Rollbacks included.", color: "oklch(0.65 0.20 40)"  },
+  { title: "Onboarding",  step: "01", desc: "Set up your workspace in minutes with our guided flow.",          color: "oklch(0.62 0.21 250)" },
+  { title: "Invite Team", step: "02", desc: "Add teammates with role-based permissions and SSO support.",      color: "oklch(0.55 0.18 300)" },
+  { title: "Import Data", step: "03", desc: "Connect your existing tools via 200+ native integrations.",       color: "oklch(0.60 0.18 170)" },
+  { title: "Launch",      step: "04", desc: "Ship to production with one click. Rollbacks always included.",   color: "oklch(0.65 0.20 40)"  },
 ]
 
 function CarouselStacked() {
@@ -8898,10 +8944,10 @@ function CarouselStacked() {
         <span className="text-xs tabular-nums text-muted-foreground">{idx + 1} / {STACK_SLIDES.length}</span>
       </div>
 
-      {/* Stack */}
+      {/* Stack container — needs explicit height so absolute children size correctly */}
       <div
         className="relative w-full select-none"
-        style={{ height: 210 }}
+        style={{ height: 200 }}
         onKeyDown={onKeyDown}
         tabIndex={0}
         role="region"
@@ -8913,31 +8959,40 @@ function CarouselStacked() {
       >
         {STACK_SLIDES.map((s, i) => {
           const offset = i - idx
+          // Only render active + up to 2 upcoming cards; hide past cards entirely
           if (offset < 0 || offset > 2) return null
-          const yOff = offset * 10
-          const scale = 1 - offset * 0.04
-          const zIdx = STACK_SLIDES.length - offset
-          const opacity = offset > 2 ? 0 : 1 - offset * 0.2
+          const yOff   = offset * 10
+          const scale  = 1 - offset * 0.05
+          const zIndex = STACK_SLIDES.length - offset
+          const opacity = 1 - offset * 0.25
+          const isActive = offset === 0
 
           return (
             <div
               key={i}
-              className="absolute inset-x-0 rounded-2xl border border-border overflow-hidden cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="absolute inset-x-0 rounded-2xl border border-border overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
               style={{
                 top: yOff,
+                height: 180,
                 transform: `scale(${scale})`,
                 transformOrigin: "top center",
-                zIndex: zIdx,
+                zIndex,
                 opacity,
-                background: `${s.color}18`,
+                backgroundColor: `color-mix(in oklch, ${s.color} 10%, var(--color-card))`,
+                cursor: isActive ? "default" : "pointer",
               }}
-              onClick={() => offset > 0 && next()}
-              aria-hidden={i !== idx}
+              onClick={() => !isActive && next()}
+              aria-hidden={!isActive}
             >
-              <div className="flex flex-col justify-between p-6" style={{ height: 180 }}>
+              <div className="flex flex-col justify-between h-full p-6">
                 <div className="flex items-start justify-between">
-                  <span className="text-4xl font-black text-foreground/10 leading-none">{s.step}</span>
-                  <div className="w-8 h-8 rounded-xl border border-border flex items-center justify-center" style={{ background: `${s.color}25` }}>
+                  <span className="text-5xl font-black leading-none" style={{ color: `color-mix(in oklch, ${s.color} 20%, transparent)` }}>
+                    {s.step}
+                  </span>
+                  <div
+                    className="w-8 h-8 rounded-xl border border-border flex items-center justify-center"
+                    style={{ backgroundColor: `color-mix(in oklch, ${s.color} 18%, transparent)` }}
+                  >
                     <ArrowRight size={14} style={{ color: s.color }} aria-hidden="true" />
                   </div>
                 </div>
@@ -8951,7 +9006,7 @@ function CarouselStacked() {
         })}
       </div>
 
-      {/* Step indicators */}
+      {/* Progress bars */}
       <div className="flex items-center gap-2 px-1" role="tablist">
         {STACK_SLIDES.map((_, i) => (
           <button
@@ -8961,7 +9016,7 @@ function CarouselStacked() {
             onClick={() => go(i)}
             className={cn(
               "flex-1 h-1 rounded-full transition-all duration-300",
-              i < idx ? "bg-primary" : i === idx ? "bg-primary/70" : "bg-border"
+              i < idx ? "bg-primary" : i === idx ? "bg-primary/60" : "bg-border"
             )}
             aria-label={`Step ${i + 1}`}
           />
@@ -8980,7 +9035,7 @@ const CAROUSEL_REGISTRY: ComponentEntry[] = [
     tags: ["carousel", "slider", "image", "autoplay", "swipe"],
     fullWidth: true,
     preview: <CarouselBasic />,
-    code: `// CarouselBasic — see lib/components-registry.tsx`,
+    code: `// CarouselBasic`,
   },
   {
     name: "Carousel — Cards Peek",
@@ -8989,16 +9044,16 @@ const CAROUSEL_REGISTRY: ComponentEntry[] = [
     tags: ["carousel", "cards", "peek", "slide", "feature"],
     fullWidth: true,
     preview: <CarouselCards />,
-    code: `// CarouselCards — see lib/components-registry.tsx`,
+    code: `// CarouselCards`,
   },
   {
     name: "Carousel — Testimonials",
-    description: "Single-slide testimonial carousel with star ratings, avatar initials, giant decorative quote mark, and directional controls.",
+    description: "Single-card testimonial carousel with star ratings, avatar initials, decorative quote mark, and directional controls.",
     category: "Carousel",
     tags: ["carousel", "testimonial", "review", "quote", "stars"],
     fullWidth: true,
     preview: <CarouselTestimonials />,
-    code: `// CarouselTestimonials — see lib/components-registry.tsx`,
+    code: `// CarouselTestimonials`,
   },
   {
     name: "Carousel — Product",
@@ -9007,7 +9062,7 @@ const CAROUSEL_REGISTRY: ComponentEntry[] = [
     tags: ["carousel", "product", "ecommerce", "shop", "swipe"],
     fullWidth: true,
     preview: <CarouselProduct />,
-    code: `// CarouselProduct — see lib/components-registry.tsx`,
+    code: `// CarouselProduct`,
   },
   {
     name: "Carousel — Filmstrip",
@@ -9016,7 +9071,7 @@ const CAROUSEL_REGISTRY: ComponentEntry[] = [
     tags: ["carousel", "filmstrip", "video", "thumbnail", "chapters"],
     fullWidth: true,
     preview: <CarouselFilmstrip />,
-    code: `// CarouselFilmstrip — see lib/components-registry.tsx`,
+    code: `// CarouselFilmstrip`,
   },
   {
     name: "Carousel — Stacked",
@@ -9025,7 +9080,7 @@ const CAROUSEL_REGISTRY: ComponentEntry[] = [
     tags: ["carousel", "stacked", "3d", "steps", "onboarding"],
     fullWidth: true,
     preview: <CarouselStacked />,
-    code: `// CarouselStacked — see lib/components-registry.tsx`,
+    code: `// CarouselStacked`,
   },
 ]
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, Suspense, useEffect } from "react"
+import { useState, useMemo, Suspense, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, COMPONENTS } from "@/lib/components-registry"
@@ -21,7 +21,7 @@ function Sidebar({
   counts: Record<string, number>
 }) {
   return (
-    <aside className="w-56 shrink-0 flex flex-col gap-1 sticky top-20 self-start">
+    <aside className="w-56 shrink-0 flex flex-col gap-1 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
       <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">
         Categories
       </p>
@@ -190,7 +190,7 @@ function ComponentGrid({
   )
 }
 
-// ─── Skeleton shown while suspended ──────────────────────────────────────────
+// ─── Skeleton shown while suspended ──────────────────────────────���───────────
 
 function GridSkeleton() {
   return (
@@ -212,10 +212,19 @@ export default function ComponentsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All")
   const [query, setQuery] = useState("")
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const gridTopRef = useRef<HTMLDivElement>(null)
 
-  // Always scroll to top when the page mounts so the above-the-fold header is visible
+  // Scroll to top of page on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" })
+  }, [])
+
+  // Scroll to top of grid when category changes
+  const handleCategory = useCallback((cat: string) => {
+    setActiveCategory(cat)
+    setTimeout(() => {
+      gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 20)
   }, [])
 
   const counts = useMemo(() => {
@@ -335,7 +344,7 @@ export default function ComponentsPage() {
               return (
                 <button
                   key={cat}
-                  onClick={() => { setActiveCategory(cat); setMobileSidebarOpen(false) }}
+                  onClick={() => { handleCategory(cat); setMobileSidebarOpen(false) }}
                   className={cn(
                     "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left",
                     activeCategory === cat
@@ -374,10 +383,12 @@ export default function ComponentsPage() {
 
         <div className="flex gap-10">
           <div className="hidden md:block">
-            <Sidebar activeCategory={activeCategory} onCategory={setActiveCategory} counts={counts} />
+            <Sidebar activeCategory={activeCategory} onCategory={handleCategory} counts={counts} />
           </div>
 
           <div className="flex-1 min-w-0">
+            {/* Scroll anchor — category clicks jump here */}
+            <div ref={gridTopRef} style={{ scrollMarginTop: "5rem" }} />
             {/* Meta row — lightweight, outside the Suspense boundary */}
             <div className="flex items-center justify-between mb-5">
               <p className="text-sm text-muted-foreground">
