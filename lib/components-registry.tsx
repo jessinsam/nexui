@@ -2402,8 +2402,6 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
-const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
 function isSameDay(a: Date | null, b: Date | null) {
   if (!a || !b) return false
@@ -2461,8 +2459,6 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
-const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
 function isSameDay(a: Date | null, b: Date | null) {
   if (!a || !b) return false
@@ -2536,8 +2532,6 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
-const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
 const EVENTS: Record<number, { label: string; color: string }[]> = {
   3:  [{ label: "Team standup", color: "bg-primary" }],
@@ -2614,8 +2608,6 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
-const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
 function isSameDay(a: Date | null, b: Date | null) {
   if (!a || !b) return false
@@ -2686,8 +2678,6 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight, Clock } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
-const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
 function isSameDay(a: Date | null, b: Date | null) {
   if (!a || !b) return false
@@ -2771,8 +2761,6 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight, CalendarDays, Check, X } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
-const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 const SLOTS = ["9:00 AM","10:00 AM","11:00 AM","1:00 PM","2:00 PM","3:00 PM","4:00 PM"]
 const BOOKED = new Set(["10:00 AM","2:00 PM"])
 
@@ -7715,11 +7703,11 @@ function WaterfallChartDemo() {
 }
 
 // ── 14. Heatmap / Calendar Heatmap ───────────────────────────────────────────
-const WEEKS = 16
-const DAYS = 7
-const HEATMAP_DATA = Array.from({ length: WEEKS * DAYS }, (_, i) => ({
-  week: Math.floor(i / DAYS),
-  day: i % DAYS,
+const HEATMAP_WEEKS = 16
+const HEATMAP_DAYS = 7
+const HEATMAP_DATA = Array.from({ length: HEATMAP_WEEKS * HEATMAP_DAYS }, (_, i) => ({
+  week: Math.floor(i / HEATMAP_DAYS),
+  day: i % HEATMAP_DAYS,
   value: Math.floor(Math.pow(Math.random(), 1.5) * 20),
 }))
 const HEAT_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -7728,7 +7716,7 @@ const HEAT_MONTHS = ["Jan", "Mar", "May", "Jul"]
 function HeatmapChartDemo() {
   const [hov, setHov] = useState<{ week: number; day: number } | null>(null)
   const CELL = 18, GAP = 3, LW = 28, TH = 20
-  const W = LW + WEEKS * (CELL + GAP), H = TH + DAYS * (CELL + GAP)
+  const W = LW + HEATMAP_WEEKS * (CELL + GAP), H = TH + HEATMAP_DAYS * (CELL + GAP)
   const maxVal = Math.max(...HEATMAP_DATA.map(d => d.value))
 
   function alpha(v: number) { return v === 0 ? 0.05 : 0.15 + (v / maxVal) * 0.75 }
@@ -7743,7 +7731,7 @@ function HeatmapChartDemo() {
         <svg viewBox={`0 0 ${W} ${H + 16}`} className="block" style={{ minWidth: W }} role="img" aria-label="Activity heatmap">
           {/* Month labels */}
           {HEAT_MONTHS.map((m, i) => (
-            <text key={m} x={LW + (i * (WEEKS / HEAT_MONTHS.length)) * (CELL + GAP)} y={12} fontSize={9} fill={C.text} opacity={0.4}>{m}</text>
+            <text key={m} x={LW + (i * (HEATMAP_WEEKS / HEAT_MONTHS.length)) * (CELL + GAP)} y={12} fontSize={9} fill={C.text} opacity={0.4}>{m}</text>
           ))}
           {/* Day labels */}
           {HEAT_LABELS.map((d, i) => (
