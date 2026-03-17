@@ -5387,7 +5387,7 @@ function FloatingChatWidget() {
   )
 }
 
-// ── 4. Voice Chat UI ──────────────────────��───────────────────────────────────
+// ── 4. Voice Chat UI ──────────────────────���───────────────────────────────────
 type VoiceState = "idle" | "listening" | "processing" | "speaking"
 
 function VoiceChatUI() {
@@ -6994,7 +6994,7 @@ function ScatterChartDemo() {
   const [tooltip, setTooltip] = React.useState<{x:number;y:number;color:string;xv:number;yv:number;z:number} | null>(null)
   const svgRef = React.useRef<SVGSVGElement>(null)
   const PAD = { t: 12, r: 12, b: 28, l: 36 }
-  const W = 560, H = 200
+  const W = 560, H = 340
   const xS = (v: number) => PAD.l + (v / 100) * W
   const yS = (v: number) => PAD.t + H - (v / 100) * H
   const groups = [
@@ -7009,7 +7009,7 @@ function ScatterChartDemo() {
         <p className="text-xs text-muted-foreground">Two-segment distribution</p>
       </div>
       <div className="relative" style={{ height: H + PAD.t + PAD.b }}>
-        <svg ref={svgRef} viewBox={`0 0 ${W + PAD.l + PAD.r} ${H + PAD.t + PAD.b}`} preserveAspectRatio="none" className="w-full h-full" onMouseLeave={() => setTooltip(null)}>
+        <svg ref={svgRef} viewBox={`0 0 ${W + PAD.l + PAD.r} ${H + PAD.t + PAD.b}`} preserveAspectRatio="xMidYMid meet" className="w-full h-full" onMouseLeave={() => setTooltip(null)}>
           {ticks.map(v => (
             <g key={v}>
               <line x1={PAD.l} x2={W+PAD.l} y1={yS(v)} y2={yS(v)} stroke="currentColor" strokeOpacity={0.07} strokeWidth={1} />
