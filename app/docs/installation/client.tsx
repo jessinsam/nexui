@@ -1,20 +1,9 @@
-import type { Metadata } from "next"
-import { InstallationClient } from "./client"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Installation",
-  description: "Install NexUI in your Next.js project. Copy components directly into your codebase — no package to install, no version conflicts.",
-  alternates: { canonical: "https://www.nexui.dev/docs/installation" },
-  openGraph: {
-    title: "Installation — NexUI",
-    description: "Install NexUI in your Next.js project. Copy components directly — no npm package needed.",
-    url: "https://www.nexui.dev/docs/installation",
-  },
-}
-
-export default function InstallationPage() {
-  return <InstallationClient />
-}
+import { useState } from "react"
+import Link from "next/link"
+import { Check, Copy, ArrowRight } from "@/components/nexui/icons"
+import { PackageManagerBlock } from "@/components/nexui/package-manager-block"
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false)
@@ -208,7 +197,7 @@ const steps = [
   },
 ]
 
-export default function InstallationPage() {
+export function InstallationClient() {
   const [active, setActive] = useState(0)
 
   return (
