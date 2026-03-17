@@ -6447,7 +6447,7 @@ function BottomTabBar() {
   )
 }
 
-// ── 7. Command Palette ────────────────────────────────────────────────────────
+// ── 7. Command Palette ──────────────────────────���─────────────────────────────
 const CMD_ITEMS = [
   { group: "Navigation", items: [
     { icon: <LayoutGrid size={13} />, label: "Go to Dashboard", shortcut: "G D" },
@@ -7705,10 +7705,19 @@ function WaterfallChartDemo() {
 // ── 14. Heatmap / Calendar Heatmap ───────────────────────────────────────────
 const HEATMAP_WEEKS = 16
 const HEATMAP_DAYS = 7
+// Deterministic seeded values — avoids SSR/client hydration mismatch from Math.random()
+const HEATMAP_SEED = [
+  7,11,4,14,0,0,3, 11,1,8,5,16,12,2, 3,14,17,13,1,2,4,
+  2,7,15,8,1,0,18, 12,0,6,3,8,8,4,  9,1,0,7,9,8,13,
+  14,3,2,12,13,0,14, 4,0,16,0,13,13, 3,4,10,3,0,13,7,
+  3,9,18,6,0,1,7,  14,3,0,9,18,15,14, 4,1,2,12,0,0,2,
+  0,6,6,5,13,4,2,   0,9,18,6,0,0,7,  14,3,1,5,17,2,4,
+  5,8,11,6,0,0,18,
+]
 const HEATMAP_DATA = Array.from({ length: HEATMAP_WEEKS * HEATMAP_DAYS }, (_, i) => ({
   week: Math.floor(i / HEATMAP_DAYS),
   day: i % HEATMAP_DAYS,
-  value: Math.floor(Math.pow(Math.random(), 1.5) * 20),
+  value: HEATMAP_SEED[i % HEATMAP_SEED.length],
 }))
 const HEAT_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const HEAT_MONTHS = ["Jan", "Mar", "May", "Jul"]
