@@ -201,7 +201,7 @@ export function AreaChart({ data, xKey, series, stacked = false, yFormatter = ni
 
         {/* Grid lines */}
         {yTicks.map((v) => (
-          <g key={v}>
+          <g key={`ytick-${v}`}>
             <line x1={PAD.l} x2={W + PAD.l} y1={yScale(v)} y2={yScale(v)} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
             <text x={PAD.l - 6} y={yScale(v)} textAnchor="end" dominantBaseline="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{yFormatter(v)}</text>
           </g>
@@ -209,7 +209,7 @@ export function AreaChart({ data, xKey, series, stacked = false, yFormatter = ni
 
         {/* X axis labels */}
         {data.map((row, i) => (
-          <text key={i} x={xScale(i)} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
+          <text key={`xlabel-${i}`} x={xScale(i)} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
         ))}
 
         {/* Areas (back to front) */}
@@ -329,14 +329,14 @@ export function BarChart({ data, xKey, series, stacked = false, horizontal = fal
           if (horizontal) {
             const x = xScale(v)
             return (
-              <g key={v}>
+              <g key={`htick-${v}`}>
                 <line x1={x} x2={x} y1={PAD.t} y2={H + PAD.t} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
                 <text x={x} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{yFormatter(v)}</text>
               </g>
             )
           }
           return (
-            <g key={v}>
+            <g key={`vtick-${v}`}>
               <line x1={PAD.l} x2={W + PAD.l} y1={yScale(v)} y2={yScale(v)} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
               <text x={PAD.l - 6} y={yScale(v)} textAnchor="end" dominantBaseline="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{yFormatter(v)}</text>
             </g>
@@ -347,9 +347,9 @@ export function BarChart({ data, xKey, series, stacked = false, horizontal = fal
         {data.map((row, i) => {
           if (horizontal) {
             const y = PAD.t + i * groupW + groupW / 2
-            return <text key={i} x={PAD.l - 6} y={y} textAnchor="end" dominantBaseline="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
+            return <text key={`hlabel-${i}`} x={PAD.l - 6} y={y} textAnchor="end" dominantBaseline="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
           }
-          return <text key={i} x={PAD.l + i * groupW + groupW / 2} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
+          return <text key={`vlabel-${i}`} x={PAD.l + i * groupW + groupW / 2} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
         })}
 
         {/* Bars */}
@@ -486,13 +486,13 @@ export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice
       >
         {/* Grid */}
         {yTicks.map((v) => (
-          <g key={v}>
+          <g key={`ytick-${v}`}>
             <line x1={PAD.l} x2={W + PAD.l} y1={yScale(v)} y2={yScale(v)} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
             <text x={PAD.l - 6} y={yScale(v)} textAnchor="end" dominantBaseline="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{yFormatter(v)}</text>
           </g>
         ))}
         {data.map((row, i) => (
-          <text key={i} x={xScale(i)} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
+          <text key={`xlabel-${i}`} x={xScale(i)} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{String(row[xKey])}</text>
         ))}
 
         {/* Reference line */}

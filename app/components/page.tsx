@@ -35,8 +35,8 @@ function Sidebar({
   counts: Record<string, number>
 }) {
   return (
-    <aside className="w-56 shrink-0 flex flex-col gap-1 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">
+    <aside className="w-48 shrink-0 flex flex-col gap-0.5 sticky top-16 self-start max-h-[calc(100vh-5rem)] overflow-y-auto pr-1">
+      <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground px-2.5 mb-1.5">
         Categories
       </p>
       {CATEGORIES.map((cat) => {
@@ -46,7 +46,7 @@ function Sidebar({
             key={cat}
             onClick={() => onCategory(cat)}
             className={cn(
-              "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left",
+              "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors w-full text-left",
               activeCategory === cat
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary"
@@ -55,7 +55,7 @@ function Sidebar({
             <span>{cat}</span>
             <span
               className={cn(
-                "text-[10px] font-mono px-1.5 py-0.5 rounded-md",
+                "text-[9px] font-mono px-1 py-0.5 rounded",
                 activeCategory === cat
                   ? "bg-primary/20 text-primary"
                   : "bg-secondary text-muted-foreground"
@@ -83,16 +83,16 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 flex flex-col">
+    <div className="rounded-lg border border-border bg-card hover:border-primary/30 transition-all duration-200 flex flex-col">
       {/* Card header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border gap-3 rounded-t-xl overflow-hidden">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="text-sm font-semibold text-foreground truncate">{comp.name}</span>
-          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border gap-2 rounded-t-lg overflow-hidden">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xs font-semibold text-foreground truncate">{comp.name}</span>
+          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0">
             {comp.category}
           </span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {comp.href && (
             <a
               href={comp.href}
@@ -101,45 +101,45 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
               aria-label={`View ${comp.name} full page`}
               className="hidden sm:flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              <ArrowUpRight size={13} aria-hidden="true" />
+              <ArrowUpRight size={12} aria-hidden="true" />
             </a>
           )}
-          <div className="flex items-center rounded-lg border border-border overflow-hidden bg-secondary">
+          <div className="flex items-center rounded-md border border-border overflow-hidden bg-secondary">
             <button
               onClick={() => setTab("preview")}
               aria-label="Show preview"
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1 px-2 py-1 text-[11px] font-medium transition-colors",
                 tab === "preview"
                   ? "bg-card text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Eye size={12} aria-hidden="true" />
+              <Eye size={11} aria-hidden="true" />
               <span className="hidden sm:inline">Preview</span>
             </button>
             <button
               onClick={() => setTab("code")}
               aria-label="Show code"
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1 px-2 py-1 text-[11px] font-medium transition-colors",
                 tab === "code"
                   ? "bg-card text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Code2 size={12} aria-hidden="true" />
+              <Code2 size={11} aria-hidden="true" />
               <span className="hidden sm:inline">Code</span>
             </button>
           </div>
           <button
             onClick={copy}
             aria-label={copied ? "Copied" : "Copy code"}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border bg-secondary text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-md border border-border bg-secondary text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             {copied
-              ? <Check size={12} aria-hidden="true" className="text-emerald-400" />
-              : <Copy size={12} aria-hidden="true" />}
+              ? <Check size={11} aria-hidden="true" className="text-emerald-400" />
+              : <Copy size={11} aria-hidden="true" />}
             <span className="hidden sm:inline">{copied ? "Copied!" : "Copy"}</span>
           </button>
         </div>
@@ -149,21 +149,21 @@ function ComponentCard({ comp }: { comp: ComponentEntry }) {
       {tab === "preview" ? (
         <div className={cn(
           "flex items-center justify-center bg-background/40 overflow-hidden",
-          comp.fullWidth ? "p-4 md:p-6" : "p-6 md:p-10"
+          comp.fullWidth ? "p-3 md:p-4" : "p-4 md:p-7"
         )}>
           <div className={cn("w-full", comp.fullWidth ? "max-w-full" : "max-w-xl")}>{comp.preview}</div>
         </div>
       ) : (
         <div className="relative bg-[var(--code-bg)]">
-          <pre className="overflow-x-auto p-5 text-xs font-mono leading-relaxed text-muted-foreground max-h-[480px] overflow-y-auto">
+          <pre className="overflow-x-auto p-4 text-[11px] font-mono leading-relaxed text-muted-foreground max-h-[420px] overflow-y-auto">
             <code>{comp.code}</code>
           </pre>
         </div>
       )}
 
       {/* Footer */}
-      <div className="px-4 py-2.5 border-t border-border rounded-b-xl overflow-hidden">
-        <p className="text-xs text-muted-foreground leading-relaxed">{comp.description}</p>
+      <div className="px-3 py-2 border-t border-border rounded-b-lg overflow-hidden">
+        <p className="text-[11px] text-muted-foreground leading-relaxed">{comp.description}</p>
       </div>
     </div>
   )
