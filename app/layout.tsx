@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { ScrollToTop } from '@/components/nexui/scroll-to-top'
 import './globals.css'
 
 const inter = Inter({
@@ -29,6 +30,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} dark`} suppressHydrationWarning>
       <body className="font-sans antialiased">
         {children}
+        <ScrollToTop />
         <Analytics />
       </body>
     </html>
