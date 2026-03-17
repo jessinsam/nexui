@@ -7940,15 +7940,13 @@ function HistogramChartDemo() {
         <p className="text-sm font-semibold text-foreground">Histogram</p>
         <p className="text-xs text-muted-foreground">Frequency distribution of 200 samples</p>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={HIST_DATA} barCategoryGap={2} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <Tooltip content={<ChartTip />} />
-          <Bar dataKey="count" name="Count" fill={C.primary} fillOpacity={0.65} radius={[3, 3, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+      <BarChart
+        data={HIST_DATA}
+        xKey="label"
+        series={[{ key: "count", label: "Count", color: C.primary }]}
+        height={220}
+        barGap={1}
+      />
     </div>
   )
 }
@@ -7967,24 +7965,26 @@ const S100_NORM = S100_DATA.map(d => {
 })
 
 function Stacked100BarDemo() {
+  const series = [
+    { key: "Design", label: "Design", color: C.primary   },
+    { key: "Dev",    label: "Dev",    color: C.secondary  },
+    { key: "QA",     label: "QA",     color: C.tertiary   },
+  ]
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">100% Stacked Bar</p>
         <p className="text-xs text-muted-foreground">Team effort distribution by quarter</p>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={S100_NORM} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="q" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} domain={[0, 100]} />
-          <Tooltip content={<ChartTip />} formatter={(v: any) => [`${v}%`]} />
-          <Bar dataKey="Design" name="Design" stackId="a" fill={C.primary}    fillOpacity={0.8} />
-          <Bar dataKey="Dev"    name="Dev"    stackId="a" fill={C.secondary}  fillOpacity={0.8} />
-          <Bar dataKey="QA"     name="QA"     stackId="a" fill={C.tertiary}   fillOpacity={0.8} radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-      <ChartLegRow items={[{ color: C.primary, label: "Design" }, { color: C.secondary, label: "Dev" }, { color: C.tertiary, label: "QA" }]} />
+      <BarChart
+        data={S100_NORM}
+        xKey="q"
+        series={series}
+        stacked
+        yFormatter={v => `${v}%`}
+        height={220}
+      />
+      <ChartLegend items={series} />
     </div>
   )
 }
@@ -8006,27 +8006,20 @@ const STEP_DATA = [
 ]
 
 function StepLineChartDemo() {
+  const series = [{ key: "price", label: "Price", color: C.quaternary }]
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Step Line Chart</p>
         <p className="text-xs text-muted-foreground">Dynamic pricing changes over 24 hours</p>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={STEP_DATA} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-          <defs>
-            <linearGradient id="stepFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={C.quaternary} stopOpacity={0.2} />
-              <stop offset="95%" stopColor={C.quaternary} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="t" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} interval={1} />
-          <YAxis tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} domain={[80, 140]} />
-          <Tooltip content={<ChartTip />} />
-          <Line type="stepAfter" dataKey="price" name="Price" stroke={C.quaternary} strokeWidth={2.5} dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
+      <LineChart
+        data={STEP_DATA}
+        xKey="t"
+        series={series}
+        step
+        height={220}
+      />
     </div>
   )
 }
@@ -8042,24 +8035,51 @@ const DUAL_DATA = [
 ]
 
 function DualAxisChartDemo() {
+  // Custom dual-axis: bars for rev (left scale) + line for users (right scale)
+  const [tooltip, setTooltip] = React.useState<{x:number;y:number;idx:number}|null>(null)
+  const svgRef = React.useRef<SVGSVGElement>(null)
+  const PAD = { t: 12, r: 44, b: 28, l: 44 }
+  const W = 560, H = 180
+  const maxRev = Math.max(...DUAL_DATA.map(d => d.rev)) * 1.15
+  const maxUsers = Math.max(...DUAL_DATA.map(d => d.users)) * 1.15
+  const n = DUAL_DATA.length
+  const gW = W / n
+  const bW = gW * 0.45
+  const xMid = (i: number) => PAD.l + i * gW + gW / 2
+  const yRev = (v: number) => PAD.t + H - (v / maxRev) * H
+  const yUsers = (v: number) => PAD.t + H - (v / maxUsers) * H
+  const linePts = DUAL_DATA.map((d, i) => [xMid(i), yUsers(d.users)] as [number, number])
+  const revTicks = [0, 0.5, 1].map(t => Math.round(maxRev * t))
+  const userTicks = [0, 0.5, 1].map(t => Math.round(maxUsers * t))
+  const legItems = [{ color: C.primary, label: "Revenue" }, { color: C.quaternary, label: "Active Users" }]
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Dual-Axis Chart</p>
         <p className="text-xs text-muted-foreground">Revenue (bars, left) vs Active users (line, right)</p>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
-        <ComposedChart data={DUAL_DATA} margin={{ top: 8, right: 32, left: -8, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="m" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="l" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
-          <YAxis yAxisId="r" orientation="right" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${(v/1000).toFixed(1)}k`} />
-          <Tooltip content={<ChartTip />} />
-          <Bar yAxisId="l" dataKey="rev" name="Revenue" fill={C.primary} fillOpacity={0.6} radius={[4, 4, 0, 0]} />
-          <Line yAxisId="r" type="monotone" dataKey="users" name="Users" stroke={C.quaternary} strokeWidth={2.5} dot={{ fill: C.quaternary, r: 3, strokeWidth: 0 }} />
-        </ComposedChart>
-      </ResponsiveContainer>
-      <ChartLegRow items={[{ color: C.primary, label: "Revenue" }, { color: C.quaternary, label: "Active Users" }]} />
+      <div className="relative" style={{ height: H + PAD.t + PAD.b }}>
+        <svg ref={svgRef} viewBox={`0 0 ${W + PAD.l + PAD.r} ${H + PAD.t + PAD.b}`} preserveAspectRatio="none" className="w-full h-full" onMouseLeave={() => setTooltip(null)}>
+          {revTicks.map(v => (
+            <g key={v}>
+              <line x1={PAD.l} x2={W + PAD.l} y1={yRev(v)} y2={yRev(v)} stroke="currentColor" strokeOpacity={0.07} strokeWidth={1} />
+              <text x={PAD.l - 5} y={yRev(v)} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="currentColor" fillOpacity={0.4}>${Math.round(v/1000)}k</text>
+            </g>
+          ))}
+          {userTicks.map((v, i) => (
+            <text key={i} x={W + PAD.l + 4} y={yUsers(v)} dominantBaseline="middle" fontSize={9} fill={C.quaternary} fillOpacity={0.6}>{(v/1000).toFixed(1)}k</text>
+          ))}
+          {DUAL_DATA.map((d, i) => (
+            <g key={i}>
+              <rect x={xMid(i) - bW / 2} y={yRev(d.rev)} width={bW} height={H - (yRev(d.rev) - PAD.t)} fill={C.primary} fillOpacity={0.65} rx={3} />
+              <text x={xMid(i)} y={H + PAD.t + 16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{d.m}</text>
+            </g>
+          ))}
+          <path d={linePts.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x} ${y}`).join(" ")} fill="none" stroke={C.quaternary} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          {linePts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={3.5} fill={C.quaternary} />)}
+        </svg>
+      </div>
+      <ChartLegend items={legItems} />
     </div>
   )
 }
@@ -8077,23 +8097,26 @@ const ROSE_DATA = [
 ]
 
 function RoseChartDemo() {
+  const series = [
+    { key: "A", label: "Season A", color: C.primary,   fillOpacity: 0.25 },
+    { key: "B", label: "Season B", color: C.secondary, fillOpacity: 0.20 },
+  ]
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Polar Area / Rose Chart</p>
         <p className="text-xs text-muted-foreground">Wind direction distribution (two datasets)</p>
       </div>
-      <ResponsiveContainer width="100%" height={260}>
-        <RadarChart data={ROSE_DATA} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
-          <PolarGrid stroke={C.border} />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: C.text, fontSize: 10, opacity: 0.6 }} />
-          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: C.text, fontSize: 8, opacity: 0.3 }} axisLine={false} />
-          <Radar name="Season A" dataKey="A" stroke={C.primary}   fill={C.primary}    fillOpacity={0.25} strokeWidth={2} />
-          <Radar name="Season B" dataKey="B" stroke={C.secondary} fill={C.secondary}  fillOpacity={0.2}  strokeWidth={2} />
-          <Tooltip content={<ChartTip />} />
-        </RadarChart>
-      </ResponsiveContainer>
-      <ChartLegRow items={[{ color: C.primary, label: "Season A" }, { color: C.secondary, label: "Season B" }]} />
+      <div className="flex justify-center">
+        <RadarChart
+          data={ROSE_DATA}
+          labelKey="subject"
+          series={series}
+          domain={[0, 100]}
+          size={260}
+        />
+      </div>
+      <ChartLegend items={series} />
     </div>
   )
 }
