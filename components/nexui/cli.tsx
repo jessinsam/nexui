@@ -153,16 +153,16 @@ export function CLI() {
         {/* Header */}
         <div className="mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">CLI</p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">
             One command away.
           </h2>
-          <p className="mt-3 text-muted-foreground max-w-xl leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
             The NexUI CLI initializes your project and pulls any component
             straight into your codebase. No registries, no runtime, no wrappers.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
 
           {/* Left: command picker + config */}
           <div className="flex flex-col gap-6">
@@ -186,8 +186,8 @@ export function CLI() {
                         aria-hidden="true"
                         className={cn(active === i ? "text-primary" : "text-muted-foreground")}
                       />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium font-mono">{cmd.title}</p>
+                    <div className="min-w-0 overflow-hidden">
+                        <p className="text-sm font-medium font-mono truncate">{cmd.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 leading-relaxed">
                           {cmd.description}
                         </p>
@@ -245,7 +245,7 @@ export function CLI() {
 
             {/* Comparison */}
             <div className="rounded-lg border border-border overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-border bg-background/60">
+              <div className="px-4 py-2.5 border-b border-border bg-background/60 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   CLI vs manual copy-paste
                 </p>
@@ -258,10 +258,10 @@ export function CLI() {
                   { label: "Dependency install", cli: "Auto (peer deps only)",   manual: "Manual" },
                   { label: "Works offline",      cli: "After first fetch",       manual: "Always" },
                 ].map((row) => (
-                  <div key={row.label} className="grid grid-cols-[1fr_1fr_1fr] text-xs">
-                    <span className="px-4 py-3 text-muted-foreground">{row.label}</span>
-                    <span className="px-4 py-3 text-primary font-mono border-x border-border">{row.cli}</span>
-                    <span className="px-4 py-3 text-muted-foreground">{row.manual}</span>
+                  <div key={row.label} className="flex flex-col sm:grid sm:grid-cols-[1fr_1fr_1fr] text-xs">
+                    <span className="px-4 pt-3 pb-1 sm:py-3 text-muted-foreground font-medium">{row.label}</span>
+                    <span className="px-4 pb-1 sm:py-3 text-primary font-mono sm:border-x sm:border-border">{row.cli}</span>
+                    <span className="px-4 pb-3 sm:py-3 text-muted-foreground hidden sm:block">{row.manual}</span>
                   </div>
                 ))}
               </div>
