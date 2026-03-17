@@ -11,11 +11,10 @@ import {
   Bot,
   User as UserIcon,
   LayoutGrid,
-  List,
+  ListIcon,
   Table,
   Kanban,
   TrendingUp,
-  BarChart,
 } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
@@ -182,7 +181,7 @@ type DataViewMode = "kanban" | "cards" | "list" | "table"
 const VIEW_TABS: { id: DataViewMode; icon: React.ReactNode; label: string }[] = [
   { id: "kanban", icon: <Kanban size={11} />,      label: "Kanban" },
   { id: "cards",  icon: <LayoutGrid size={11} />,  label: "Cards"  },
-  { id: "list",   icon: <List size={11} />,         label: "List"   },
+  { id: "list",   icon: <ListIcon size={11} />,    label: "List"   },
   { id: "table",  icon: <Table size={11} />,        label: "Table"  },
 ]
 
@@ -328,7 +327,7 @@ function ChartsPreview() {
             type === "bar" ? "bg-background text-foreground shadow-sm border border-border/50" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          <BarChart size={11} aria-hidden="true" /> Bar
+          <LayoutGrid size={11} aria-hidden="true" /> Bar
         </button>
         <button
           onClick={() => setType("line")}
