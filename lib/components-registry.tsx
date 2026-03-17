@@ -6411,35 +6411,36 @@ function BottomTabBar() {
           style={{ height: 64, gridTemplateColumns: "repeat(5, 1fr)" }}
           aria-label="Bottom navigation"
         >
-          {BOTTOM_TABS.map(tab => (
-            <button
-              key={tab.label}
-              onClick={() => setActive(tab.label)}
-              aria-label={tab.label}
-              aria-current={active === tab.label ? "page" : undefined}
-              className={cn(
-                "relative flex flex-col items-center justify-center gap-1 transition-colors",
-                active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {/* Active indicator — pinned to top center */}
-              {active === tab.label && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[2px] rounded-full bg-primary" />
-              )}
-              {/* Icon wrapper — fixed size so badge never shifts the icon */}
-              <span className="relative flex items-center justify-center w-6 h-6">
-                {tab.icon}
-                {tab.badge && (
-                  <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 rounded-full bg-rose-400 border border-card text-[8px] font-bold text-white flex items-center justify-center px-0.5">
-                    {tab.badge}
-                  </span>
+          {BOTTOM_TABS.map(tab => {
+            const isActive = active === tab.label
+            return (
+              <button
+                key={tab.label}
+                onClick={() => setActive(tab.label)}
+                aria-label={tab.label}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 pt-1.5 pb-1 transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
-              </span>
-              <span className="text-[9px] font-medium leading-none">
-                {tab.label}
-              </span>
-            </button>
-          ))}
+              >
+                {/* Active indicator — rendered in flow, centered by items-center */}
+                <span className={cn("w-6 h-[2px] rounded-full -mb-0.5", isActive ? "bg-primary" : "bg-transparent")} />
+                {/* Icon wrapper — fixed size so badge doesn't shift icon */}
+                <span className="relative flex items-center justify-center w-6 h-6">
+                  {tab.icon}
+                  {tab.badge && (
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 rounded-full bg-rose-400 border border-card text-[8px] font-bold text-white flex items-center justify-center px-0.5">
+                      {tab.badge}
+                    </span>
+                  )}
+                </span>
+                <span className="text-[9px] font-medium leading-none">
+                  {tab.label}
+                </span>
+              </button>
+            )
+          })}
         </nav>
       </div>
     </div>
@@ -7980,7 +7981,7 @@ function Stacked100BarDemo() {
   )
 }
 
-// ── 19. Step / Staircase Line Chart ────────────────────���─────────────────────
+// ── 19. Step / Staircase Line Chart ───��────────────────���─────────────────────
 const STEP_DATA = [
   { t: "00:00", price: 100 },
   { t: "04:00", price: 100 },
