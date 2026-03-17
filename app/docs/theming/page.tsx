@@ -2,8 +2,14 @@ import Link from "next/link"
 import { ArrowRight } from "@/components/nexui/icons"
 
 export const metadata = {
-  title: "Theming — NexUI",
-  description: "Customise NexUI colours, fonts, and radius with CSS variables.",
+  title: "Theming",
+  description: "Customise NexUI colours, fonts, and border radius with CSS variables. Full OKLCH colour system with dark mode out of the box.",
+  alternates: { canonical: "https://www.nexui.dev/docs/theming" },
+  openGraph: {
+    title: "Theming — NexUI",
+    description: "Customise NexUI colours, fonts, and border radius with CSS variables.",
+    url: "https://www.nexui.dev/docs/theming",
+  },
 }
 
 const cssVarsCode = `/* globals.css */

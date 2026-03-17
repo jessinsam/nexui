@@ -2,8 +2,14 @@ import Link from "next/link"
 import { ArrowRight } from "@/components/nexui/icons"
 
 export const metadata = {
-  title: "CLI — NexUI",
-  description: "Use the NexUI CLI to add components to your project automatically.",
+  title: "CLI",
+  description: "Use the NexUI CLI to initialise your project and add components automatically. Works with npm, pnpm, yarn, and bun.",
+  alternates: { canonical: "https://www.nexui.dev/docs/cli" },
+  openGraph: {
+    title: "CLI — NexUI",
+    description: "Use the NexUI CLI to initialise your project and add components automatically.",
+    url: "https://www.nexui.dev/docs/cli",
+  },
 }
 
 const initOutput = [

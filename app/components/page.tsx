@@ -1,5 +1,19 @@
 "use client"
 
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Components",
+  description: "Browse 50+ hand-crafted, accessible React components built with Tailwind CSS. Copy-paste into your project. No npm install required.",
+  alternates: { canonical: "https://www.nexui.dev/components" },
+  openGraph: {
+    title: "Components — NexUI",
+    description: "Browse 50+ hand-crafted, accessible React components built with Tailwind CSS.",
+    url: "https://www.nexui.dev/components",
+  },
+}
+
+
 import { useState, useMemo, Suspense, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"

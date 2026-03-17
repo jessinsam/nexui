@@ -2,8 +2,14 @@ import Link from "next/link"
 import { ArrowRight } from "@/components/nexui/icons"
 
 export const metadata = {
-  title: "Introduction — NexUI",
-  description: "NexUI is a collection of hand-crafted, accessible components inspired by the shadcn/ui copy-paste philosophy.",
+  title: "Introduction",
+  description: "NexUI is a collection of hand-crafted, accessible React components inspired by the shadcn/ui copy-paste philosophy. No npm install — copy the code and own it.",
+  alternates: { canonical: "https://www.nexui.dev/docs" },
+  openGraph: {
+    title: "Introduction — NexUI",
+    description: "NexUI is a collection of hand-crafted, accessible React components. Copy-paste into your project and own every line.",
+    url: "https://www.nexui.dev/docs",
+  },
 }
 
 export default function DocsPage() {
