@@ -1,10 +1,10 @@
 export function Footer() {
   return (
-    <footer className="border-t border-border py-16 px-6">
+    <footer className="border-t border-border py-12 sm:py-16 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-[1fr_auto_auto_auto] gap-10 md:gap-16">
-          {/* Brand */}
-          <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-[1fr_auto_auto_auto] gap-8 sm:gap-10 md:gap-16">
+          {/* Brand — spans full width on mobile */}
+          <div className="col-span-2 sm:col-span-2 md:col-span-1 flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">

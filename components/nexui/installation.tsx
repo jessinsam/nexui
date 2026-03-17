@@ -126,78 +126,98 @@ export function Installation() {
   const [active, setActive] = useState(0)
 
   return (
-    <section id="installation" className="py-24 px-6 border-t border-border">
+    <section id="installation" className="py-16 sm:py-24 px-4 sm:px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="mb-14">
+        <div className="mb-10 sm:mb-14">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">
             Installation
           </p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">
             Up and running in minutes.
           </h2>
-          <p className="mt-3 text-muted-foreground max-w-xl leading-relaxed">
+          <p className="mt-3 text-muted-foreground max-w-xl leading-relaxed text-sm sm:text-base">
             Inspired by the shadcn/ui copy-paste model — no package to install,
             no version conflicts. Initialize once, then add exactly the components
             you need.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-[260px_1fr] gap-8 items-start">
-          {/* Step sidebar */}
+        {/* Mobile: horizontal step tabs; Desktop: sidebar + content */}
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-[260px_1fr] md:gap-8 md:items-start">
+          {/* Step navigation — horizontal scroll on mobile, vertical list on desktop */}
           <div className="flex flex-col gap-1">
-            {STEPS.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => setActive(i)}
-                className={cn(
-                  "text-left px-4 py-3 rounded-lg border transition-all",
-                  active === i
-                    ? "border-primary/40 bg-primary/10 text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={cn(
-                      "text-xs font-mono font-semibold tabular-nums",
-                      active === i ? "text-primary" : "text-muted-foreground"
-                    )}
-                  >
+            {/* Mobile tab strip */}
+            <div className="flex md:hidden gap-1 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+              {STEPS.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium whitespace-nowrap shrink-0 transition-all",
+                    active === i
+                      ? "border-primary/40 bg-primary/10 text-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  <span className={cn("text-xs font-mono font-semibold", active === i ? "text-primary" : "text-muted-foreground")}>
                     {s.step}
                   </span>
-                  <span className="text-sm font-medium">{s.title}</span>
-                </div>
-              </button>
-            ))}
+                  {s.title}
+                </button>
+              ))}
+            </div>
 
-            {/* Framework support table */}
-            <div className="mt-6 rounded-lg border border-border overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-border bg-background/60">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Framework support
-                </p>
-              </div>
-              <div className="divide-y divide-border">
-                {FRAMEWORKS.map((f) => (
-                  <div key={f.name} className="flex items-center justify-between px-4 py-2.5">
-                    <div>
-                      <p className="text-xs font-medium text-foreground">{f.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{f.note}</p>
-                    </div>
-                    <span
-                      className={cn(
-                        "text-[10px] font-medium px-2 py-0.5 rounded-full",
-                        f.status === "Supported"
-                          ? "bg-green-500/10 text-green-500"
-                          : "bg-yellow-500/10 text-yellow-500"
-                      )}
-                    >
-                      {f.status}
+            {/* Desktop sidebar list */}
+            <div className="hidden md:flex flex-col gap-1">
+              {STEPS.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  className={cn(
+                    "text-left px-4 py-3 rounded-lg border transition-all",
+                    active === i
+                      ? "border-primary/40 bg-primary/10 text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={cn("text-xs font-mono font-semibold tabular-nums", active === i ? "text-primary" : "text-muted-foreground")}>
+                      {s.step}
                     </span>
+                    <span className="text-sm font-medium">{s.title}</span>
                   </div>
-                ))}
+                </button>
+              ))}
+
+              {/* Framework support table — desktop only */}
+              <div className="mt-6 rounded-lg border border-border overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-border bg-background/60">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Framework support
+                  </p>
+                </div>
+                <div className="divide-y divide-border">
+                  {FRAMEWORKS.map((f) => (
+                    <div key={f.name} className="flex items-center justify-between px-4 py-2.5">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{f.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{f.note}</p>
+                      </div>
+                      <span
+                        className={cn(
+                          "text-[10px] font-medium px-2 py-0.5 rounded-full",
+                          f.status === "Supported"
+                            ? "bg-green-500/10 text-green-500"
+                            : "bg-yellow-500/10 text-yellow-500"
+                        )}
+                      >
+                        {f.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

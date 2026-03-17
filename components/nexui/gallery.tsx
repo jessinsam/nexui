@@ -24,7 +24,7 @@ function AuthPreview() {
   const [showPw, setShowPw] = useState(false)
   const [email, setEmail] = useState("")
   return (
-    <div className="w-full max-w-[280px] flex flex-col gap-2.5 text-left">
+    <div className="w-full max-w-[280px] mx-auto flex flex-col gap-2.5 text-left">
       <div className="mb-0.5">
         <p className="text-sm font-semibold text-foreground">Welcome back</p>
         <p className="text-xs text-muted-foreground">Sign in to your account</p>
@@ -95,7 +95,7 @@ function ChatPreview() {
   }
 
   return (
-    <div className="w-full max-w-[300px] flex flex-col rounded-xl border border-border bg-card overflow-hidden" style={{ height: 260 }}>
+    <div className="w-full max-w-[300px] mx-auto flex flex-col rounded-xl border border-border bg-card overflow-hidden" style={{ height: 260 }}>
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-secondary/40 shrink-0">
         <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
@@ -466,13 +466,13 @@ const SHOWCASE_ITEMS = [
 
 export function Gallery() {
   return (
-    <section id="components" className="py-20 px-6 border-t border-border">
+    <section id="components" className="py-14 sm:py-20 px-4 sm:px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-8 sm:mb-10">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Component Showcase</p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">
             Everything you need.
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed text-sm">
@@ -481,21 +481,21 @@ export function Gallery() {
         </div>
 
         {/* Showcase grid */}
-        <div className="grid sm:grid-cols-2 gap-5">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
           {SHOWCASE_ITEMS.map((item) => (
             <div
               key={item.name}
               className="group rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden flex flex-col"
             >
               {/* Preview */}
-              <div className="flex-1 flex items-center justify-center p-5 bg-background/40 min-h-[200px]">
+              <div className="flex-1 flex items-center justify-center p-4 sm:p-5 bg-background/40 min-h-[200px] overflow-x-auto">
                 {item.preview}
               </div>
 
               {/* Info */}
               <div className="px-4 py-3 border-t border-border flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <span className="text-sm font-semibold text-foreground">{item.name}</span>
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                       {item.tag}
@@ -509,7 +509,7 @@ export function Gallery() {
         </div>
 
         {/* Explore more */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-border bg-secondary/30 px-6 py-5">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-border bg-secondary/30 px-5 sm:px-6 py-5">
           <div>
             <p className="text-sm font-semibold text-foreground">Explore all components</p>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -518,7 +518,7 @@ export function Gallery() {
           </div>
           <a
             href="/components"
-            className="flex items-center gap-2 shrink-0 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-2 shrink-0 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors w-full sm:w-auto justify-center"
           >
             Browse components <ChevronRight size={14} aria-hidden="true" />
           </a>

@@ -2,7 +2,7 @@ import { ArrowRight, Star, Zap, Code2, Package } from "@/components/nexui/icons"
 
 export function Hero() {
   return (
-    <section className="relative pt-36 pb-28 px-6 overflow-hidden">
+    <section className="relative pt-24 sm:pt-32 md:pt-36 pb-16 sm:pb-20 md:pb-28 px-4 sm:px-6 overflow-hidden">
       {/* grid overlay */}
       <div
         aria-hidden="true"
@@ -30,13 +30,13 @@ export function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl md:text-7xl font-semibold leading-tight tracking-tight text-balance text-foreground">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold leading-tight tracking-tight text-balance text-foreground">
           UI components,{" "}
           <span className="text-primary">fully yours.</span>
         </h1>
 
         {/* Sub */}
-        <p className="text-lg md:text-xl text-muted-foreground max-w-xl text-balance leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl text-balance leading-relaxed px-2 sm:px-0">
           NexUI is a collection of hand-crafted, accessible components built with pure Tailwind CSS and React — inspired by the shadcn/ui copy-paste philosophy. Copy the code and own every pixel.
         </p>
 
@@ -58,7 +58,7 @@ export function Hero() {
         </div>
 
         {/* Stats row */}
-        <div className="flex flex-wrap justify-center gap-8 pt-4">
+        <div className="flex flex-wrap justify-center gap-6 sm:gap-8 pt-4">
           {[
             { value: "50+",  label: "Components" },
             { value: "0 KB", label: "Bundle size" },
@@ -66,15 +66,15 @@ export function Hero() {
             { value: "MIT",  label: "License" },
           ].map((s) => (
             <div key={s.label} className="flex flex-col items-center gap-0.5">
-              <span className="text-2xl font-semibold text-foreground">{s.value}</span>
-              <span className="text-xs text-muted-foreground uppercase tracking-widest">{s.label}</span>
+              <span className="text-xl sm:text-2xl font-semibold text-foreground">{s.value}</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest">{s.label}</span>
             </div>
           ))}
         </div>
 
         {/* Code preview */}
-        <div className="w-full mt-6 rounded-xl border border-border bg-card overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background/50">
+        <div className="w-full mt-4 sm:mt-6 rounded-xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-3 border-b border-border bg-background/50">
             <div className="w-3 h-3 rounded-full bg-border" />
             <div className="w-3 h-3 rounded-full bg-border" />
             <div className="w-3 h-3 rounded-full bg-border" />
@@ -83,7 +83,7 @@ export function Hero() {
               www.nexui.dev
             </span>
           </div>
-          <pre className="text-left overflow-x-auto p-6 text-sm font-mono leading-relaxed bg-[var(--code-bg)]">
+          <pre className="text-left overflow-x-auto p-4 sm:p-6 text-xs sm:text-sm font-mono leading-relaxed bg-[var(--code-bg)]">
             <code>
               <span className="text-muted-foreground">{"# 1. Initialize (once per project)\n"}</span>
               <span className="text-foreground">{"$ "}</span>
@@ -106,16 +106,16 @@ export function Hero() {
               <span className="text-[oklch(0.75_0.18_85)]">{'"@/components/ui/button"'}</span>
             </code>
           </pre>
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-background/50">
-            <span className="text-xs text-muted-foreground font-mono">github.com/jessinsam/nexui</span>
-            <div className="flex items-center gap-3">
-              <button className="text-xs px-4 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-border bg-background/50">
+            <span className="text-xs text-muted-foreground font-mono hidden sm:inline">github.com/jessinsam/nexui</span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button className="text-xs px-3 sm:px-4 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">
                 Default
               </button>
-              <button className="text-xs px-4 py-1.5 rounded-md border border-border text-foreground hover:bg-secondary transition-colors font-medium">
+              <button className="text-xs px-3 sm:px-4 py-1.5 rounded-md border border-border text-foreground hover:bg-secondary transition-colors font-medium">
                 Outline
               </button>
-              <button className="text-xs px-4 py-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium">
+              <button className="text-xs px-3 sm:px-4 py-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium">
                 Ghost
               </button>
             </div>

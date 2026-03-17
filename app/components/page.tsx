@@ -274,7 +274,7 @@ export default function ComponentsPage() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Fixed header — always renders immediately */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="NexUI home">
             <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -388,11 +388,11 @@ export default function ComponentsPage() {
       )}
 
       {/* Page body */}
-      <div className="max-w-7xl mx-auto px-6 pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-16 sm:pb-20">
         {/* Above-the-fold header — always paints first */}
-        <div className="mb-10">
+        <div className="mb-8 sm:mb-10">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Library</p>
-          <h1 className="text-3xl md:text-4xl font-semibold text-foreground text-balance">Components</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground text-balance">Components</h1>
           <p className="mt-2 text-muted-foreground max-w-lg leading-relaxed text-sm">
             {COMPONENTS.length} accessible, dark-mode-ready components built with Tailwind CSS. Copy the code and own it.
           </p>
