@@ -11,11 +11,11 @@ import { ChartLegend, AreaChart, BarChart, LineChart, PieChart, RadarChart, Radi
 
 function ButtonPreview() {
   return (
-    <div className="flex flex-wrap gap-2">
-      <button className="text-xs px-4 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">Default</button>
-      <button className="text-xs px-4 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors font-medium">Secondary</button>
-      <button className="text-xs px-4 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary transition-colors font-medium">Outline</button>
-      <button className="text-xs px-4 py-1.5 rounded-lg bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-colors font-medium">Destructive</button>
+    <div className="flex flex-wrap gap-2 items-center">
+      <button className="text-xs px-4 py-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">Default</button>
+      <button className="text-xs px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 transition-colors font-medium">Secondary</button>
+      <button className="text-xs px-4 py-1.5 rounded-full border border-border bg-transparent text-foreground hover:bg-secondary transition-colors font-medium">Outline</button>
+      <button className="text-xs px-4 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/40 hover:bg-destructive/25 transition-colors font-medium">Destructive</button>
     </div>
   )
 }
@@ -7591,7 +7591,7 @@ const CHARTS_REGISTRY: ComponentEntry[] = [
 
 COMPONENTS.push(...CHARTS_REGISTRY)
 
-// ���── Advanced Charts (custom — no shadcn, pure Recharts + SVG) ───────────────
+// ���─��� Advanced Charts (custom — no shadcn, pure Recharts + SVG) ───────────────
 
 // Shared custom tooltip ────────────────────────────────────────────────────────
 function ChartTip({ active, payload, label }: any) {
