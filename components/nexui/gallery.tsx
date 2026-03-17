@@ -24,7 +24,7 @@ function AuthPreview() {
   const [showPw, setShowPw] = useState(false)
   const [email, setEmail] = useState("")
   return (
-    <div className="w-full max-w-[280px] mx-auto flex flex-col gap-2.5 text-left">
+    <div className="w-full flex flex-col gap-2.5 text-left">
       <div className="mb-0.5">
         <p className="text-sm font-semibold text-foreground">Welcome back</p>
         <p className="text-xs text-muted-foreground">Sign in to your account</p>
