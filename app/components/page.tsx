@@ -390,7 +390,7 @@ export default function ComponentsPage() {
             {/* Scroll anchor — category clicks jump here */}
             <div ref={gridTopRef} style={{ scrollMarginTop: "5rem" }} />
             {/* Meta row — lightweight, outside the Suspense boundary */}
-            <div className="flex items-center justify-between mb-5">
+            <div id="component-grid-top" className="flex items-center justify-between mb-5">
               <p className="text-sm text-muted-foreground">
                 {filtered.length === 0
                   ? "No components found"
