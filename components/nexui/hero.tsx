@@ -26,7 +26,7 @@ export function Hero() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 text-primary text-xs px-3 py-1 rounded-full font-medium">
           <Star size={10} strokeWidth={2.5} aria-hidden="true" />
-          Inspired by shadcn/ui — built entirely from scratch. Just your code.
+          Inspired by shadcn/ui — built from scratch. Own every line.
         </div>
 
         {/* Headline */}
@@ -37,7 +37,7 @@ export function Hero() {
 
         {/* Sub */}
         <p className="text-lg md:text-xl text-muted-foreground max-w-xl text-balance leading-relaxed">
-          NexUI is a collection of hand-crafted, accessible components built with pure Tailwind CSS and React. Inspired by shadcn/ui — copy the code and own every pixel.
+          NexUI is a collection of hand-crafted, accessible components built with pure Tailwind CSS and React — inspired by the shadcn/ui copy-paste philosophy. Copy the code and own every pixel.
         </p>
 
         {/* Actions */}
@@ -123,7 +123,7 @@ export function Hero() {
             {
               icon: <Code2 size={14} aria-hidden="true" className="text-primary" />,
               title: "Inspired by shadcn/ui",
-              body: "Every component is written from scratch in the spirit of shadcn/ui — copy-paste ownership, no hidden wrappers. Pure HTML, Tailwind CSS, and React state.",
+              body: "Built in the same spirit as shadcn/ui — copy-paste ownership, zero hidden wrappers. Pure HTML, Tailwind CSS, and React state you can read and modify.",
             },
             {
               icon: <Package size={14} aria-hidden="true" className="text-primary" />,
