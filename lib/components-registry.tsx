@@ -6408,7 +6408,7 @@ function BottomTabBar() {
         {/* Tab bar */}
         <nav
           className="shrink-0 grid border-t border-border bg-card/95"
-          style={{ height: 60, gridTemplateColumns: "repeat(5, 1fr)" }}
+          style={{ height: 64, gridTemplateColumns: "repeat(5, 1fr)" }}
           aria-label="Bottom navigation"
         >
           {BOTTOM_TABS.map(tab => (
@@ -6418,22 +6418,24 @@ function BottomTabBar() {
               aria-label={tab.label}
               aria-current={active === tab.label ? "page" : undefined}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-0.5 transition-colors overflow-hidden",
+                "relative flex flex-col items-center justify-center gap-1 transition-colors",
                 active === tab.label ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
+              {/* Active indicator — pinned to top center */}
               {active === tab.label && (
                 <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[2px] rounded-full bg-primary" />
               )}
-              {tab.badge ? (
-                <span className="relative inline-flex shrink-0">
-                  {tab.icon}
-                  <span className="absolute -top-1.5 -right-2 size-4 rounded-full bg-rose-400 border-2 border-card text-[8px] font-bold text-white flex items-center justify-center">
+              {/* Icon wrapper — fixed size so badge never shifts the icon */}
+              <span className="relative flex items-center justify-center w-6 h-6">
+                {tab.icon}
+                {tab.badge && (
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 rounded-full bg-rose-400 border border-card text-[8px] font-bold text-white flex items-center justify-center px-0.5">
                     {tab.badge}
                   </span>
-                </span>
-              ) : <span className="shrink-0">{tab.icon}</span>}
-              <span className="text-[10px] font-medium leading-none truncate w-full text-center px-0.5">
+                )}
+              </span>
+              <span className="text-[9px] font-medium leading-none">
                 {tab.label}
               </span>
             </button>
