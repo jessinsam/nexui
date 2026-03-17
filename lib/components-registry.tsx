@@ -257,7 +257,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function SignInFull() {
+export function SignInFull() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   return (

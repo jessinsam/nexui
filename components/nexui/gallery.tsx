@@ -1,7 +1,7 @@
 "use client"
 
 import { ChevronRight } from "@/components/nexui/icons"
-import { SignIn } from "@/lib/components-registry"
+import { SignInFull } from "@/lib/components-registry"
 
 // ─── Gallery section ──────────────────────────────────────────────────────────
 
@@ -22,9 +22,9 @@ export function Gallery() {
           </p>
         </div>
 
-        {/* Auth showcase — real SignIn component */}
+        {/* Auth showcase — real SignInFull component with image */}
         <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden">
-          <SignIn />
+          <SignInFull />
 
           {/* Info footer */}
           <div className="px-5 py-4 border-t border-border flex flex-col sm:flex-row sm:items-center gap-3">
