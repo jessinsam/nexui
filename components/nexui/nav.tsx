@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X } from "@/components/nexui/icons"
 
 const links = [
   { label: "Components", href: "/components" },

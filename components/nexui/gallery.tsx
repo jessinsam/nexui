@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowUpRight, Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2 } from "lucide-react"
+import { ArrowUpRight, Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2 } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 // ---- Mini component previews ----

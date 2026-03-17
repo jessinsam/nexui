@@ -1,4 +1,4 @@
-import { ArrowRight, Star, Zap, Code2, Package } from "lucide-react"
+import { ArrowRight, Star, Zap, Code2, Package } from "@/components/nexui/icons"
 
 export function Hero() {
   return (

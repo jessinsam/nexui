@@ -1,8 +1,8 @@
 "use client"
 
-// icons: lucide-react@0.564
+
 import React, { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign } from "lucide-react"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, ListIcon, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign } from "@/components/nexui/icons"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
@@ -2213,7 +2213,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: "Sign In", description: "Email + password login with GitHub OAuth and show/hide password toggle.", category: "Auth", tags: ["auth", "login", "form", "password", "github"], href: "/sign-in", fullWidth: true, preview: <SignInFull />,
     code: `"use client"
 import { useState } from "react"
-import { Eye, EyeOff, ArrowRight, Github } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, Github } from "@/components/nexui/icons"
 
 export function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
@@ -2262,7 +2262,7 @@ export function SignIn() {
     name: "Sign Up", description: "Registration form with name fields, email, and live password strength hints.", category: "Auth", tags: ["auth", "register", "form", "password"], href: "/sign-up", fullWidth: true, preview: <SignUpFull />,
     code: `"use client"
 import { useState } from "react"
-import { Eye, EyeOff, ArrowRight, Github, Check } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, Github, Check } from "@/components/nexui/icons"
 
 const rules = [
   { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
@@ -2333,7 +2333,7 @@ export function SignUp() {
     name: "Create Account", description: "Two-step flow: account type picker then profile details.", category: "Auth", tags: ["auth", "onboarding", "stepper", "form"], href: "/create-account", fullWidth: true, preview: <CreateAccountFull />,
     code: `"use client"
 import { useState } from "react"
-import { ArrowRight, Github, Building2, User, Code2 } from "lucide-react"
+import { ArrowRight, Github, Building2, User, Code2 } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const types = [
@@ -2399,7 +2399,7 @@ export function CreateAccount() {
     name: "Calendar — Basic", description: "Single date picker with month navigation and today indicator.", category: "Calendar", tags: ["calendar", "date", "picker", "datepicker"], fullWidth: true, preview: <CalendarBasic />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
@@ -2458,7 +2458,7 @@ export function CalendarBasic() {
     name: "Calendar — Range", description: "Select a start and end date with an interactive range highlight.", category: "Calendar", tags: ["calendar", "range", "date", "picker", "from", "to"], fullWidth: true, preview: <CalendarRange />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
@@ -2533,7 +2533,7 @@ export function CalendarRange() {
     name: "Calendar — With Events", description: "Monthly view with colour-coded event dots and a day detail panel.", category: "Calendar", tags: ["calendar", "events", "schedule", "dots"], fullWidth: true, preview: <CalendarWithEvents />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
@@ -2611,7 +2611,7 @@ export function CalendarWithEvents() {
     name: "Calendar �� Mini", description: "Compact inline calendar paired with an upcoming events list.", category: "Calendar", tags: ["calendar", "mini", "inline", "compact", "events"], fullWidth: true, preview: <CalendarMini />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
@@ -2683,7 +2683,7 @@ export function CalendarMini() {
     name: "Calendar — Time Picker", description: "Date picker combined with an AM/PM hour and minute roller.", category: "Calendar", tags: ["calendar", "time", "datetime", "picker", "schedule"], fullWidth: true, preview: <CalendarTimePicker />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, Clock } from "lucide-react"
+import { ChevronLeft, ChevronRight, Clock } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
@@ -2768,7 +2768,7 @@ export function CalendarTimePicker() {
     name: "Calendar — Booking", description: "Date selector with available time slots and a confirm booking flow.", category: "Calendar", tags: ["calendar", "booking", "slots", "availability", "schedule"], fullWidth: true, preview: <CalendarBooking />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, CalendarDays, Check, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, CalendarDays, Check, X } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const DAYS = ["Su","Mo","Tu","We","Th","Fr","Sa"]
@@ -2855,7 +2855,7 @@ export function CalendarBooking() {
     name: "Dropdown — Basic", description: "Single-select dropdown with a solid primary background on the selected item and a left-aligned checkmark — matching the macOS-native style.", category: "Dropdown", tags: ["dropdown", "select", "menu", "picker"], fullWidth: true, preview: <DropdownBasic />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronDown, Check } from "lucide-react"
+import { ChevronDown, Check } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const options = ["Next.js", "Remix", "Astro", "SvelteKit"]
@@ -2905,7 +2905,7 @@ export function Dropdown() {
     name: "Dropdown — Searchable", description: "Dropdown with a live search input to filter a long list of options.", category: "Dropdown", tags: ["dropdown", "search", "filter", "combobox"], fullWidth: true, preview: <DropdownSearch />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronDown, Check, Search } from "lucide-react"
+import { ChevronDown, Check, Search } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const options = ["TypeScript", "JavaScript", "Python", "Rust", "Go", "Swift", "Kotlin", "C++"]
@@ -2958,7 +2958,7 @@ export function DropdownSearch() {
     name: "Dropdown — Multi-select", description: "Select multiple options with checkboxes and removable chip badges.", category: "Dropdown", tags: ["dropdown", "multi", "multiselect", "checkbox", "chips"], fullWidth: true, preview: <DropdownMulti />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronDown, Check, X } from "lucide-react"
+import { ChevronDown, Check, X } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const options = ["UI Design", "Frontend", "Backend", "DevOps", "Mobile", "Data Science"]
@@ -3012,7 +3012,7 @@ export function DropdownMulti() {
     name: "Dropdown — With Icons", description: "Rich dropdown with icon, title, and subtitle per option — great for framework or service pickers.", category: "Dropdown", tags: ["dropdown", "icons", "rich", "select", "picker"], fullWidth: true, preview: <DropdownWithIcons />,
     code: `"use client"
 import { useState } from "react"
-import { ChevronDown, Check, Globe, Layers, Zap, Server } from "lucide-react"
+import { ChevronDown, Check, Globe, Layers, Zap, Server } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const options = [
@@ -3071,7 +3071,7 @@ export function DropdownWithIcons() {
     name: "Search — Basic", description: "Clean animated search bar with a glowing ring focus state and animated clear button.", category: "Search", tags: ["search", "input", "focus", "animated"], fullWidth: true, preview: <SearchBarBasic />,
     code: `"use client"
 import { useState } from "react"
-import { Search, X } from "lucide-react"
+import { Search, X } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 export function SearchBar() {
@@ -3102,7 +3102,7 @@ export function SearchBar() {
     name: "Search — Command", description: "Command palette style search bar with ⌘K keyboard shortcut badge.", category: "Search", tags: ["search", "command", "keyboard", "palette"], fullWidth: true, preview: <SearchBarCommand />,
     code: `"use client"
 import { useState } from "react"
-import { Command } from "lucide-react"
+import { Command } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 export function CommandSearch() {
@@ -3132,7 +3132,7 @@ export function CommandSearch() {
     name: "Search — With Suggestions", description: "Animated suggestions dropdown that appears on focus with live filtering.", category: "Search", tags: ["search", "suggestions", "autocomplete", "dropdown", "animated"], fullWidth: true, preview: <SearchBarWithSuggestions />,
     code: `"use client"
 import { useState } from "react"
-import { Search, X } from "lucide-react"
+import { Search, X } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const suggestions = ["Next.js App Router","Tailwind CSS v4","React Server Components","TypeScript 5.4","Vercel Edge Functions"]
@@ -3173,7 +3173,7 @@ export function SearchWithSuggestions() {
     name: "Search — With Filters", description: "Search bar with animated filter pill tabs to scope the search query.", category: "Search", tags: ["search", "filter", "tabs", "animated"], fullWidth: true, preview: <SearchBarWithFilters />,
     code: `"use client"
 import { useState } from "react"
-import { Search, Filter } from "lucide-react"
+import { Search, Filter } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const filters = ["All", "Docs", "Blog", "API"]
@@ -3211,7 +3211,7 @@ export function SearchWithFilters() {
     name: "Toggle — Dark / Light", description: "Animated pill toggle that switches between dark and light mode with icon transitions.", category: "Toggle", tags: ["toggle", "dark", "light", "theme", "animated"], fullWidth: true, preview: <ToggleDarkLight />,
     code: `"use client"
 import { useState } from "react"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 export function ThemeToggle() {
@@ -3232,7 +3232,7 @@ export function ThemeToggle() {
     name: "Toggle — Mode Group", description: "Three-way segmented control for System / Light / Dark mode selection.", category: "Toggle", tags: ["toggle", "segmented", "theme", "mode", "group"], fullWidth: true, preview: <ToggleGroup />,
     code: `"use client"
 import { useState } from "react"
-import { Sun, Moon, SlidersHorizontal } from "lucide-react"
+import { Sun, Moon, SlidersHorizontal } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 export function ModeToggleGroup() {
@@ -3330,7 +3330,7 @@ export function PaletteSwatches() {
     name: "Palette — Design Tokens", description: "Interactive design token grid with dark/light mode preview and one-click hex copy.", category: "Palette", tags: ["color", "tokens", "theme", "design", "system"], fullWidth: true, preview: <ColorTokensGrid />,
     code: `"use client"
 import { useState } from "react"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const tokens = [
@@ -3408,7 +3408,7 @@ export function DesignTokens() {
     name: "View — All Views", description: "Full view-switcher with Kanban, Board, Cards, List, and Table — all sharing the same filter and sort toolbar.", category: "Data Views", tags: ["view", "switcher", "kanban", "table", "list", "cards", "filter", "sort"], fullWidth: true, preview: <ViewSwitcher />,
     code: `"use client"
 import { useState } from "react"
-import { Search, X, Star, ArrowUp, ArrowDown, ArrowUpDown, GripVertical, Kanban, Columns, LayoutGrid, List, Table, Circle, PauseCircle, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Search, X, Star, ArrowUp, ArrowDown, ArrowUpDown, GripVertical, Kanban, Columns, LayoutGrid, ListIcon as List, Table, Circle, PauseCircle, AlertCircle, CheckCircle2 } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 type Priority = "Low" | "Medium" | "High"
@@ -3556,7 +3556,7 @@ export function Button({ variant = "default", size = "md", className, ...props }
     name: "Checkbox", description: "Multi-select control with accessible toggle states.", category: "Inputs", tags: ["checkbox", "toggle", "select", "form"], preview: <CheckboxPreview />,
     code: `"use client"
 import { useState } from "react"
-import { Check } from "lucide-react"
+import { Check } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 export function Checkbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
@@ -4627,7 +4627,7 @@ export const FORM_REGISTRY: ComponentEntry[] = [
     preview: <ContactForm />,
     code: `"use client"
 import { useState } from "react"
-import { Send, Mail, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react"
+import { Send, Mail, CheckCircle2, AlertTriangle, Loader2 } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 function FormField({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {

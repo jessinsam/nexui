@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Package, List, Zap } from "lucide-react"
+import { Check, Copy, Package, List, Zap } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 import { PackageManagerBlock } from "@/components/nexui/package-manager-block"
 

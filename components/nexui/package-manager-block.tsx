@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Terminal } from "lucide-react"
+import { Check, Copy, Terminal } from "@/components/nexui/icons"
 import { cn } from "@/lib/utils"
 
 const PACKAGE_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const
