@@ -6,7 +6,7 @@ import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, Chevron
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, ReferenceLine, Treemap, FunnelChart, Funnel, LabelList } from "recharts"
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, ReferenceLine, Treemap, FunnelChart, Funnel, LabelList, ComposedChart } from "recharts"
 
 // ─── Compact previews (non-auth) ──────────────────────────────────────────────
 
@@ -6890,7 +6890,7 @@ function LineChartDemo() {
   )
 }
 
-// ── 4. Pie & Donut Chart ──────────────────────────────────────────────────────
+// ── 4. Pie & Donut Chart ────────────────────��─────────────────────────────────
 const PIE_DATA = [
   { name: "Direct",   value: 38 },
   { name: "Organic",  value: 27 },
@@ -7590,4 +7590,758 @@ const CHARTS_REGISTRY: ComponentEntry[] = [
 ]
 
 COMPONENTS.push(...CHARTS_REGISTRY)
+
+// ─── Advanced Charts (custom — no shadcn, pure Recharts + SVG) ───────────────
+
+// Shared custom tooltip ────────────────────────────────────────────────────────
+function ChartTip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="rounded-xl border border-border bg-card px-3 py-2 shadow-xl text-xs">
+      {label != null && <p className="font-semibold text-foreground mb-1">{label}</p>}
+      {payload.map((p: any, i: number) => (
+        <div key={i} className="flex items-center gap-1.5">
+          <span className="size-2 rounded-sm shrink-0" style={{ background: p.color || p.fill }} />
+          <span className="text-muted-foreground">{p.name}:</span>
+          <span className="font-medium text-foreground">{typeof p.value === "number" ? p.value.toLocaleString() : p.value}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Custom Legend row ────────────────────────────────────────────────────────────
+function ChartLegRow({ items }: { items: { color: string; label: string }[] }) {
+  return (
+    <div className="flex flex-wrap gap-3 justify-center pt-1">
+      {items.map(it => (
+        <div key={it.label} className="flex items-center gap-1.5">
+          <span className="size-2 rounded-sm" style={{ background: it.color }} />
+          <span className="text-[10px] text-muted-foreground">{it.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── 13. Waterfall Chart (custom SVG) ─────────────────────────────────────────
+const WATERFALL_DATA = [
+  { label: "Jan",      value: 4200,  isTotal: false },
+  { label: "Feb",      value: 800,   isTotal: false },
+  { label: "Mar",      value: -600,  isTotal: false },
+  { label: "Apr",      value: 1100,  isTotal: false },
+  { label: "May",      value: -300,  isTotal: false },
+  { label: "Jun",      value: 900,   isTotal: false },
+  { label: "Total",    value: 0,     isTotal: true  },
+]
+
+function WaterfallChartDemo() {
+  const W = 560, H = 220, PAD = { t: 20, r: 20, b: 40, l: 52 }
+  const barW = 48, gap = (W - PAD.l - PAD.r - barW * WATERFALL_DATA.length) / (WATERFALL_DATA.length - 1)
+
+  // compute running totals
+  let running = 0
+  const items = WATERFALL_DATA.map(d => {
+    const base = d.isTotal ? 0 : running
+    const v = d.isTotal ? running : d.value
+    if (!d.isTotal) running += d.value
+    return { ...d, base, v, end: base + v }
+  })
+  // fix total bar
+  items[items.length - 1].v = running
+
+  const allVals = items.flatMap(d => [d.base, d.base + d.v])
+  const minV = Math.min(0, ...allVals), maxV = Math.max(...allVals)
+  const range = maxV - minV || 1
+  const yScale = (v: number) => PAD.t + (1 - (v - minV) / range) * (H - PAD.t - PAD.b)
+  const zero = yScale(0)
+
+  const ticks = 5
+  const tickVals = Array.from({ length: ticks + 1 }, (_, i) => minV + (i / ticks) * range)
+
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Waterfall Chart</p>
+        <p className="text-xs text-muted-foreground">Cumulative revenue change Jan–Jun</p>
+      </div>
+      <div className="w-full overflow-x-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full block min-w-[360px]" role="img" aria-label="Waterfall chart">
+          {/* Y grid + labels */}
+          {tickVals.map((v, i) => {
+            const y = yScale(v)
+            return (
+              <g key={i}>
+                <line x1={PAD.l} y1={y} x2={W - PAD.r} y2={y} stroke={C.border} strokeWidth={0.5} opacity={0.5} />
+                <text x={PAD.l - 6} y={y + 4} textAnchor="end" fontSize={9} fill={C.text} opacity={0.45}>{v >= 1000 || v <= -1000 ? `${(v/1000).toFixed(0)}k` : v}</text>
+              </g>
+            )
+          })}
+          {/* Zero line */}
+          <line x1={PAD.l} y1={zero} x2={W - PAD.r} y2={zero} stroke={C.muted} strokeWidth={1} opacity={0.6} />
+
+          {/* Bars */}
+          {items.map((d, i) => {
+            const x = PAD.l + i * (barW + gap)
+            const top = yScale(Math.max(d.base, d.base + d.v))
+            const bot = yScale(Math.min(d.base, d.base + d.v))
+            const bh = Math.max(bot - top, 1)
+            const color = d.isTotal ? C.muted : d.v >= 0 ? C.tertiary : C.quinary
+            return (
+              <g key={d.label}>
+                {/* Connector line to previous bar */}
+                {i > 0 && !d.isTotal && (
+                  <line
+                    x1={PAD.l + (i - 1) * (barW + gap) + barW} y1={yScale(d.base)}
+                    x2={x} y2={yScale(d.base)}
+                    stroke={C.muted} strokeWidth={1} strokeDasharray="3 2" opacity={0.4}
+                  />
+                )}
+                <rect x={x} y={top} width={barW} height={bh} rx={4} fill={color} fillOpacity={0.7} />
+                {/* Value label */}
+                <text x={x + barW / 2} y={top - 4} textAnchor="middle" fontSize={9} fill={C.text} opacity={0.7} fontWeight={600}>
+                  {d.v >= 0 ? "+" : ""}{d.v >= 1000 ? `${(d.v/1000).toFixed(1)}k` : d.v}
+                </text>
+                {/* X label */}
+                <text x={x + barW / 2} y={H - PAD.b + 14} textAnchor="middle" fontSize={10} fill={C.text} opacity={0.5}>{d.label}</text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+      <ChartLegRow items={[{ color: C.tertiary, label: "Gain" }, { color: C.quinary, label: "Loss" }, { color: C.muted, label: "Total" }]} />
+    </div>
+  )
+}
+
+// ── 14. Heatmap / Calendar Heatmap ───────────────────────────────────────────
+const WEEKS = 16
+const DAYS = 7
+const HEATMAP_DATA = Array.from({ length: WEEKS * DAYS }, (_, i) => ({
+  week: Math.floor(i / DAYS),
+  day: i % DAYS,
+  value: Math.floor(Math.pow(Math.random(), 1.5) * 20),
+}))
+const HEAT_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const HEAT_MONTHS = ["Jan", "Mar", "May", "Jul"]
+
+function HeatmapChartDemo() {
+  const [hov, setHov] = useState<{ week: number; day: number } | null>(null)
+  const CELL = 18, GAP = 3, LW = 28, TH = 20
+  const W = LW + WEEKS * (CELL + GAP), H = TH + DAYS * (CELL + GAP)
+  const maxVal = Math.max(...HEATMAP_DATA.map(d => d.value))
+
+  function alpha(v: number) { return v === 0 ? 0.05 : 0.15 + (v / maxVal) * 0.75 }
+
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Activity Heatmap</p>
+        <p className="text-xs text-muted-foreground">Contribution graph — 16 weeks</p>
+      </div>
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${W} ${H + 16}`} className="block" style={{ minWidth: W }} role="img" aria-label="Activity heatmap">
+          {/* Month labels */}
+          {HEAT_MONTHS.map((m, i) => (
+            <text key={m} x={LW + (i * (WEEKS / HEAT_MONTHS.length)) * (CELL + GAP)} y={12} fontSize={9} fill={C.text} opacity={0.4}>{m}</text>
+          ))}
+          {/* Day labels */}
+          {HEAT_LABELS.map((d, i) => (
+            i % 2 === 1 && <text key={d} x={LW - 4} y={TH + i * (CELL + GAP) + CELL * 0.75} textAnchor="end" fontSize={8} fill={C.text} opacity={0.35}>{d}</text>
+          ))}
+          {/* Cells */}
+          {HEATMAP_DATA.map(cell => {
+            const isHov = hov?.week === cell.week && hov?.day === cell.day
+            return (
+              <rect
+                key={`${cell.week}-${cell.day}`}
+                x={LW + cell.week * (CELL + GAP)} y={TH + cell.day * (CELL + GAP)}
+                width={CELL} height={CELL} rx={3}
+                fill={C.primary} fillOpacity={alpha(cell.value)}
+                stroke={isHov ? C.primary : "transparent"} strokeWidth={1.5}
+                onMouseEnter={() => setHov({ week: cell.week, day: cell.day })}
+                onMouseLeave={() => setHov(null)}
+                style={{ cursor: "pointer" }}
+                role="gridcell" aria-label={`${HEAT_LABELS[cell.day]} week ${cell.week + 1}: ${cell.value} contributions`}
+              />
+            )
+          })}
+        </svg>
+      </div>
+      {/* Legend scale */}
+      <div className="flex items-center gap-1.5 px-1">
+        <span className="text-[10px] text-muted-foreground">Less</span>
+        {[0.05, 0.25, 0.45, 0.65, 0.9].map((a, i) => (
+          <span key={i} className="size-3 rounded-sm" style={{ background: C.primary, opacity: a }} />
+        ))}
+        <span className="text-[10px] text-muted-foreground">More</span>
+      </div>
+    </div>
+  )
+}
+
+// ── 15. Bubble Chart ─────────────────────────────────────────────────────────
+const BUBBLE_DATA = [
+  { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
+  { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
+  { x: 70, y: 75, z: 60,  name: "Product C", color: C.tertiary    },
+  { x: 30, y: 25, z: 200, name: "Product D", color: C.quaternary  },
+  { x: 80, y: 50, z: 90,  name: "Product E", color: C.quinary     },
+  { x: 55, y: 85, z: 45,  name: "Product F", color: C.primary     },
+  { x: 15, y: 80, z: 150, name: "Product G", color: C.secondary   },
+]
+
+function BubbleChartDemo() {
+  const [hov, setHov] = useState<string | null>(null)
+  const W = 560, H = 260, PAD = { t: 20, r: 20, b: 36, l: 44 }
+  const iW = W - PAD.l - PAD.r, iH = H - PAD.t - PAD.b
+  const xS = (v: number) => PAD.l + (v / 100) * iW
+  const yS = (v: number) => H - PAD.b - (v / 100) * iH
+  const rS = (v: number) => 6 + (v / 200) * 28
+  const ticks5 = [0, 25, 50, 75, 100]
+
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Bubble Chart</p>
+        <p className="text-xs text-muted-foreground">Market share (size) vs satisfaction (y) vs price (x)</p>
+      </div>
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full block min-w-[320px]" role="img" aria-label="Bubble chart">
+          {ticks5.map(t => (
+            <g key={t}>
+              <line x1={PAD.l} y1={yS(t)} x2={W - PAD.r} y2={yS(t)} stroke={C.border} strokeWidth={0.5} opacity={0.4} />
+              <text x={PAD.l - 6} y={yS(t) + 4} textAnchor="end" fontSize={9} fill={C.text} opacity={0.4}>{t}</text>
+              <line x1={xS(t)} y1={PAD.t} x2={xS(t)} y2={H - PAD.b} stroke={C.border} strokeWidth={0.5} opacity={0.4} />
+              <text x={xS(t)} y={H - PAD.b + 14} textAnchor="middle" fontSize={9} fill={C.text} opacity={0.4}>{t}</text>
+            </g>
+          ))}
+          {/* Axis labels */}
+          <text x={W / 2} y={H - 2} textAnchor="middle" fontSize={9} fill={C.text} opacity={0.35}>Price Index</text>
+          <text transform={`translate(10,${H / 2}) rotate(-90)`} textAnchor="middle" fontSize={9} fill={C.text} opacity={0.35}>Satisfaction</text>
+
+          {BUBBLE_DATA.map(d => {
+            const isHov = hov === d.name
+            return (
+              <g key={d.name} onMouseEnter={() => setHov(d.name)} onMouseLeave={() => setHov(null)} style={{ cursor: "pointer" }}>
+                <circle cx={xS(d.x)} cy={yS(d.y)} r={rS(d.z)} fill={d.color} fillOpacity={isHov ? 0.5 : 0.25} stroke={d.color} strokeWidth={isHov ? 2 : 1} strokeOpacity={0.7} />
+                {isHov && (
+                  <text x={xS(d.x)} y={yS(d.y) + 4} textAnchor="middle" fontSize={9} fill={C.text} fontWeight={700}>{d.name}</text>
+                )}
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+      <ChartLegRow items={BUBBLE_DATA.map(d => ({ color: d.color, label: d.name }))} />
+    </div>
+  )
+}
+
+// ── 16. Candlestick / OHLC Chart ─────────────────────────────────────────────
+const CANDLES = [
+  { d: "Jan 13", o: 142, h: 151, l: 138, c: 149 },
+  { d: "Jan 14", o: 149, h: 155, l: 143, c: 145 },
+  { d: "Jan 15", o: 145, h: 148, l: 139, c: 141 },
+  { d: "Jan 16", o: 141, h: 150, l: 140, c: 148 },
+  { d: "Jan 17", o: 148, h: 158, l: 147, c: 156 },
+  { d: "Jan 20", o: 156, h: 162, l: 153, c: 160 },
+  { d: "Jan 21", o: 160, h: 163, l: 155, c: 157 },
+  { d: "Jan 22", o: 157, h: 165, l: 154, c: 163 },
+  { d: "Jan 23", o: 163, h: 168, l: 158, c: 162 },
+  { d: "Jan 24", o: 162, h: 170, l: 160, c: 167 },
+]
+
+function CandlestickChartDemo() {
+  const [hov, setHov] = useState<number | null>(null)
+  const W = 560, H = 240, PAD = { t: 20, r: 20, b: 36, l: 52 }
+  const iW = W - PAD.l - PAD.r, iH = H - PAD.t - PAD.b
+  const allVals = CANDLES.flatMap(c => [c.h, c.l])
+  const minV = Math.min(...allVals) - 2, maxV = Math.max(...allVals) + 2
+  const range = maxV - minV
+  const yS = (v: number) => PAD.t + (1 - (v - minV) / range) * iH
+  const step = iW / CANDLES.length
+  const candleW = step * 0.55
+  const ticks = [135, 145, 155, 165]
+
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Candlestick Chart</p>
+        <p className="text-xs text-muted-foreground">OHLC — stock price Jan 13–24</p>
+      </div>
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full block min-w-[360px]" role="img" aria-label="Candlestick chart">
+          {ticks.map(t => (
+            <g key={t}>
+              <line x1={PAD.l} y1={yS(t)} x2={W - PAD.r} y2={yS(t)} stroke={C.border} strokeWidth={0.5} opacity={0.4} />
+              <text x={PAD.l - 6} y={yS(t) + 4} textAnchor="end" fontSize={9} fill={C.text} opacity={0.4}>{t}</text>
+            </g>
+          ))}
+          {CANDLES.map((c, i) => {
+            const cx = PAD.l + i * step + step / 2
+            const isUp = c.c >= c.o
+            const color = isUp ? C.tertiary : C.quinary
+            const bodyTop = yS(Math.max(c.o, c.c))
+            const bodyH = Math.max(Math.abs(yS(c.o) - yS(c.c)), 1)
+            const isHov = hov === i
+            return (
+              <g key={i} onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)} style={{ cursor: "pointer" }}>
+                {/* Wick */}
+                <line x1={cx} y1={yS(c.h)} x2={cx} y2={yS(c.l)} stroke={color} strokeWidth={1.5} opacity={0.7} />
+                {/* Body */}
+                <rect x={cx - candleW / 2} y={bodyTop} width={candleW} height={bodyH} rx={2}
+                  fill={color} fillOpacity={isHov ? 0.8 : 0.5} stroke={color} strokeWidth={1} strokeOpacity={0.8} />
+                {/* Tooltip */}
+                {isHov && (
+                  <g>
+                    <rect x={cx - 38} y={PAD.t - 2} width={76} height={38} rx={5} fill={C.bg} stroke={C.border} strokeWidth={0.8} opacity={0.95} />
+                    <text x={cx} y={PAD.t + 11} textAnchor="middle" fontSize={8} fill={C.text} opacity={0.7}>{c.d}</text>
+                    <text x={cx} y={PAD.t + 24} textAnchor="middle" fontSize={8} fill={color} fontWeight={700}>O:{c.o} H:{c.h} L:{c.l} C:{c.c}</text>
+                  </g>
+                )}
+                <text x={cx} y={H - PAD.b + 14} textAnchor="middle" fontSize={7.5} fill={C.text} opacity={0.4}>{c.d.split(" ")[1]}</text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+      <ChartLegRow items={[{ color: C.tertiary, label: "Bullish" }, { color: C.quinary, label: "Bearish" }]} />
+    </div>
+  )
+}
+
+// ── 17. Histogram ─────────────────────────────────────────────────────────────
+const RAW_VALUES = Array.from({ length: 200 }, (_, i) =>
+  Math.round(50 + 20 * Math.sin(i * 0.31) * Math.cos(i * 0.13) + Math.random() * 30)
+)
+const BINS = 10
+const BIN_MIN = Math.min(...RAW_VALUES), BIN_MAX = Math.max(...RAW_VALUES)
+const BIN_SIZE = (BIN_MAX - BIN_MIN) / BINS
+const HIST_DATA = Array.from({ length: BINS }, (_, i) => {
+  const lo = BIN_MIN + i * BIN_SIZE, hi = lo + BIN_SIZE
+  return { label: `${Math.round(lo)}`, count: RAW_VALUES.filter(v => v >= lo && (i === BINS - 1 ? v <= hi : v < hi)).length }
+})
+
+function HistogramChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Histogram</p>
+        <p className="text-xs text-muted-foreground">Frequency distribution of 200 samples</p>
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={HIST_DATA} barCategoryGap={2} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="label" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <Tooltip content={<ChartTip />} />
+          <Bar dataKey="count" name="Count" fill={C.primary} fillOpacity={0.65} radius={[3, 3, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ── 18. Stacked 100% Bar Chart ────────────────────────────────────────────────
+const S100_DATA = [
+  { q: "Q1", design: 35, dev: 45, qa: 20 },
+  { q: "Q2", design: 28, dev: 52, qa: 20 },
+  { q: "Q3", design: 40, dev: 38, qa: 22 },
+  { q: "Q4", design: 30, dev: 50, qa: 20 },
+]
+// Normalise to 100%
+const S100_NORM = S100_DATA.map(d => {
+  const t = d.design + d.dev + d.qa
+  return { q: d.q, Design: +(d.design / t * 100).toFixed(1), Dev: +(d.dev / t * 100).toFixed(1), QA: +(d.qa / t * 100).toFixed(1) }
+})
+
+function Stacked100BarDemo() {
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">100% Stacked Bar</p>
+        <p className="text-xs text-muted-foreground">Team effort distribution by quarter</p>
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={S100_NORM} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="q" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} domain={[0, 100]} />
+          <Tooltip content={<ChartTip />} formatter={(v: any) => [`${v}%`]} />
+          <Bar dataKey="Design" name="Design" stackId="a" fill={C.primary}    fillOpacity={0.8} />
+          <Bar dataKey="Dev"    name="Dev"    stackId="a" fill={C.secondary}  fillOpacity={0.8} />
+          <Bar dataKey="QA"     name="QA"     stackId="a" fill={C.tertiary}   fillOpacity={0.8} radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+      <ChartLegRow items={[{ color: C.primary, label: "Design" }, { color: C.secondary, label: "Dev" }, { color: C.tertiary, label: "QA" }]} />
+    </div>
+  )
+}
+
+// ── 19. Step / Staircase Line Chart ──────────────────────────────────────────
+const STEP_DATA = [
+  { t: "00:00", price: 100 },
+  { t: "04:00", price: 100 },
+  { t: "06:00", price: 115 },
+  { t: "08:00", price: 115 },
+  { t: "10:00", price: 98  },
+  { t: "12:00", price: 98  },
+  { t: "14:00", price: 122 },
+  { t: "16:00", price: 122 },
+  { t: "18:00", price: 108 },
+  { t: "20:00", price: 108 },
+  { t: "22:00", price: 130 },
+  { t: "24:00", price: 130 },
+]
+
+function StepLineChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Step Line Chart</p>
+        <p className="text-xs text-muted-foreground">Dynamic pricing changes over 24 hours</p>
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={STEP_DATA} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
+          <defs>
+            <linearGradient id="stepFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={C.quaternary} stopOpacity={0.2} />
+              <stop offset="95%" stopColor={C.quaternary} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="t" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} interval={1} />
+          <YAxis tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} domain={[80, 140]} />
+          <Tooltip content={<ChartTip />} />
+          <Line type="stepAfter" dataKey="price" name="Price" stroke={C.quaternary} strokeWidth={2.5} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ── 20. Dual-axis Combined Chart ──────────────────────────────────────────────
+const DUAL_DATA = [
+  { m: "Jan", rev: 42000, users: 1200 },
+  { m: "Feb", rev: 58000, users: 1800 },
+  { m: "Mar", rev: 52000, users: 2100 },
+  { m: "Apr", rev: 71000, users: 2600 },
+  { m: "May", rev: 65000, users: 3200 },
+  { m: "Jun", rev: 83000, users: 4100 },
+]
+
+function DualAxisChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Dual-Axis Chart</p>
+        <p className="text-xs text-muted-foreground">Revenue (bars, left) vs Active users (line, right)</p>
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <ComposedChart data={DUAL_DATA} margin={{ top: 8, right: 32, left: -8, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="m" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <YAxis yAxisId="l" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
+          <YAxis yAxisId="r" orientation="right" tick={{ fill: C.text, fontSize: 10, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${(v/1000).toFixed(1)}k`} />
+          <Tooltip content={<ChartTip />} />
+          <Bar yAxisId="l" dataKey="rev" name="Revenue" fill={C.primary} fillOpacity={0.6} radius={[4, 4, 0, 0]} />
+          <Line yAxisId="r" type="monotone" dataKey="users" name="Users" stroke={C.quaternary} strokeWidth={2.5} dot={{ fill: C.quaternary, r: 3, strokeWidth: 0 }} />
+        </ComposedChart>
+      </ResponsiveContainer>
+      <ChartLegRow items={[{ color: C.primary, label: "Revenue" }, { color: C.quaternary, label: "Active Users" }]} />
+    </div>
+  )
+}
+
+// ── 21. Polar Area / Rose Chart ───────────────────────────────────────────────
+const ROSE_DATA = [
+  { subject: "North",  A: 85, B: 60 },
+  { subject: "NE",     A: 72, B: 90 },
+  { subject: "East",   A: 55, B: 78 },
+  { subject: "SE",     A: 92, B: 50 },
+  { subject: "South",  A: 68, B: 82 },
+  { subject: "SW",     A: 48, B: 95 },
+  { subject: "West",   A: 78, B: 65 },
+  { subject: "NW",     A: 62, B: 72 },
+]
+
+function RoseChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Polar Area / Rose Chart</p>
+        <p className="text-xs text-muted-foreground">Wind direction distribution (two datasets)</p>
+      </div>
+      <ResponsiveContainer width="100%" height={260}>
+        <RadarChart data={ROSE_DATA} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+          <PolarGrid stroke={C.border} />
+          <PolarAngleAxis dataKey="subject" tick={{ fill: C.text, fontSize: 10, opacity: 0.6 }} />
+          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: C.text, fontSize: 8, opacity: 0.3 }} axisLine={false} />
+          <Radar name="Season A" dataKey="A" stroke={C.primary}   fill={C.primary}    fillOpacity={0.25} strokeWidth={2} />
+          <Radar name="Season B" dataKey="B" stroke={C.secondary} fill={C.secondary}  fillOpacity={0.2}  strokeWidth={2} />
+          <Tooltip content={<ChartTip />} />
+        </RadarChart>
+      </ResponsiveContainer>
+      <ChartLegRow items={[{ color: C.primary, label: "Season A" }, { color: C.secondary, label: "Season B" }]} />
+    </div>
+  )
+}
+
+// ── 22. Gantt — Milestone / Phase view ───────────────────────────────────────
+const MILESTONES = [
+  { phase: "Discovery",    start: 0,  end: 4,  milestones: [{ day: 3, label: "Brief signed" }] },
+  { phase: "Design",       start: 3,  end: 10, milestones: [{ day: 7, label: "Wireframes" }, { day: 10, label: "Design QA" }] },
+  { phase: "Development",  start: 9,  end: 22, milestones: [{ day: 15, label: "Beta"  }, { day: 22, label: "Code freeze" }] },
+  { phase: "Testing",      start: 20, end: 26, milestones: [{ day: 24, label: "UAT pass" }] },
+  { phase: "Launch",       start: 25, end: 28, milestones: [{ day: 28, label: "Go live" }] },
+]
+const MS_TOTAL = 30
+const MS_COLORS = [C.primary, C.secondary, C.tertiary, C.quaternary, C.quinary]
+
+function MilestoneGanttDemo() {
+  const [hov, setHov] = useState<string | null>(null)
+  const ROW = 44, LW = 96, PAD = 8, CELL = 14
+  const H = MILESTONES.length * ROW + 32 + PAD * 2
+
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Milestone Gantt</p>
+        <p className="text-xs text-muted-foreground">Phase + milestone diamonds — 30-day project</p>
+      </div>
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <svg viewBox={`0 0 ${LW + MS_TOTAL * CELL + PAD * 2} ${H}`} className="block min-w-[440px]" role="img" aria-label="Milestone Gantt">
+          {/* Header */}
+          <rect x={0} y={0} width="100%" height={32} fill={C.bg} opacity={0.8} />
+          {Array.from({ length: MS_TOTAL }).map((_, d) => (
+            <g key={d}>
+              <line x1={LW + PAD + d * CELL} y1={32} x2={LW + PAD + d * CELL} y2={H} stroke={C.border} strokeWidth={0.5} opacity={0.3} />
+              {(d + 1) % 5 === 0 && <text x={LW + PAD + d * CELL - CELL / 2} y={20} textAnchor="middle" fontSize={8} fill={C.text} opacity={0.4}>D{d+1}</text>}
+            </g>
+          ))}
+          {/* Today */}
+          <line x1={LW + PAD + 14 * CELL} y1={0} x2={LW + PAD + 14 * CELL} y2={H} stroke={C.quaternary} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.5} />
+
+          {MILESTONES.map((phase, pi) => {
+            const color = MS_COLORS[pi % MS_COLORS.length]
+            const y = 32 + PAD + pi * ROW
+            const barY = y + 10
+            const x = LW + PAD + phase.start * CELL
+            const w = (phase.end - phase.start) * CELL
+            return (
+              <g key={phase.phase}>
+                {/* Row bg */}
+                <rect x={0} y={y} width="100%" height={ROW} fill={pi % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"} />
+                {/* Phase label */}
+                <text x={LW - 8} y={barY + 10} textAnchor="end" fontSize={10} fill={C.text} opacity={0.7} fontWeight={500}>{phase.phase}</text>
+                {/* Phase bar */}
+                <rect x={x} y={barY} width={w} height={16} rx={6}
+                  fill={color} fillOpacity={0.2} stroke={color} strokeWidth={1} strokeOpacity={0.5} />
+                {/* Progress fill (60%) */}
+                <rect x={x} y={barY} width={w * 0.6} height={16} rx={6}
+                  fill={color} fillOpacity={0.5} />
+                {/* Milestones */}
+                {phase.milestones.map(ms => {
+                  const mx = LW + PAD + ms.day * CELL
+                  const key = `${phase.phase}-${ms.label}`
+                  const isHov = hov === key
+                  return (
+                    <g key={key} onMouseEnter={() => setHov(key)} onMouseLeave={() => setHov(null)} style={{ cursor: "pointer" }}>
+                      {/* Diamond */}
+                      <polygon
+                        points={`${mx},${barY - 4} ${mx + 6},${barY + 8} ${mx},${barY + 20} ${mx - 6},${barY + 8}`}
+                        fill={isHov ? color : C.bg} stroke={color} strokeWidth={1.5}
+                      />
+                      {/* Label */}
+                      {isHov && (
+                        <g>
+                          <rect x={mx - 30} y={barY - 22} width={60} height={14} rx={3} fill={C.bg} stroke={C.border} strokeWidth={0.8} opacity={0.95} />
+                          <text x={mx} y={barY - 12} textAnchor="middle" fontSize={8} fill={C.text} fontWeight={600}>{ms.label}</text>
+                        </g>
+                      )}
+                    </g>
+                  )
+                })}
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+// ── 23. Network / Dependency Graph (SVG) ─────────────────────────────────────
+const NODES = [
+  { id: "api",      label: "API",       x: 280, y: 120, color: C.primary    },
+  { id: "auth",     label: "Auth",      x: 100, y: 60,  color: C.secondary  },
+  { id: "db",       label: "DB",        x: 100, y: 200, color: C.tertiary   },
+  { id: "cache",    label: "Cache",     x: 460, y: 60,  color: C.quaternary },
+  { id: "worker",   label: "Worker",    x: 460, y: 200, color: C.quinary    },
+  { id: "frontend", label: "Frontend",  x: 280, y: 280, color: C.secondary  },
+]
+const EDGES = [
+  { from: "frontend", to: "api" },
+  { from: "api",      to: "auth"   },
+  { from: "api",      to: "db"     },
+  { from: "api",      to: "cache"  },
+  { from: "api",      to: "worker" },
+  { from: "auth",     to: "db"     },
+  { from: "worker",   to: "db"     },
+  { from: "worker",   to: "cache"  },
+]
+
+function NetworkGraphDemo() {
+  const [hov, setHov] = useState<string | null>(null)
+  const nodeMap = Object.fromEntries(NODES.map(n => [n.id, n]))
+
+  return (
+    <div className="w-full flex flex-col gap-2">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Network / Dependency Graph</p>
+        <p className="text-xs text-muted-foreground">Service architecture — hover nodes to highlight</p>
+      </div>
+      <div className="overflow-x-auto">
+        <svg viewBox="0 0 560 360" className="w-full block min-w-[360px]" role="img" aria-label="Network graph">
+          <defs>
+            <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill={C.muted} opacity={0.5} />
+            </marker>
+          </defs>
+          {EDGES.map(e => {
+            const a = nodeMap[e.from], b = nodeMap[e.to]
+            const isLit = hov === e.from || hov === e.to
+            // shorten line to not overlap node circles
+            const dx = b.x - a.x, dy = b.y - a.y, dist = Math.sqrt(dx*dx+dy*dy)
+            const r = 26
+            const x1 = a.x + (dx/dist)*r, y1 = a.y + (dy/dist)*r
+            const x2 = b.x - (dx/dist)*(r+6), y2 = b.y - (dy/dist)*(r+6)
+            return (
+              <line key={`${e.from}-${e.to}`} x1={x1} y1={y1} x2={x2} y2={y2}
+                stroke={isLit ? C.primary : C.muted} strokeWidth={isLit ? 2 : 1}
+                strokeOpacity={isLit ? 0.7 : 0.3} markerEnd="url(#arrow)" />
+            )
+          })}
+          {NODES.map(n => {
+            const isHov = hov === n.id
+            const connected = new Set(EDGES.filter(e => e.from === n.id || e.to === n.id).flatMap(e => [e.from, e.to]))
+            const dim = hov && !connected.has(n.id)
+            return (
+              <g key={n.id} onMouseEnter={() => setHov(n.id)} onMouseLeave={() => setHov(null)} style={{ cursor: "pointer" }}>
+                <circle cx={n.x} cy={n.y} r={26} fill={n.color} fillOpacity={dim ? 0.1 : isHov ? 0.4 : 0.2} stroke={n.color} strokeWidth={isHov ? 2 : 1} strokeOpacity={dim ? 0.2 : 0.6} />
+                <text x={n.x} y={n.y + 4} textAnchor="middle" fontSize={11} fill={C.text} fontWeight={600} opacity={dim ? 0.3 : 0.9}>{n.label}</text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+// ─── Additional Charts registry ───────────────────────────────────────────────
+const EXTRA_CHARTS_REGISTRY: ComponentEntry[] = [
+  {
+    name: "Waterfall Chart",
+    description: "Custom SVG waterfall chart showing cumulative revenue gains and losses with connector lines between bars and a running total column.",
+    category: "Charts",
+    tags: ["chart", "waterfall", "cumulative", "finance", "svg"],
+    fullWidth: true,
+    preview: <WaterfallChartDemo />,
+    code: `// WaterfallChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Activity Heatmap",
+    description: "GitHub-style calendar heatmap over 16 weeks. Custom SVG cells with opacity-scaled fill and an interactive hover state.",
+    category: "Charts",
+    tags: ["chart", "heatmap", "calendar", "activity", "svg"],
+    fullWidth: true,
+    preview: <HeatmapChartDemo />,
+    code: `// HeatmapChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Bubble Chart",
+    description: "Pure SVG bubble chart encoding three dimensions: x-axis price, y-axis satisfaction, and bubble radius as market share. Hover to reveal product names.",
+    category: "Charts",
+    tags: ["chart", "bubble", "scatter", "multi-dimensional", "svg"],
+    fullWidth: true,
+    preview: <BubbleChartDemo />,
+    code: `// BubbleChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Candlestick Chart",
+    description: "OHLC candlestick chart with green/red candle bodies, high/low wicks, and an on-hover tooltip showing all four price values.",
+    category: "Charts",
+    tags: ["chart", "candlestick", "ohlc", "stock", "finance", "svg"],
+    fullWidth: true,
+    preview: <CandlestickChartDemo />,
+    code: `// CandlestickChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Histogram",
+    description: "Frequency distribution histogram built with Recharts BarChart with zero gap between bins and a sample of 200 data points.",
+    category: "Charts",
+    tags: ["chart", "histogram", "distribution", "frequency", "recharts"],
+    fullWidth: true,
+    preview: <HistogramChartDemo />,
+    code: `// HistogramChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "100% Stacked Bar",
+    description: "Proportional stacked bar chart normalised to 100% per quarter, showing relative team effort split across Design, Dev, and QA.",
+    category: "Charts",
+    tags: ["chart", "bar", "stacked", "100%", "proportional", "recharts"],
+    fullWidth: true,
+    preview: <Stacked100BarDemo />,
+    code: `// Stacked100BarDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Step Line Chart",
+    description: "Staircase-type line chart using Recharts stepAfter interpolation for discrete pricing or status changes over time.",
+    category: "Charts",
+    tags: ["chart", "line", "step", "staircase", "pricing", "recharts"],
+    fullWidth: true,
+    preview: <StepLineChartDemo />,
+    code: `// StepLineChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Dual-Axis Chart",
+    description: "ComposedChart with revenue bars on the left Y-axis and active user count line on the right Y-axis — two independent scales on one canvas.",
+    category: "Charts",
+    tags: ["chart", "dual-axis", "composed", "bar", "line", "recharts"],
+    fullWidth: true,
+    preview: <DualAxisChartDemo />,
+    code: `// DualAxisChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Polar Area / Rose Chart",
+    description: "Eight-direction polar area chart (wind rose) built with Recharts RadarChart, comparing two seasonal datasets with filled area traces.",
+    category: "Charts",
+    tags: ["chart", "polar", "rose", "radar", "wind", "recharts"],
+    fullWidth: true,
+    preview: <RoseChartDemo />,
+    code: `// RoseChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Milestone Gantt",
+    description: "Phase + milestone SVG Gantt chart with diamond milestone markers, 60% progress fills inside phase bars, and a Today reference line. Hover diamonds for labels.",
+    category: "Charts",
+    tags: ["chart", "gantt", "milestone", "project", "svg"],
+    fullWidth: true,
+    preview: <MilestoneGanttDemo />,
+    code: `// MilestoneGanttDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Network Graph",
+    description: "SVG service-architecture dependency graph with directed arrow edges, hover-triggered node and edge highlighting, and automatic edge shortening to avoid node overlap.",
+    category: "Charts",
+    tags: ["chart", "network", "graph", "dependency", "architecture", "svg"],
+    fullWidth: true,
+    preview: <NetworkGraphDemo />,
+    code: `// NetworkGraphDemo — see lib/components-registry.tsx`,
+  },
+]
+
+COMPONENTS.push(...EXTRA_CHARTS_REGISTRY)
 
