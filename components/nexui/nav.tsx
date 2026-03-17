@@ -4,10 +4,10 @@ import { useState } from "react"
 import { Menu, X } from "@/components/nexui/icons"
 
 const links = [
-  { label: "Components", href: "/components" },
-  { label: "Docs",       href: "#installation" },
-  { label: "CLI",        href: "#cli" },
-  { label: "Theming",    href: "#theming" },
+  { label: "Docs",         href: "/docs" },
+  { label: "Components",   href: "/components" },
+  { label: "Installation", href: "/docs/installation" },
+  { label: "Theming",      href: "/docs/theming" },
 ]
 
 export function Nav() {

@@ -68,11 +68,11 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Documentation</p>
             {[
-              { label: "Getting started", href: "#installation"  },
-              { label: "Installation",    href: "#installation"  },
-              { label: "CLI reference",   href: "#cli"           },
-              { label: "Theming",         href: "#theming"       },
-              { label: "Accessibility",   href: "#installation"  },
+              { label: "Introduction",  href: "/docs"              },
+              { label: "Installation",  href: "/docs/installation" },
+              { label: "CLI",           href: "/docs/cli"          },
+              { label: "Theming",       href: "/docs/theming"      },
+              { label: "Components",    href: "/components"        },
             ].map((l) => (
               <a key={l.label} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {l.label}

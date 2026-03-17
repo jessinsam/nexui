@@ -123,7 +123,22 @@ const steps = [
           Install <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">clsx</code> and{" "}
           <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">tailwind-merge</code> — the only two helper packages NexUI uses.
         </p>
-        <PackageManagerBlock command="npx add clsx tailwind-merge" />
+        <div className="rounded-lg border border-border overflow-hidden font-mono text-sm">
+          <div className="px-4 py-2 border-b border-border bg-[var(--code-bg)] text-xs text-muted-foreground">bash</div>
+          <div className="flex flex-col gap-0.5 px-4 py-3 bg-[var(--code-bg)]">
+            {[
+              { pm: "npm",  cmd: "npm install clsx tailwind-merge" },
+              { pm: "pnpm", cmd: "pnpm add clsx tailwind-merge" },
+              { pm: "yarn", cmd: "yarn add clsx tailwind-merge" },
+              { pm: "bun",  cmd: "bun add clsx tailwind-merge" },
+            ].map(({ pm, cmd }) => (
+              <div key={pm} className="flex items-center gap-3">
+                <span className="text-muted-foreground text-xs w-8 shrink-0">{pm}</span>
+                <code className="text-foreground text-xs">{cmd}</code>
+              </div>
+            ))}
+          </div>
+        </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
           Then create <code className="text-xs font-mono text-foreground">lib/utils.ts</code>:
         </p>
