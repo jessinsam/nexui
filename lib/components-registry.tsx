@@ -5,8 +5,7 @@ import React, { useState } from "react"
 import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign } from "@/components/nexui/icons"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, ReferenceLine, Treemap, FunnelChart, Funnel, LabelList, ComposedChart } from "recharts"
+import { ChartLegend, AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialProgress } from "@/components/nexui/charts"
 
 // ─── Compact previews (non-auth) ──────────────────────────────────────────────
 
@@ -4561,7 +4560,7 @@ function OnboardingForm() {
   )
 }
 
-// ── Quick Reaction Widget ─────────────────────────────────────────────────────
+// ── Quick Reaction Widget ──��──────────────────────────────────────────────────
 function ReactionForm() {
   const [voted, setVoted] = useState<string | null>(null)
   const [counts, setCounts] = useState({ helpful: 124, notHelpful: 18 })
@@ -6447,7 +6446,7 @@ function BottomTabBar() {
   )
 }
 
-// ── 7. Command Palette ──────────────────────────���─────────────────────────────
+// ── 7. Command Palette ──────────────────────────�����─────────────────────────────
 const CMD_ITEMS = [
   { group: "Navigation", items: [
     { icon: <LayoutGrid size={13} />, label: "Go to Dashboard", shortcut: "G D" },
@@ -6740,13 +6739,17 @@ const AREA_DATA = [
   { month: "Jun", revenue: 8900, expenses: 3100 },
   { month: "Jul", revenue: 9200, expenses: 4100 },
 ]
-const areaConfig: ChartConfig = {
+const areaConfig = {
   revenue:  { label: "Revenue",  color: C.primary },
   expenses: { label: "Expenses", color: C.secondary },
 }
 
 function AreaChartDemo() {
   const [stacked, setStacked] = useState(false)
+  const series = [
+    { key: "revenue",  label: "Revenue",  color: C.primary },
+    { key: "expenses", label: "Expenses", color: C.secondary },
+  ]
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center justify-between px-1">
@@ -6763,27 +6766,15 @@ function AreaChartDemo() {
           ))}
         </div>
       </div>
-      <ChartContainer config={areaConfig} className="h-56 w-full">
-        <AreaChart data={AREA_DATA} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <defs>
-            <linearGradient id="gradRev" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={C.primary} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={C.primary} stopOpacity={0}/>
-            </linearGradient>
-            <linearGradient id="gradExp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={C.secondary} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={C.secondary} stopOpacity={0}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="month" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Area type="monotone" dataKey="revenue" stroke={C.primary} strokeWidth={2} fill="url(#gradRev)" stackId={stacked ? "s" : undefined} />
-          <Area type="monotone" dataKey="expenses" stroke={C.secondary} strokeWidth={2} fill="url(#gradExp)" stackId={stacked ? "s" : undefined} />
-        </AreaChart>
-      </ChartContainer>
+      <AreaChart
+        data={AREA_DATA}
+        xKey="month"
+        series={series}
+        stacked={stacked}
+        yFormatter={v => `$${v/1000}k`}
+        height={224}
+      />
+      <ChartLegend items={series} />
     </div>
   )
 }
@@ -6795,7 +6786,7 @@ const BAR_DATA = [
   { name: "Q3", web: 4900, mobile: 3800, desktop: 2600 },
   { name: "Q4", web: 7200, mobile: 4100, desktop: 3200 },
 ]
-const barConfig: ChartConfig = {
+const barConfig = {
   web:     { label: "Web",     color: C.primary },
   mobile:  { label: "Mobile",  color: C.secondary },
   desktop: { label: "Desktop", color: C.tertiary },
@@ -6804,6 +6795,11 @@ const barConfig: ChartConfig = {
 function BarChartDemo() {
   const [horizontal, setHorizontal] = useState(false)
   const [grouped, setGrouped] = useState(true)
+  const series = [
+    { key: "web",     label: "Web",     color: C.primary },
+    { key: "mobile",  label: "Mobile",  color: C.secondary },
+    { key: "desktop", label: "Desktop", color: C.tertiary },
+  ]
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center justify-between flex-wrap gap-2 px-1">
@@ -6819,20 +6815,16 @@ function BarChartDemo() {
           <button onClick={() => setHorizontal(v=>!v)} className="px-3 py-1 rounded-lg text-xs font-medium bg-secondary text-muted-foreground hover:text-foreground transition-all">{horizontal ? "Vertical" : "Horizontal"}</button>
         </div>
       </div>
-      <ChartContainer config={barConfig} className="h-56 w-full">
-        <BarChart data={BAR_DATA} layout={horizontal ? "vertical" : "horizontal"} margin={{ top: 8, right: 8, left: horizontal ? 24 : -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} horizontal={!horizontal} vertical={horizontal} />
-          {horizontal
-            ? <><XAxis type="number" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} /><YAxis dataKey="name" type="category" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} width={24} /></>
-            : <><XAxis dataKey="name" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} /></>
-          }
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Bar dataKey="web"     fill={C.primary}   radius={[4,4,0,0]} stackId={grouped ? undefined : "s"} />
-          <Bar dataKey="mobile"  fill={C.secondary}  radius={[4,4,0,0]} stackId={grouped ? undefined : "s"} />
-          <Bar dataKey="desktop" fill={C.tertiary}  radius={[4,4,0,0]} stackId={grouped ? undefined : "s"} />
-        </BarChart>
-      </ChartContainer>
+      <BarChart
+        data={BAR_DATA}
+        xKey="name"
+        series={series}
+        stacked={!grouped}
+        horizontal={horizontal}
+        yFormatter={v => `${v/1000}k`}
+        height={224}
+      />
+      <ChartLegend items={series} />
     </div>
   )
 }
@@ -6848,52 +6840,47 @@ const LINE_DATA = [
   { week: "W7",  userA: 350, userB: 210, userC: 230 },
   { week: "W8",  userA: 400, userB: 290, userC: 260 },
 ]
-const lineConfig: ChartConfig = {
+const lineConfig = {
   userA: { label: "Team A", color: C.primary },
   userB: { label: "Team B", color: C.secondary },
   userC: { label: "Team C", color: C.tertiary },
 }
 
 function LineChartDemo() {
+  const series = [
+    { key: "userA", label: "Team A", color: C.primary },
+    { key: "userB", label: "Team B", color: C.secondary },
+    { key: "userC", label: "Team C", color: C.tertiary },
+  ]
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Weekly Active Users</p>
         <p className="text-xs text-muted-foreground">8-week trend by team</p>
       </div>
-      <ChartContainer config={lineConfig} className="h-56 w-full">
-        <LineChart data={LINE_DATA} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="week" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <ReferenceLine y={200} stroke={C.muted} strokeDasharray="4 4" label={{ value: "Target", fill: C.text, fontSize: 10, opacity: 0.6 }} />
-          <Line type="monotone" dataKey="userA" stroke={C.primary}   strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.primary }} />
-          <Line type="monotone" dataKey="userB" stroke={C.secondary}  strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.secondary }} />
-          <Line type="monotone" dataKey="userC" stroke={C.tertiary}  strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.tertiary }} />
-        </LineChart>
-      </ChartContainer>
+      <LineChart
+        data={LINE_DATA}
+        xKey="week"
+        series={series}
+        referenceLine={{ value: 200, label: "Target" }}
+        height={224}
+      />
+      <ChartLegend items={series} />
     </div>
   )
 }
 
-// ── 4. Pie & Donut Chart ────────────────────��─────────────────────────────────
+// ── 4. Pie & Donut Chart ─────────────────────────────────────────────────────
 const PIE_DATA = [
-  { name: "Direct",   value: 38 },
-  { name: "Organic",  value: 27 },
-  { name: "Referral", value: 18 },
-  { name: "Social",   value: 11 },
-  { name: "Email",    value: 6  },
+  { name: "Direct",   value: 38, color: PALETTE[0] },
+  { name: "Organic",  value: 27, color: PALETTE[1] },
+  { name: "Referral", value: 18, color: PALETTE[2] },
+  { name: "Social",   value: 11, color: PALETTE[3] },
+  { name: "Email",    value: 6,  color: PALETTE[4] },
 ]
-const pieConfig: ChartConfig = Object.fromEntries(
-  PIE_DATA.map((d, i) => [d.name.toLowerCase(), { label: d.name, color: PALETTE[i] }])
-)
 
 function PieChartDemo() {
   const [donut, setDonut] = useState(true)
-  const [activeIdx, setActiveIdx] = useState<number | null>(null)
-
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center justify-between px-1">
@@ -6909,41 +6896,11 @@ function PieChartDemo() {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <ChartContainer config={pieConfig} className="h-52 w-52 shrink-0">
-          <PieChart>
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <Pie
-              data={PIE_DATA}
-              cx="50%"
-              cy="50%"
-              innerRadius={donut ? 52 : 0}
-              outerRadius={80}
-              paddingAngle={3}
-              dataKey="value"
-              onMouseEnter={(_, i) => setActiveIdx(i)}
-              onMouseLeave={() => setActiveIdx(null)}
-              strokeWidth={0}
-            >
-              {PIE_DATA.map((_, i) => (
-                <Cell
-                  key={i}
-                  fill={PALETTE[i]}
-                  opacity={activeIdx === null || activeIdx === i ? 1 : 0.4}
-                  style={{ outline: "none", transition: "opacity 0.2s" }}
-                />
-              ))}
-              {donut && (
-                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill={C.text} fontSize={20} fontWeight={700}>
-                  {PIE_DATA.reduce((s, d) => s + d.value, 0)}%
-                </text>
-              )}
-            </Pie>
-          </PieChart>
-        </ChartContainer>
+        <PieChart data={PIE_DATA} donut={donut} size={200} className="shrink-0" />
         <div className="flex flex-col gap-2 flex-1">
-          {PIE_DATA.map((d, i) => (
+          {PIE_DATA.map((d) => (
             <div key={d.name} className="flex items-center gap-2">
-              <span className="size-2 rounded-sm shrink-0" style={{ background: PALETTE[i] }} />
+              <span className="size-2 rounded-sm shrink-0" style={{ background: d.color }} />
               <span className="text-xs text-muted-foreground flex-1">{d.name}</span>
               <span className="text-xs font-semibold text-foreground tabular-nums">{d.value}%</span>
             </div>
@@ -6953,8 +6910,7 @@ function PieChartDemo() {
     </div>
   )
 }
-
-// ── 5. Radar Chart ────────────────────────────────────────────────────────────
+// ── 5. Radar Chart ───────────────────────────────────────────────────────────
 const RADAR_DATA = [
   { skill: "TypeScript", score: 90, benchmark: 70 },
   { skill: "React",      score: 85, benchmark: 75 },
@@ -6963,43 +6919,39 @@ const RADAR_DATA = [
   { skill: "Testing",    score: 65, benchmark: 60 },
   { skill: "DevOps",     score: 55, benchmark: 72 },
 ]
-const radarConfig: ChartConfig = {
-  score:     { label: "You",       color: C.primary },
-  benchmark: { label: "Avg",       color: C.secondary },
-}
 
 function RadarChartDemo() {
+  const series = [
+    { key: "score",     label: "You", color: C.primary,   fillOpacity: 0.25 },
+    { key: "benchmark", label: "Avg", color: C.secondary, fillOpacity: 0.15 },
+  ]
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Skill Radar</p>
         <p className="text-xs text-muted-foreground">Score vs industry average</p>
       </div>
-      <ChartContainer config={radarConfig} className="h-64 w-full">
-        <RadarChart data={RADAR_DATA} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
-          <PolarGrid stroke={C.border} />
-          <PolarAngleAxis dataKey="skill" tick={{ fill: C.text, fontSize: 11, opacity: 0.7 }} />
-          <PolarRadiusAxis angle={30} domain={[0,100]} tick={{ fill: C.text, fontSize: 9, opacity: 0.4 }} axisLine={false} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Radar dataKey="benchmark" stroke={C.secondary} fill={C.secondary} fillOpacity={0.15} strokeWidth={1.5} dot={false} />
-          <Radar dataKey="score"     stroke={C.primary}   fill={C.primary}   fillOpacity={0.25} strokeWidth={2} dot={{ fill: C.primary, r: 3 }} />
-        </RadarChart>
-      </ChartContainer>
+      <div className="flex justify-center">
+        <RadarChart
+          data={RADAR_DATA}
+          labelKey="skill"
+          series={series}
+          domain={[0, 100]}
+          size={260}
+        />
+      </div>
+      <ChartLegend items={series} />
     </div>
   )
 }
 
 // ── 6. Radial Bar Chart ───────────────────────────────────────────────────────
 const RADIAL_DATA = [
-  { name: "Storage",  value: 82,  fill: C.primary   },
-  { name: "Memory",   value: 65,  fill: C.secondary  },
-  { name: "CPU",      value: 48,  fill: C.tertiary   },
-  { name: "Network",  value: 91,  fill: C.quaternary },
+  { name: "Storage",  value: 82,  color: C.primary   },
+  { name: "Memory",   value: 65,  color: C.secondary  },
+  { name: "CPU",      value: 48,  color: C.tertiary   },
+  { name: "Network",  value: 91,  color: C.quaternary },
 ]
-const radialConfig: ChartConfig = Object.fromEntries(
-  RADIAL_DATA.map(d => [d.name.toLowerCase(), { label: d.name, color: d.fill }])
-)
 
 function RadialBarChartDemo() {
   return (
@@ -7009,15 +6961,7 @@ function RadialBarChartDemo() {
         <p className="text-xs text-muted-foreground">Resource utilisation %</p>
       </div>
       <div className="flex items-center gap-4">
-        <ChartContainer config={radialConfig} className="h-52 w-52 shrink-0">
-          <RadialBarChart data={RADIAL_DATA} innerRadius={20} outerRadius={90} startAngle={90} endAngle={-270} barSize={10}>
-            <PolarGrid gridType="circle" stroke={C.border} />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} formatter={(v, n) => [`${v}%`, n]} />
-            <RadialBar dataKey="value" cornerRadius={5} background={{ fill: C.border }}>
-              {RADIAL_DATA.map((d, i) => <Cell key={i} fill={d.fill} />)}
-            </RadialBar>
-          </RadialBarChart>
-        </ChartContainer>
+        <RadialProgress data={RADIAL_DATA} size={200} className="shrink-0" />
         <div className="flex flex-col gap-3 flex-1">
           {RADIAL_DATA.map(d => (
             <div key={d.name} className="flex flex-col gap-1">
@@ -7026,7 +6970,7 @@ function RadialBarChartDemo() {
                 <span className="text-xs font-bold text-foreground tabular-nums">{d.value}%</span>
               </div>
               <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
-                <div className="h-full rounded-full transition-all" style={{ width: `${d.value}%`, background: d.fill }} />
+                <div className="h-full rounded-full transition-all" style={{ width: `${d.value}%`, background: d.color }} />
               </div>
             </div>
           ))}
@@ -7047,29 +6991,56 @@ function makeScatter(n: number, cx: number, cy: number, spread: number, color: s
 }
 const SCATTER_DATA_A = makeScatter(20, 40, 50, 20, C.primary)
 const SCATTER_DATA_B = makeScatter(20, 70, 30, 15, C.secondary)
-const scatterConfig: ChartConfig = {
-  groupA: { label: "Segment A", color: C.primary },
-  groupB: { label: "Segment B", color: C.secondary },
-}
-
 function ScatterChartDemo() {
+  const [tooltip, setTooltip] = React.useState<{x:number;y:number;color:string;xv:number;yv:number;z:number} | null>(null)
+  const svgRef = React.useRef<SVGSVGElement>(null)
+  const PAD = { t: 12, r: 12, b: 28, l: 36 }
+  const W = 560, H = 200
+  const xS = (v: number) => PAD.l + (v / 100) * W
+  const yS = (v: number) => PAD.t + H - (v / 100) * H
+  const groups = [
+    { data: SCATTER_DATA_A, color: C.primary,   label: "Segment A" },
+    { data: SCATTER_DATA_B, color: C.secondary, label: "Segment B" },
+  ]
+  const ticks = [0, 25, 50, 75, 100]
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Scatter Plot</p>
-        <p className="text-xs text-muted-foreground">Two-segment bubble chart</p>
+        <p className="text-xs text-muted-foreground">Two-segment distribution</p>
       </div>
-      <ChartContainer config={scatterConfig} className="h-56 w-full">
-        <ScatterChart margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-          <XAxis type="number" dataKey="x" name="X" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} domain={[0, 100]} />
-          <YAxis type="number" dataKey="y" name="Y" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} domain={[0, 100]} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Scatter name="groupA" data={SCATTER_DATA_A} fill={C.primary} fillOpacity={0.7} />
-          <Scatter name="groupB" data={SCATTER_DATA_B} fill={C.secondary} fillOpacity={0.7} />
-        </ScatterChart>
-      </ChartContainer>
+      <div className="relative" style={{ height: H + PAD.t + PAD.b }}>
+        <svg ref={svgRef} viewBox={`0 0 ${W + PAD.l + PAD.r} ${H + PAD.t + PAD.b}`} preserveAspectRatio="none" className="w-full h-full" onMouseLeave={() => setTooltip(null)}>
+          {ticks.map(v => (
+            <g key={v}>
+              <line x1={PAD.l} x2={W+PAD.l} y1={yS(v)} y2={yS(v)} stroke="currentColor" strokeOpacity={0.07} strokeWidth={1} />
+              <line x1={xS(v)} x2={xS(v)} y1={PAD.t} y2={H+PAD.t} stroke="currentColor" strokeOpacity={0.07} strokeWidth={1} />
+              <text x={PAD.l-4} y={yS(v)} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="currentColor" fillOpacity={0.35}>{v}</text>
+              <text x={xS(v)} y={H+PAD.t+14} textAnchor="middle" fontSize={9} fill="currentColor" fillOpacity={0.35}>{v}</text>
+            </g>
+          ))}
+          {groups.map(g => g.data.map((d: any, i: number) => (
+            <circle key={i} cx={xS(d.x)} cy={yS(d.y)} r={Math.max(3, Math.min(10, d.z / 3))}
+              fill={g.color} fillOpacity={0.65} stroke={g.color} strokeOpacity={0.3} strokeWidth={1}
+              style={{ cursor: "pointer" }}
+              onMouseMove={e => {
+                if (!svgRef.current) return
+                const r = svgRef.current.getBoundingClientRect()
+                setTooltip({ x: e.clientX - r.left, y: e.clientY - r.top, color: g.color, xv: d.x, yv: d.y, z: d.z })
+              }}
+            />
+          )))}
+        </svg>
+        {tooltip && (
+          <div className="pointer-events-none absolute z-50 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-xl text-xs" style={{ left: tooltip.x, top: tooltip.y, transform: "translate(-50%,-110%)" }}>
+            <div className="flex items-center gap-1.5 mb-1"><span className="size-2 rounded-sm" style={{ background: tooltip.color }} /><span className="text-muted-foreground">Point</span></div>
+            <div className="flex gap-3 tabular-nums text-foreground font-medium">
+              <span>x: {tooltip.xv}</span><span>y: {tooltip.yv}</span><span>z: {tooltip.z}</span>
+            </div>
+          </div>
+        )}
+      </div>
+      <ChartLegend items={groups} />
     </div>
   )
 }
@@ -7085,31 +7056,41 @@ const TREEMAP_DATA = [
   { name: "Vercel",     size: 140, fill: C.secondary  },
   { name: "Radix",      size: 110, fill: C.tertiary   },
 ]
-const treemapConfig: ChartConfig = {}
-
 function TreemapChartDemo() {
-  const CustomContent = (props: any) => {
-    const { x, y, width, height, name, fill } = props
-    if (width < 30 || height < 20) return null
-    return (
-      <g>
-        <rect x={x+2} y={y+2} width={width-4} height={height-4} rx={6} fill={fill} fillOpacity={0.25} stroke={fill} strokeOpacity={0.5} strokeWidth={1} />
-        {width > 60 && height > 32 && (
-          <text x={x+width/2} y={y+height/2} textAnchor="middle" dominantBaseline="middle" fill={C.text} fontSize={width > 100 ? 13 : 10} fontWeight={600} opacity={0.9}>{name}</text>
-        )}
-      </g>
-    )
+  // Pure SVG treemap — squarified layout
+  const W = 560, H = 210
+  const total = TREEMAP_DATA.reduce((s, d) => s + d.size, 0)
+  type Rect = { x:number; y:number; w:number; h:number; name:string; fill:string; size:number }
+  const rects: Rect[] = []
+  function layout(items: typeof TREEMAP_DATA, x: number, y: number, w: number, h: number) {
+    if (items.length === 0) return
+    if (items.length === 1) { rects.push({ x, y, w, h, ...items[0] }); return }
+    const half = items.reduce((s, d) => s + d.size, 0) / 2
+    let sum = 0, split = 0
+    for (let i = 0; i < items.length; i++) { sum += items[i].size; if (sum >= half) { split = i + 1; break } }
+    const frac = items.slice(0, split).reduce((s, d) => s + d.size, 0) / items.reduce((s, d) => s + d.size, 0)
+    if (w >= h) { layout(items.slice(0, split), x, y, w * frac, h); layout(items.slice(split), x + w * frac, y, w * (1 - frac), h) }
+    else { layout(items.slice(0, split), x, y, w, h * frac); layout(items.slice(split), x, y + h * frac, w, h * (1 - frac)) }
   }
-
+  layout(TREEMAP_DATA.slice().sort((a, b) => b.size - a.size), 0, 0, W, H)
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Tech Stack Usage</p>
         <p className="text-xs text-muted-foreground">Size = relative popularity</p>
       </div>
-      <ChartContainer config={treemapConfig} className="h-56 w-full">
-        <Treemap data={TREEMAP_DATA} dataKey="size" content={<CustomContent />} />
-      </ChartContainer>
+      <div style={{ height: H }}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full">
+          {rects.map((r, i) => (
+            <g key={i}>
+              <rect x={r.x+2} y={r.y+2} width={Math.max(0,r.w-4)} height={Math.max(0,r.h-4)} rx={5} fill={r.fill} fillOpacity={0.22} stroke={r.fill} strokeOpacity={0.5} strokeWidth={1} />
+              {r.w > 55 && r.h > 28 && (
+                <text x={r.x+r.w/2} y={r.y+r.h/2} textAnchor="middle" dominantBaseline="middle" fill="currentColor" fontSize={r.w > 90 ? 12 : 9} fontWeight={600} fillOpacity={0.85}>{r.name}</text>
+              )}
+            </g>
+          ))}
+        </svg>
+      </div>
     </div>
   )
 }
@@ -7434,33 +7415,63 @@ const COMPOSED_DATA = [
   { month: "May", sales: 5800, target: 5500, growth: 5  },
   { month: "Jun", sales: 7100, target: 6000, growth: 22 },
 ]
-const composedConfig: ChartConfig = {
-  sales:  { label: "Sales",     color: C.primary   },
-  target: { label: "Target",    color: C.secondary  },
-  growth: { label: "Growth %",  color: C.tertiary   },
-}
-
 function ComposedChartDemo() {
+  // Dual-axis composed chart: bars (sales/target) + line (growth) all in pure SVG
+  const [tooltip, setTooltip] = React.useState<{x:number;y:number;idx:number} | null>(null)
+  const svgRef = React.useRef<SVGSVGElement>(null)
+  const PAD = { t: 12, r: 40, b: 28, l: 44 }
+  const W = 560, H = 200
+  const maxBar = Math.max(...COMPOSED_DATA.map(d => Math.max(d.sales, d.target))) * 1.15
+  const minGrowth = Math.min(...COMPOSED_DATA.map(d => d.growth))
+  const maxGrowth = Math.max(...COMPOSED_DATA.map(d => d.growth))
+  const growthRange = maxGrowth - minGrowth || 1
+  const n = COMPOSED_DATA.length
+  const groupW = W / n
+  const barW = groupW * 0.3
+  const xMid = (i: number) => PAD.l + i * groupW + groupW / 2
+  const yBar = (v: number) => PAD.t + H - (v / maxBar) * H
+  const yLine = (v: number) => PAD.t + H - ((v - minGrowth) / growthRange) * H
+  const linePts = COMPOSED_DATA.map((d, i) => [xMid(i), yLine(d.growth)] as [number,number])
+  const barTicks = [0, 0.25, 0.5, 0.75, 1].map(t => Math.round(maxBar * t))
+  const growthTicks = [minGrowth, (minGrowth+maxGrowth)/2, maxGrowth].map(v => Math.round(v))
+  const series = [
+    { key: "sales",  label: "Sales",    color: C.primary },
+    { key: "target", label: "Target",   color: C.secondary },
+    { key: "growth", label: "Growth %", color: C.tertiary },
+  ]
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="px-1">
         <p className="text-sm font-semibold text-foreground">Sales vs Target + Growth</p>
         <p className="text-xs text-muted-foreground">Bar (sales & target) + Line (growth %)</p>
       </div>
-      <ChartContainer config={composedConfig} className="h-56 w-full">
-        <BarChart data={COMPOSED_DATA} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-          <XAxis dataKey="month" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="left" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
-          <YAxis yAxisId="right" orientation="right" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Bar yAxisId="left" dataKey="sales"  fill={C.primary}   radius={[4,4,0,0]} fillOpacity={0.8} />
-          <Bar yAxisId="left" dataKey="target" fill={C.secondary} radius={[4,4,0,0]} fillOpacity={0.5} />
-          <Line yAxisId="right" type="monotone" dataKey="growth" stroke={C.tertiary} strokeWidth={2} dot={{ fill: C.tertiary, r: 3 }} />
-          <ReferenceLine yAxisId="right" y={0} stroke={C.muted} strokeDasharray="3 3" />
-        </BarChart>
-      </ChartContainer>
+      <div className="relative" style={{ height: H + PAD.t + PAD.b }}>
+        <svg ref={svgRef} viewBox={`0 0 ${W + PAD.l + PAD.r} ${H + PAD.t + PAD.b}`} preserveAspectRatio="none" className="w-full h-full" onMouseLeave={() => setTooltip(null)}>
+          {barTicks.map(v => (
+            <g key={v}>
+              <line x1={PAD.l} x2={W+PAD.l} y1={yBar(v)} y2={yBar(v)} stroke="currentColor" strokeOpacity={0.07} strokeWidth={1} />
+              <text x={PAD.l-6} y={yBar(v)} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="currentColor" fillOpacity={0.4}>${Math.round(v/1000)}k</text>
+            </g>
+          ))}
+          {growthTicks.map((v, i) => (
+            <text key={i} x={W+PAD.l+4} y={yLine(v)} dominantBaseline="middle" fontSize={9} fill={C.tertiary} fillOpacity={0.6}>{v}%</text>
+          ))}
+          {COMPOSED_DATA.map((d, i) => (
+            <g key={i}>
+              <rect x={xMid(i) - barW - 1} y={yBar(d.sales)} width={barW} height={H - (yBar(d.sales) - PAD.t)} fill={C.primary} fillOpacity={0.8} rx={2} />
+              <rect x={xMid(i) + 1} y={yBar(d.target)} width={barW} height={H - (yBar(d.target) - PAD.t)} fill={C.secondary} fillOpacity={0.5} rx={2} />
+              <text x={xMid(i)} y={H+PAD.t+16} textAnchor="middle" fontSize={10} fill="currentColor" fillOpacity={0.4}>{d.month}</text>
+              <rect x={PAD.l + i*groupW} y={PAD.t} width={groupW} height={H} fill="transparent" onMouseMove={e => { if (!svgRef.current) return; const r = svgRef.current.getBoundingClientRect(); setTooltip({x: e.clientX-r.left, y: e.clientY-r.top}) }} />
+            </g>
+          ))}
+          {/* zero reference line for growth */}
+          <line x1={PAD.l} x2={W+PAD.l} y1={yLine(0)} y2={yLine(0)} stroke={C.tertiary} strokeOpacity={0.2} strokeWidth={1} strokeDasharray="4 3" />
+          {/* growth line */}
+          <path d={linePts.map(([x,y],i) => `${i===0?'M':'L'} ${x} ${y}`).join(' ')} fill="none" stroke={C.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          {linePts.map(([x,y],i) => <circle key={i} cx={x} cy={y} r={3} fill={C.tertiary} />)}
+        </svg>
+      </div>
+      <ChartLegend items={series} />
     </div>
   )
 }
@@ -7777,7 +7788,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ─────────────────────────────────────────────────────────
+// ── 15. Bubble Chart ─────────────────────────────────────���───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
