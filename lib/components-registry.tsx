@@ -2150,7 +2150,7 @@ function ViewTable() {
   )
 }
 
-// ─── All Views Switcher (master showcase) ─────────────────────────────────────
+// ─── All Views Switcher (master showcase) ─────────────────────────────────���───
 
 type ViewMode = "kanban" | "board" | "cards" | "list" | "table"
 
@@ -5388,7 +5388,7 @@ function FloatingChatWidget() {
   )
 }
 
-// ── 4. Voice Chat UI ──────────────────────────────────────────────────────────
+// ── 4. Voice Chat UI ──────────────────────��───────────────────────────────────
 type VoiceState = "idle" | "listening" | "processing" | "speaking"
 
 function VoiceChatUI() {
@@ -7790,7 +7790,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ─────────────────────────────────────����───────────────────
+// ── 15. Bubble Chart ────────────────────────��────────────����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
@@ -7922,16 +7922,19 @@ function CandlestickChartDemo() {
 }
 
 // ── 17. Histogram ─────────────────────────────────────────────────────────────
-const RAW_VALUES = Array.from({ length: 200 }, (_, i) =>
-  Math.round(50 + 20 * Math.sin(i * 0.31) * Math.cos(i * 0.13) + Math.random() * 30)
-)
-const BINS = 10
-const BIN_MIN = Math.min(...RAW_VALUES), BIN_MAX = Math.max(...RAW_VALUES)
-const BIN_SIZE = (BIN_MAX - BIN_MIN) / BINS
-const HIST_DATA = Array.from({ length: BINS }, (_, i) => {
-  const lo = BIN_MIN + i * BIN_SIZE, hi = lo + BIN_SIZE
-  return { label: `${Math.round(lo)}`, count: RAW_VALUES.filter(v => v >= lo && (i === BINS - 1 ? v <= hi : v < hi)).length }
-})
+// Fully static dataset — no Math.random(), guarantees SSR/client match
+const HIST_DATA = [
+  { label: "20", count: 4  },
+  { label: "28", count: 11 },
+  { label: "36", count: 23 },
+  { label: "44", count: 34 },
+  { label: "52", count: 42 },
+  { label: "60", count: 38 },
+  { label: "68", count: 27 },
+  { label: "76", count: 14 },
+  { label: "84", count: 6  },
+  { label: "92", count: 2  },
+]
 
 function HistogramChartDemo() {
   return (
