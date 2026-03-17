@@ -6375,91 +6375,110 @@ function StepperNav() {
 }
 
 // ── 6. Bottom Tab Bar (mobile) ────────────────────────────────────────────────
-const BOTTOM_TABS = [
-  { icon: LayoutGrid, label: "Home" },
-  { icon: Search,      label: "Search" },
-  { icon: MessageSquare, label: "Chat", badge: 3 },
-  { icon: Star,        label: "Saved" },
-  { icon: User,        label: "Profile" },
-] as const
+type TabItem = { label: string; icon: React.ElementType; badge?: number }
+
+const TAB_ITEMS: TabItem[] = [
+  { label: "Home",    icon: LayoutGrid },
+  { label: "Search",  icon: Search },
+  { label: "Chat",    icon: MessageSquare, badge: 3 },
+  { label: "Saved",   icon: Star },
+  { label: "Profile", icon: User },
+]
 
 function BottomTabBar() {
   const [active, setActive] = useState("Home")
 
   return (
-    <div className="mx-auto" style={{ width: 360 }}>
-      {/* Phone mock */}
+    <div style={{ width: 360, margin: "0 auto" }}>
       <div
-        className="flex flex-col rounded-[28px] border border-border bg-card overflow-hidden"
-        style={{ height: 440 }}
+        style={{ height: 440, display: "flex", flexDirection: "column", borderRadius: 28, overflow: "hidden" }}
+        className="border border-border bg-card"
       >
-        {/* Content area */}
-        <div className="flex-1 p-5 flex flex-col gap-3 overflow-hidden">
+        {/* Mock content */}
+        <div style={{ flex: 1, padding: 20, display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}>
           <p className="text-sm font-semibold text-foreground">{active}</p>
-          <div className="flex flex-col gap-2">
-            {[88, 68, 78, 52].map((w, i) => (
-              <div key={i} className="h-2.5 rounded-full bg-secondary" style={{ width: `${w}%` }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[88, 66, 76, 50].map((w, i) => (
+              <div key={i} className="bg-secondary rounded-full" style={{ height: 10, width: `${w}%` }} />
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-2 flex-1">
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} className="rounded-2xl bg-secondary" />
-            ))}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, flex: 1 }}>
+            {[0,1,2,3].map(i => <div key={i} className="bg-secondary rounded-2xl" />)}
           </div>
         </div>
 
-        {/* Tab bar — 5 equal columns, no absolute positioning */}
-        <nav
-          className="shrink-0 border-t border-border bg-card"
-          style={{ height: 64 }}
+        {/* Tab bar */}
+        <div
+          className="border-t border-border bg-card"
+          style={{ height: 64, display: "flex" }}
+          role="navigation"
           aria-label="Bottom navigation"
         >
-          <div className="flex h-full">
-            {BOTTOM_TABS.map(({ icon: Icon, label, badge }) => {
-              const isActive = active === label
-              return (
-                <button
-                  key={label}
-                  onClick={() => setActive(label)}
-                  aria-label={label}
-                  aria-current={isActive ? "page" : undefined}
-                  style={{ flex: "1 1 0", minWidth: 0 }}
-                  className={cn(
-                    "flex flex-col items-center justify-center gap-[3px] transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground"
+          {TAB_ITEMS.map(({ label, icon: Icon, badge }) => {
+            const on = active === label
+            return (
+              <button
+                key={label}
+                onClick={() => setActive(label)}
+                aria-label={label}
+                aria-current={on ? "page" : undefined}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4,
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  color: on ? "var(--color-primary)" : "var(--color-muted-foreground)",
+                  padding: "6px 0 4px",
+                }}
+              >
+                {/* Indicator line */}
+                <span style={{
+                  display: "block",
+                  width: 24,
+                  height: 2,
+                  borderRadius: 9999,
+                  background: on ? "var(--color-primary)" : "transparent",
+                  marginBottom: 2,
+                }} />
+                {/* Icon + badge */}
+                <span style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icon size={18} />
+                  {badge != null && (
+                    <span style={{
+                      position: "absolute",
+                      top: -5,
+                      right: -7,
+                      minWidth: 14,
+                      height: 14,
+                      borderRadius: 9999,
+                      background: "#f43f5e",
+                      color: "#fff",
+                      fontSize: 8,
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "0 3px",
+                      lineHeight: 1,
+                      border: "2px solid var(--color-card)",
+                    }}>
+                      {badge}
+                    </span>
                   )}
-                >
-                  {/* Top indicator pip */}
-                  <span
-                    className="rounded-full transition-all"
-                    style={{
-                      width: 24,
-                      height: 2,
-                      marginBottom: 1,
-                      background: isActive ? "var(--color-primary)" : "transparent",
-                    }}
-                  />
-                  {/* Icon with optional badge */}
-                  <span className="relative" style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Icon size={18} />
-                    {badge != null && (
-                      <span
-                        className="absolute bg-rose-500 text-white font-bold rounded-full border-2 border-card flex items-center justify-center"
-                        style={{ fontSize: 8, minWidth: 15, height: 15, top: -6, right: -8, lineHeight: 1, padding: "0 3px" }}
-                      >
-                        {badge}
-                      </span>
-                    )}
-                  </span>
-                  {/* Label */}
-                  <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, lineHeight: 1 }}>
-                    {label}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </nav>
+                </span>
+                {/* Label */}
+                <span style={{ fontSize: 10, fontWeight: on ? 600 : 400, lineHeight: 1 }}>
+                  {label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
