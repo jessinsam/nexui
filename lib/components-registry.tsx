@@ -6420,7 +6420,7 @@ function BottomTabBar() {
                 aria-label={tab.label}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 pt-1.5 pb-1 transition-colors",
+                  "w-full h-full flex flex-col items-center justify-center gap-1 pt-1.5 pb-1 transition-colors",
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
