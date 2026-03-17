@@ -16,14 +16,29 @@ function AuthPreview() {
   const [email, setEmail] = useState("")
 
   return (
-    <div className="w-full max-w-sm mx-auto flex flex-col gap-3 text-left">
-      <div className="mb-1">
-        <p className="text-base font-semibold text-foreground">Welcome back</p>
-        <p className="text-sm text-muted-foreground">Sign in to your account</p>
+    <div className="w-full flex flex-col gap-5 text-left">
+      {/* Logo */}
+      <div className="flex items-center gap-2">
+        <span className="w-7 h-7 rounded-md flex items-center justify-center bg-primary shrink-0">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="5" height="5" rx="1" fill="white" />
+            <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.6" />
+            <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.6" />
+            <rect x="8" y="8" width="5" height="5" rx="1" fill="white" />
+          </svg>
+        </span>
+        <span className="font-semibold text-sm text-foreground tracking-tight">Nex<span className="text-primary">UI</span></span>
       </div>
 
-      <button className="flex items-center justify-center gap-2 w-full h-10 rounded-lg border border-border bg-secondary text-sm font-medium text-foreground hover:bg-secondary/80 transition-colors">
-        <Github size={14} aria-hidden="true" />
+      {/* Heading */}
+      <div>
+        <h3 className="text-2xl font-semibold text-foreground">Welcome back</h3>
+        <p className="text-sm text-muted-foreground mt-1">Sign in to your NexUI account to continue.</p>
+      </div>
+
+      {/* GitHub */}
+      <button className="flex items-center justify-center gap-2 w-full h-11 rounded-lg border border-border bg-secondary text-sm font-medium text-foreground hover:bg-secondary/80 transition-colors">
+        <Github size={15} aria-hidden="true" />
         Continue with GitHub
       </button>
 
@@ -33,44 +48,60 @@ function AuthPreview() {
         <div className="flex-1 h-px bg-border" />
       </div>
 
-      <input
-        type="email"
-        placeholder="you@example.com"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        className="h-10 w-full rounded-lg border border-border bg-secondary px-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition"
-      />
-
-      <div className="relative">
+      {/* Email */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Email</label>
         <input
-          type={showPw ? "text" : "password"}
-          placeholder="••••••••"
-          readOnly
-          className="h-10 w-full rounded-lg border border-border bg-secondary px-3.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          className="h-11 w-full rounded-lg border border-border bg-secondary px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition"
         />
-        <button
-          type="button"
-          onClick={() => setShowPw(v => !v)}
-          aria-label="Toggle password visibility"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {showPw ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-        </button>
       </div>
 
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <div className="w-3.5 h-3.5 rounded border border-border bg-secondary" />
-          <span className="text-xs text-muted-foreground">Remember me</span>
-        </label>
-        <button className="text-xs text-primary hover:text-primary/80 transition-colors">
-          Forgot password?
-        </button>
+      {/* Password */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Password</label>
+          <button className="text-xs text-primary hover:text-primary/80 transition-colors">Forgot password?</button>
+        </div>
+        <div className="relative">
+          <input
+            type={showPw ? "text" : "password"}
+            placeholder="••••••••"
+            readOnly
+            className="h-11 w-full rounded-lg border border-border bg-secondary px-4 pr-11 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw(v => !v)}
+            aria-label="Toggle password visibility"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showPw ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
+          </button>
+        </div>
       </div>
 
-      <button className="flex items-center justify-center gap-2 h-10 w-full rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all">
-        Sign in <ArrowRight size={13} aria-hidden="true" />
+      {/* Sign in */}
+      <button className="flex items-center justify-center gap-2 h-11 w-full rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all">
+        Sign in <ArrowRight size={14} aria-hidden="true" />
       </button>
+
+      {/* Sign up */}
+      <p className="text-center text-xs text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <button className="text-primary hover:text-primary/80 transition-colors font-medium">Sign up</button>
+      </p>
+
+      {/* Terms */}
+      <p className="text-center text-[10px] text-muted-foreground leading-relaxed">
+        By continuing, you agree to our{" "}
+        <button className="underline underline-offset-2 hover:text-foreground transition-colors">Terms</button>
+        {" & "}
+        <button className="underline underline-offset-2 hover:text-foreground transition-colors">Privacy Policy</button>.
+      </p>
     </div>
   )
 }
@@ -97,29 +128,29 @@ export function Gallery() {
         {/* Auth showcase — two-column: form left, image right */}
         <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden">
           {/* Preview area */}
-          <div className="grid md:grid-cols-2 min-h-[420px]">
+          <div className="grid md:grid-cols-2 min-h-[560px]">
             {/* Left — form */}
-            <div className="flex items-center justify-center bg-background/40 px-6 sm:px-10 py-10 sm:py-14 border-b md:border-b-0 md:border-r border-border">
+            <div className="flex items-center justify-center bg-[#0a0a0a] px-8 sm:px-14 py-12 border-b md:border-b-0 md:border-r border-border">
               <div className="w-full max-w-sm">
                 <AuthPreview />
               </div>
             </div>
 
-            {/* Right — image */}
-            <div className="relative hidden md:block overflow-hidden bg-background">
+            {/* Right — image with quote */}
+            <div className="relative hidden md:block overflow-hidden">
               <img
                 src="/auth-visual.jpg"
-                alt="Authentication visual"
-                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                alt="Fashion editorial — authentication visual"
+                className="absolute inset-0 w-full h-full object-cover"
               />
-              {/* Overlay gradient so it blends with the card edge */}
-              <div className="absolute inset-0 bg-gradient-to-r from-card/60 via-transparent to-transparent" />
-              {/* Floating badge */}
-              <div className="absolute bottom-6 right-6 flex flex-col gap-2">
-                <div className="px-3 py-2 rounded-lg bg-background/70 backdrop-blur-sm border border-border text-xs text-muted-foreground">
-                  <span className="block text-foreground font-semibold text-sm mb-0.5">Secure by default</span>
-                  OAuth · Password hash · 2FA
-                </div>
+              {/* Left-side fade to blend with form panel */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/40 via-transparent to-transparent" />
+              {/* Quote overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                <blockquote className="text-white text-lg font-semibold leading-snug text-balance">
+                  &ldquo;The best UI is the one developers actually want to use.&rdquo;
+                </blockquote>
+                <p className="mt-2 text-white/60 text-sm">— NexUI Team</p>
               </div>
             </div>
           </div>
@@ -129,18 +160,13 @@ export function Gallery() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-sm font-semibold text-foreground">Authentication</span>
-                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Auth
-                </span>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Auth</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Sign-in, sign-up, and multi-step account creation flows with OAuth, password strength validation, and 2FA.
               </p>
             </div>
-            <a
-              href="/components"
-              className="flex items-center gap-1.5 shrink-0 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-            >
+            <a href="/components" className="flex items-center gap-1.5 shrink-0 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
               View all components <ChevronRight size={12} aria-hidden="true" />
             </a>
           </div>

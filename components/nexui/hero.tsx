@@ -57,8 +57,8 @@ export function Hero() {
           </a>
         </div>
 
-        {/* Stats row */}
-        <div className="flex flex-wrap justify-center gap-6 sm:gap-8 pt-4">
+        {/* Stats row — always 4 columns so MIT never orphans */}
+        <div className="w-full grid grid-cols-4 gap-2 pt-4 max-w-sm sm:max-w-none sm:flex sm:justify-center sm:gap-8">
           {[
             { value: "50+",  label: "Components" },
             { value: "0 KB", label: "Bundle size" },
@@ -66,8 +66,8 @@ export function Hero() {
             { value: "MIT",  label: "License" },
           ].map((s) => (
             <div key={s.label} className="flex flex-col items-center gap-0.5">
-              <span className="text-xl sm:text-2xl font-semibold text-foreground">{s.value}</span>
-              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest">{s.label}</span>
+              <span className="text-lg sm:text-2xl font-semibold text-foreground">{s.value}</span>
+              <span className="text-[9px] sm:text-xs text-muted-foreground uppercase tracking-widest text-center">{s.label}</span>
             </div>
           ))}
         </div>

@@ -147,7 +147,7 @@ export function CLI() {
   const [active, setActive] = useState(0)
 
   return (
-    <section id="cli" className="py-24 px-6 border-t border-border">
+    <section id="cli" className="py-14 sm:py-24 px-4 sm:px-6 border-t border-border">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
