@@ -94,12 +94,33 @@ export function Gallery() {
           </p>
         </div>
 
-        {/* Auth showcase — full width */}
+        {/* Auth showcase — two-column: form left, image right */}
         <div className="rounded-xl border border-border bg-card hover:border-primary/30 transition-all duration-200 overflow-hidden">
           {/* Preview area */}
-          <div className="flex items-center justify-center bg-background/40 px-6 py-10 sm:py-14">
-            <div className="w-full max-w-md">
-              <AuthPreview />
+          <div className="grid md:grid-cols-2 min-h-[420px]">
+            {/* Left — form */}
+            <div className="flex items-center justify-center bg-background/40 px-6 sm:px-10 py-10 sm:py-14 border-b md:border-b-0 md:border-r border-border">
+              <div className="w-full max-w-sm">
+                <AuthPreview />
+              </div>
+            </div>
+
+            {/* Right — image */}
+            <div className="relative hidden md:block overflow-hidden bg-background">
+              <img
+                src="/auth-visual.jpg"
+                alt="Authentication visual"
+                className="absolute inset-0 w-full h-full object-cover opacity-80"
+              />
+              {/* Overlay gradient so it blends with the card edge */}
+              <div className="absolute inset-0 bg-gradient-to-r from-card/60 via-transparent to-transparent" />
+              {/* Floating badge */}
+              <div className="absolute bottom-6 right-6 flex flex-col gap-2">
+                <div className="px-3 py-2 rounded-lg bg-background/70 backdrop-blur-sm border border-border text-xs text-muted-foreground">
+                  <span className="block text-foreground font-semibold text-sm mb-0.5">Secure by default</span>
+                  OAuth · Password hash · 2FA
+                </div>
+              </div>
             </div>
           </div>
 
