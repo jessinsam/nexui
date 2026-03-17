@@ -52,6 +52,15 @@ function nice(v: number): string {
   return String(v)
 }
 
+/** Round a raw max value up to a "nice" ceiling so ticks are always integers. */
+function niceMax(rawMax: number): number {
+  if (rawMax <= 0) return 1
+  // magnitude of the top tick step
+  const mag = Math.pow(10, Math.floor(Math.log10(rawMax)))
+  const step = mag >= 5 ? mag : mag * (rawMax / mag <= 2 ? 1 : rawMax / mag <= 5 ? 2 : 5)
+  return Math.ceil(rawMax / step) * step
+}
+
 function mono(points: [number, number][]): string {
   if (points.length < 2) return ""
   const d: string[] = []
@@ -102,11 +111,13 @@ export function AreaChart({ data, xKey, series, stacked = false, yFormatter = ni
   })
 
   const stackedTotals = stacked ? numericData.map((row) => series.reduce((s, sr) => s + row[sr.key], 0)) : []
-  const maxY = stacked
+  const rawMaxY = stacked
     ? Math.max(...stackedTotals, 1)
     : Math.max(...series.flatMap((s) => numericData.map((r) => r[s.key])), 1)
+  const maxY = niceMax(rawMaxY)
 
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(maxY * t))
+  const TICK_COUNT = 5
+  const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => Math.round((maxY / (TICK_COUNT - 1)) * i))
   const xScale = (i: number) => PAD.l + (i / (data.length - 1)) * W
   const yScale = (v: number) => PAD.t + H - (v / maxY) * H
 
@@ -231,6 +242,8 @@ export interface BarChartProps {
   yFormatter?: (v: number) => string
   className?: string
   height?: number
+  /** Gap between bars in pixels (unused in current layout but accepted for API compat) */
+  barGap?: number
 }
 
 export function BarChart({ data, xKey, series, stacked = false, horizontal = false, yFormatter = nice, className, height = 224 }: BarChartProps) {
@@ -249,11 +262,13 @@ export function BarChart({ data, xKey, series, stacked = false, horizontal = fal
   })
 
   const stackedTotals = stacked ? numericData.map((row) => series.reduce((s, sr) => s + row[sr.key], 0)) : []
-  const maxVal = stacked
+  const rawMaxVal = stacked
     ? Math.max(...stackedTotals, 1)
     : Math.max(...series.flatMap((s) => numericData.map((r) => r[s.key])), 1)
+  const maxVal = niceMax(rawMaxVal)
 
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(maxVal * t))
+  const TICK_COUNT = 5
+  const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => Math.round((maxVal / (TICK_COUNT - 1)) * i))
   const groupW = W / data.length
   const barW = stacked ? groupW * 0.5 : (groupW * 0.7) / series.length
   const gap = stacked ? 0 : groupW * 0.7 / series.length
@@ -381,9 +396,11 @@ export interface LineChartProps {
   yFormatter?: (v: number) => string
   className?: string
   height?: number
+  /** Render as step-after line instead of smooth curve */
+  step?: boolean
 }
 
-export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice, className, height = 224 }: LineChartProps) {
+export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice, className, height = 224, step = false }: LineChartProps) {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; data: ChartTooltipData } | null>(null)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -399,14 +416,24 @@ export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice
   })
 
   const allVals = series.flatMap((s) => numericData.map((r) => r[s.key]))
-  const maxY = Math.max(...allVals, referenceLine?.value ?? 0, 1)
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(maxY * t))
+  const rawMaxY = Math.max(...allVals, referenceLine?.value ?? 0, 1)
+  const maxY = niceMax(rawMaxY)
+  const TICK_COUNT = 5
+  const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => Math.round((maxY / (TICK_COUNT - 1)) * i))
 
   const xScale = (i: number) => PAD.l + (i / (data.length - 1)) * W
   const yScale = (v: number) => PAD.t + H - (v / maxY) * H
 
   const getPoints = (s: LineSeries): [number, number][] =>
     numericData.map((row, i) => [xScale(i), yScale(row[s.key])])
+
+  const pathForSeries = (s: LineSeries): string => {
+    const pts = getPoints(s)
+    if (step) {
+      return pts.map(([x, y], i) => i === 0 ? `M ${x} ${y}` : `H ${x} V ${y}`).join(" ")
+    }
+    return mono(pts)
+  }
 
   const handleMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current) return
@@ -456,7 +483,7 @@ export function LineChart({ data, xKey, series, referenceLine, yFormatter = nice
 
         {/* Lines */}
         {series.map((s) => (
-          <path key={s.key} d={mono(getPoints(s))} fill="none" stroke={s.color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          <path key={s.key} d={pathForSeries(s)} fill="none" stroke={s.color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         ))}
 
         {/* Hover */}
