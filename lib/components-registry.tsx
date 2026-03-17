@@ -5,6 +5,8 @@ import React, { useState } from "react"
 import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend, ReferenceLine, Treemap, FunnelChart, Funnel, LabelList } from "recharts"
 
 // ─── Compact previews (non-auth) ──────────────────────────────────────────────
 
@@ -2204,7 +2206,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation", "Charts"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -6722,4 +6724,870 @@ const NAV_REGISTRY: ComponentEntry[] = [
 ]
 
 COMPONENTS.push(...NAV_REGISTRY)
+
+// ─── Chart colors (resolved from CSS vars at runtime) ────────────────────────
+// We pass literal oklch values so Recharts can use them directly — CSS vars
+// are not resolved inside SVG paint attributes.
+
+const C = {
+  primary:   "oklch(0.62 0.21 250)",
+  secondary: "oklch(0.55 0.18 300)",
+  tertiary:  "oklch(0.60 0.18 170)",
+  quaternary:"oklch(0.65 0.20 40)",
+  quinary:   "oklch(0.58 0.15 340)",
+  muted:     "oklch(0.40 0.00 0)",
+  border:    "oklch(0.25 0.00 0)",
+  text:      "oklch(0.92 0.00 0)",
+  bg:        "oklch(0.10 0.00 0)",
+}
+const PALETTE = [C.primary, C.secondary, C.tertiary, C.quaternary, C.quinary]
+
+// ── 1. Area Chart (simple + stacked) ─────────────────────────────────────────
+const AREA_DATA = [
+  { month: "Jan", revenue: 4200, expenses: 2400 },
+  { month: "Feb", revenue: 5800, expenses: 2800 },
+  { month: "Mar", revenue: 5200, expenses: 3200 },
+  { month: "Apr", revenue: 7100, expenses: 2900 },
+  { month: "May", revenue: 6400, expenses: 3600 },
+  { month: "Jun", revenue: 8900, expenses: 3100 },
+  { month: "Jul", revenue: 9200, expenses: 4100 },
+]
+const areaConfig: ChartConfig = {
+  revenue:  { label: "Revenue",  color: C.primary },
+  expenses: { label: "Expenses", color: C.secondary },
+}
+
+function AreaChartDemo() {
+  const [stacked, setStacked] = useState(false)
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Revenue vs Expenses</p>
+          <p className="text-xs text-muted-foreground">Jan – Jul 2025</p>
+        </div>
+        <div className="flex gap-1">
+          {["Normal","Stacked"].map(v => (
+            <button key={v} onClick={() => setStacked(v==="Stacked")}
+              className={cn("px-3 py-1 rounded-lg text-xs font-medium transition-all",
+                (v==="Stacked") === stacked ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+              )}>{v}</button>
+          ))}
+        </div>
+      </div>
+      <ChartContainer config={areaConfig} className="h-56 w-full">
+        <AreaChart data={AREA_DATA} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+          <defs>
+            <linearGradient id="gradRev" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={C.primary} stopOpacity={0.3}/>
+              <stop offset="95%" stopColor={C.primary} stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="gradExp" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={C.secondary} stopOpacity={0.3}/>
+              <stop offset="95%" stopColor={C.secondary} stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="month" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Area type="monotone" dataKey="revenue" stroke={C.primary} strokeWidth={2} fill="url(#gradRev)" stackId={stacked ? "s" : undefined} />
+          <Area type="monotone" dataKey="expenses" stroke={C.secondary} strokeWidth={2} fill="url(#gradExp)" stackId={stacked ? "s" : undefined} />
+        </AreaChart>
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ── 2. Bar Chart (vertical + horizontal) ─────────────────────────────────────
+const BAR_DATA = [
+  { name: "Q1", web: 4200, mobile: 2400, desktop: 1800 },
+  { name: "Q2", web: 5800, mobile: 3100, desktop: 2200 },
+  { name: "Q3", web: 4900, mobile: 3800, desktop: 2600 },
+  { name: "Q4", web: 7200, mobile: 4100, desktop: 3200 },
+]
+const barConfig: ChartConfig = {
+  web:     { label: "Web",     color: C.primary },
+  mobile:  { label: "Mobile",  color: C.secondary },
+  desktop: { label: "Desktop", color: C.tertiary },
+}
+
+function BarChartDemo() {
+  const [horizontal, setHorizontal] = useState(false)
+  const [grouped, setGrouped] = useState(true)
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-2 px-1">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Traffic by Platform</p>
+          <p className="text-xs text-muted-foreground">Quarterly breakdown</p>
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {["Grouped","Stacked"].map(v => (
+            <button key={v} onClick={() => setGrouped(v==="Grouped")}
+              className={cn("px-3 py-1 rounded-lg text-xs font-medium transition-all", (v==="Grouped")===grouped ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>{v}</button>
+          ))}
+          <button onClick={() => setHorizontal(v=>!v)} className="px-3 py-1 rounded-lg text-xs font-medium bg-secondary text-muted-foreground hover:text-foreground transition-all">{horizontal ? "Vertical" : "Horizontal"}</button>
+        </div>
+      </div>
+      <ChartContainer config={barConfig} className="h-56 w-full">
+        <BarChart data={BAR_DATA} layout={horizontal ? "vertical" : "horizontal"} margin={{ top: 8, right: 8, left: horizontal ? 24 : -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} horizontal={!horizontal} vertical={horizontal} />
+          {horizontal
+            ? <><XAxis type="number" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} /><YAxis dataKey="name" type="category" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} width={24} /></>
+            : <><XAxis dataKey="name" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} /></>
+          }
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Bar dataKey="web"     fill={C.primary}   radius={[4,4,0,0]} stackId={grouped ? undefined : "s"} />
+          <Bar dataKey="mobile"  fill={C.secondary}  radius={[4,4,0,0]} stackId={grouped ? undefined : "s"} />
+          <Bar dataKey="desktop" fill={C.tertiary}  radius={[4,4,0,0]} stackId={grouped ? undefined : "s"} />
+        </BarChart>
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ── 3. Line Chart (multi-line + reference) ───────────────────────────────────
+const LINE_DATA = [
+  { week: "W1",  userA: 120, userB: 80,  userC: 60  },
+  { week: "W2",  userA: 180, userB: 120, userC: 90  },
+  { week: "W3",  userA: 150, userB: 200, userC: 110 },
+  { week: "W4",  userA: 220, userB: 160, userC: 140 },
+  { week: "W5",  userA: 300, userB: 180, userC: 160 },
+  { week: "W6",  userA: 280, userB: 240, userC: 200 },
+  { week: "W7",  userA: 350, userB: 210, userC: 230 },
+  { week: "W8",  userA: 400, userB: 290, userC: 260 },
+]
+const lineConfig: ChartConfig = {
+  userA: { label: "Team A", color: C.primary },
+  userB: { label: "Team B", color: C.secondary },
+  userC: { label: "Team C", color: C.tertiary },
+}
+
+function LineChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Weekly Active Users</p>
+        <p className="text-xs text-muted-foreground">8-week trend by team</p>
+      </div>
+      <ChartContainer config={lineConfig} className="h-56 w-full">
+        <LineChart data={LINE_DATA} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="week" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <ReferenceLine y={200} stroke={C.muted} strokeDasharray="4 4" label={{ value: "Target", fill: C.text, fontSize: 10, opacity: 0.6 }} />
+          <Line type="monotone" dataKey="userA" stroke={C.primary}   strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.primary }} />
+          <Line type="monotone" dataKey="userB" stroke={C.secondary}  strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.secondary }} />
+          <Line type="monotone" dataKey="userC" stroke={C.tertiary}  strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.tertiary }} />
+        </LineChart>
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ── 4. Pie & Donut Chart ──────────────────────────────────────────────────────
+const PIE_DATA = [
+  { name: "Direct",   value: 38 },
+  { name: "Organic",  value: 27 },
+  { name: "Referral", value: 18 },
+  { name: "Social",   value: 11 },
+  { name: "Email",    value: 6  },
+]
+const pieConfig: ChartConfig = Object.fromEntries(
+  PIE_DATA.map((d, i) => [d.name.toLowerCase(), { label: d.name, color: PALETTE[i] }])
+)
+
+function PieChartDemo() {
+  const [donut, setDonut] = useState(true)
+  const [activeIdx, setActiveIdx] = useState<number | null>(null)
+
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Traffic Sources</p>
+          <p className="text-xs text-muted-foreground">Channel distribution</p>
+        </div>
+        <div className="flex gap-1">
+          {["Pie","Donut"].map(v => (
+            <button key={v} onClick={() => setDonut(v==="Donut")}
+              className={cn("px-3 py-1 rounded-lg text-xs font-medium transition-all", (v==="Donut")===donut ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>{v}</button>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        <ChartContainer config={pieConfig} className="h-52 w-52 shrink-0">
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <Pie
+              data={PIE_DATA}
+              cx="50%"
+              cy="50%"
+              innerRadius={donut ? 52 : 0}
+              outerRadius={80}
+              paddingAngle={3}
+              dataKey="value"
+              onMouseEnter={(_, i) => setActiveIdx(i)}
+              onMouseLeave={() => setActiveIdx(null)}
+              strokeWidth={0}
+            >
+              {PIE_DATA.map((_, i) => (
+                <Cell
+                  key={i}
+                  fill={PALETTE[i]}
+                  opacity={activeIdx === null || activeIdx === i ? 1 : 0.4}
+                  style={{ outline: "none", transition: "opacity 0.2s" }}
+                />
+              ))}
+              {donut && (
+                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fill={C.text} fontSize={20} fontWeight={700}>
+                  {PIE_DATA.reduce((s, d) => s + d.value, 0)}%
+                </text>
+              )}
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+        <div className="flex flex-col gap-2 flex-1">
+          {PIE_DATA.map((d, i) => (
+            <div key={d.name} className="flex items-center gap-2">
+              <span className="size-2 rounded-sm shrink-0" style={{ background: PALETTE[i] }} />
+              <span className="text-xs text-muted-foreground flex-1">{d.name}</span>
+              <span className="text-xs font-semibold text-foreground tabular-nums">{d.value}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 5. Radar Chart ────────────────────────────────────────────────────────────
+const RADAR_DATA = [
+  { skill: "TypeScript", score: 90, benchmark: 70 },
+  { skill: "React",      score: 85, benchmark: 75 },
+  { skill: "CSS",        score: 78, benchmark: 65 },
+  { skill: "Node.js",    score: 72, benchmark: 68 },
+  { skill: "Testing",    score: 65, benchmark: 60 },
+  { skill: "DevOps",     score: 55, benchmark: 72 },
+]
+const radarConfig: ChartConfig = {
+  score:     { label: "You",       color: C.primary },
+  benchmark: { label: "Avg",       color: C.secondary },
+}
+
+function RadarChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Skill Radar</p>
+        <p className="text-xs text-muted-foreground">Score vs industry average</p>
+      </div>
+      <ChartContainer config={radarConfig} className="h-64 w-full">
+        <RadarChart data={RADAR_DATA} margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+          <PolarGrid stroke={C.border} />
+          <PolarAngleAxis dataKey="skill" tick={{ fill: C.text, fontSize: 11, opacity: 0.7 }} />
+          <PolarRadiusAxis angle={30} domain={[0,100]} tick={{ fill: C.text, fontSize: 9, opacity: 0.4 }} axisLine={false} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Radar dataKey="benchmark" stroke={C.secondary} fill={C.secondary} fillOpacity={0.15} strokeWidth={1.5} dot={false} />
+          <Radar dataKey="score"     stroke={C.primary}   fill={C.primary}   fillOpacity={0.25} strokeWidth={2} dot={{ fill: C.primary, r: 3 }} />
+        </RadarChart>
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ── 6. Radial Bar Chart ───────────────────────────────────────────────────────
+const RADIAL_DATA = [
+  { name: "Storage",  value: 82,  fill: C.primary   },
+  { name: "Memory",   value: 65,  fill: C.secondary  },
+  { name: "CPU",      value: 48,  fill: C.tertiary   },
+  { name: "Network",  value: 91,  fill: C.quaternary },
+]
+const radialConfig: ChartConfig = Object.fromEntries(
+  RADIAL_DATA.map(d => [d.name.toLowerCase(), { label: d.name, color: d.fill }])
+)
+
+function RadialBarChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">System Usage</p>
+        <p className="text-xs text-muted-foreground">Resource utilisation %</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <ChartContainer config={radialConfig} className="h-52 w-52 shrink-0">
+          <RadialBarChart data={RADIAL_DATA} innerRadius={20} outerRadius={90} startAngle={90} endAngle={-270} barSize={10}>
+            <PolarGrid gridType="circle" stroke={C.border} />
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} formatter={(v, n) => [`${v}%`, n]} />
+            <RadialBar dataKey="value" cornerRadius={5} background={{ fill: C.border }}>
+              {RADIAL_DATA.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </RadialBar>
+          </RadialBarChart>
+        </ChartContainer>
+        <div className="flex flex-col gap-3 flex-1">
+          {RADIAL_DATA.map(d => (
+            <div key={d.name} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{d.name}</span>
+                <span className="text-xs font-bold text-foreground tabular-nums">{d.value}%</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div className="h-full rounded-full transition-all" style={{ width: `${d.value}%`, background: d.fill }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 7. Scatter Chart ──────────────────────────────────────────────────────────
+function makeScatter(n: number, cx: number, cy: number, spread: number, color: string) {
+  return Array.from({ length: n }, (_, i) => ({
+    x: +(cx + (Math.sin(i*1.3)*spread + Math.cos(i*2.1)*spread*0.5)).toFixed(1),
+    y: +(cy + (Math.cos(i*1.7)*spread + Math.sin(i*2.9)*spread*0.4)).toFixed(1),
+    z: Math.round(20 + Math.abs(Math.sin(i)) * 60),
+    color,
+  }))
+}
+const SCATTER_DATA_A = makeScatter(20, 40, 50, 20, C.primary)
+const SCATTER_DATA_B = makeScatter(20, 70, 30, 15, C.secondary)
+const scatterConfig: ChartConfig = {
+  groupA: { label: "Segment A", color: C.primary },
+  groupB: { label: "Segment B", color: C.secondary },
+}
+
+function ScatterChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Scatter Plot</p>
+        <p className="text-xs text-muted-foreground">Two-segment bubble chart</p>
+      </div>
+      <ChartContainer config={scatterConfig} className="h-56 w-full">
+        <ScatterChart margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+          <XAxis type="number" dataKey="x" name="X" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} domain={[0, 100]} />
+          <YAxis type="number" dataKey="y" name="Y" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} domain={[0, 100]} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Scatter name="groupA" data={SCATTER_DATA_A} fill={C.primary} fillOpacity={0.7} />
+          <Scatter name="groupB" data={SCATTER_DATA_B} fill={C.secondary} fillOpacity={0.7} />
+        </ScatterChart>
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ── 8. Treemap ────────────────────────────────────────────────────────────────
+const TREEMAP_DATA = [
+  { name: "React",      size: 420, fill: C.primary },
+  { name: "TypeScript", size: 310, fill: C.secondary },
+  { name: "Next.js",    size: 280, fill: C.tertiary },
+  { name: "Tailwind",   size: 240, fill: C.quaternary },
+  { name: "Prisma",     size: 180, fill: C.quinary },
+  { name: "Supabase",   size: 160, fill: C.primary   },
+  { name: "Vercel",     size: 140, fill: C.secondary  },
+  { name: "Radix",      size: 110, fill: C.tertiary   },
+]
+const treemapConfig: ChartConfig = {}
+
+function TreemapChartDemo() {
+  const CustomContent = (props: any) => {
+    const { x, y, width, height, name, fill } = props
+    if (width < 30 || height < 20) return null
+    return (
+      <g>
+        <rect x={x+2} y={y+2} width={width-4} height={height-4} rx={6} fill={fill} fillOpacity={0.25} stroke={fill} strokeOpacity={0.5} strokeWidth={1} />
+        {width > 60 && height > 32 && (
+          <text x={x+width/2} y={y+height/2} textAnchor="middle" dominantBaseline="middle" fill={C.text} fontSize={width > 100 ? 13 : 10} fontWeight={600} opacity={0.9}>{name}</text>
+        )}
+      </g>
+    )
+  }
+
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Tech Stack Usage</p>
+        <p className="text-xs text-muted-foreground">Size = relative popularity</p>
+      </div>
+      <ChartContainer config={treemapConfig} className="h-56 w-full">
+        <Treemap data={TREEMAP_DATA} dataKey="size" content={<CustomContent />} />
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ── 9. Funnel Chart ───────────────────────────────────────────────────────────
+const FUNNEL_DATA = [
+  { name: "Visitors",   value: 12400, fill: C.primary },
+  { name: "Sign-ups",   value: 4300,  fill: C.secondary },
+  { name: "Activated",  value: 2100,  fill: C.tertiary },
+  { name: "Converted",  value: 890,   fill: C.quaternary },
+  { name: "Retained",   value: 340,   fill: C.quinary },
+]
+const funnelConfig: ChartConfig = {}
+
+function FunnelChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Conversion Funnel</p>
+        <p className="text-xs text-muted-foreground">Visitor → Retention</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <ChartContainer config={funnelConfig} className="h-52 flex-1">
+          <FunnelChart>
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} formatter={(v, n) => [Number(v).toLocaleString(), n]} />
+            <Funnel dataKey="value" data={FUNNEL_DATA} isAnimationActive>
+              {FUNNEL_DATA.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.85} />)}
+              <LabelList dataKey="value" position="center" fill={C.text} fontSize={11} fontWeight={700} formatter={(v: number) => v.toLocaleString()} />
+            </Funnel>
+          </FunnelChart>
+        </ChartContainer>
+        <div className="flex flex-col gap-2 w-32 shrink-0">
+          {FUNNEL_DATA.map((d, i) => {
+            const rate = i === 0 ? 100 : Math.round(d.value / FUNNEL_DATA[0].value * 100)
+            return (
+              <div key={d.name} className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="size-2 rounded-sm shrink-0" style={{ background: d.fill }} />
+                  <span className="text-[10px] text-muted-foreground">{d.name}</span>
+                </div>
+                <span className="text-xs font-bold text-foreground tabular-nums pl-3.5">{rate}%</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 10. Gantt Chart (pure SVG — no Recharts needed) ───────────────────────────
+interface GanttTask {
+  id: string
+  label: string
+  group: string
+  start: number  // day offset
+  end: number    // day offset
+  color: string
+  deps?: string[]
+  progress: number // 0-100
+}
+
+const GANTT_TASKS: GanttTask[] = [
+  { id:"t1", label:"Discovery",       group:"Research",    start:0,  end:6,  color:C.primary,    progress:100 },
+  { id:"t2", label:"Requirements",    group:"Research",    start:3,  end:9,  color:C.primary,    progress:80  },
+  { id:"t3", label:"UI Design",       group:"Design",      start:8,  end:16, color:C.secondary,  progress:60, deps:["t2"] },
+  { id:"t4", label:"Prototyping",     group:"Design",      start:13, end:20, color:C.secondary,  progress:30  },
+  { id:"t5", label:"API Setup",       group:"Dev",         start:10, end:18, color:C.tertiary,   progress:55, deps:["t2"] },
+  { id:"t6", label:"Frontend",        group:"Dev",         start:16, end:27, color:C.tertiary,   progress:20, deps:["t3","t5"] },
+  { id:"t7", label:"Backend",         group:"Dev",         start:14, end:25, color:C.tertiary,   progress:35, deps:["t5"] },
+  { id:"t8", label:"Integration",     group:"Dev",         start:24, end:30, color:C.quaternary, progress:0,  deps:["t6","t7"] },
+  { id:"t9", label:"QA Testing",      group:"QA",          start:26, end:33, color:C.quinary,    progress:0,  deps:["t8"] },
+  { id:"t10",label:"Launch",          group:"Release",     start:32, end:35, color:C.quaternary, progress:0,  deps:["t9"] },
+]
+
+const TOTAL_DAYS = 36
+const LABEL_W = 100
+const ROW_H = 32
+const HEADER_H = 36
+const CHART_PAD = 8
+
+function GanttChartDemo() {
+  const [hovered, setHovered] = useState<string | null>(null)
+  const [zoom, setZoom] = useState<"day"|"week">("day")
+
+  const groups = [...new Set(GANTT_TASKS.map(t => t.group))]
+  const totalH = GANTT_TASKS.length * ROW_H + HEADER_H + CHART_PAD * 2
+  const days = zoom === "day" ? TOTAL_DAYS : Math.ceil(TOTAL_DAYS / 7)
+
+  // map task id → row index
+  const rowIdx = Object.fromEntries(GANTT_TASKS.map((t, i) => [t.id, i]))
+
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Project Gantt Chart</p>
+          <p className="text-xs text-muted-foreground">10 tasks · 5 groups · dependencies</p>
+        </div>
+        <div className="flex gap-1">
+          {(["day","week"] as const).map(v => (
+            <button key={v} onClick={() => setZoom(v)}
+              className={cn("px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all", zoom===v ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>{v}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <svg
+          width="100%"
+          viewBox={`0 0 ${LABEL_W + days * 18 + CHART_PAD * 2} ${totalH}`}
+          className="block min-w-[540px]"
+          aria-label="Gantt chart"
+          role="img"
+        >
+          {/* Header background */}
+          <rect x={0} y={0} width="100%" height={HEADER_H} fill={C.bg} opacity={0.6} />
+
+          {/* Day/Week column headers */}
+          {Array.from({ length: days }).map((_, di) => {
+            const x = LABEL_W + CHART_PAD + di * 18
+            const label = zoom === "day" ? `D${di+1}` : `W${di+1}`
+            return (
+              <g key={di}>
+                <line x1={x} y1={HEADER_H} x2={x} y2={totalH} stroke={C.border} strokeWidth={0.5} opacity={0.5} />
+                {di % (zoom==="day" ? 5 : 1) === 0 && (
+                  <text x={x+2} y={HEADER_H-10} fontSize={8} fill={C.text} opacity={0.4}>{label}</text>
+                )}
+              </g>
+            )
+          })}
+
+          {/* Group background rows */}
+          {GANTT_TASKS.map((_, ri) => (
+            <rect key={ri} x={0} y={HEADER_H + CHART_PAD + ri * ROW_H} width="100%" height={ROW_H}
+              fill={ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"} />
+          ))}
+
+          {/* Dependency arrows */}
+          {GANTT_TASKS.flatMap(task =>
+            (task.deps || []).map(depId => {
+              const dep = GANTT_TASKS.find(t => t.id === depId)
+              if (!dep) return null
+              const depRow = rowIdx[depId]
+              const taskRow = rowIdx[task.id]
+              const scale = zoom === "week" ? (1/7) : 1
+              const x1 = LABEL_W + CHART_PAD + dep.end * 18 * scale
+              const y1 = HEADER_H + CHART_PAD + depRow * ROW_H + ROW_H / 2
+              const x2 = LABEL_W + CHART_PAD + task.start * 18 * scale
+              const y2 = HEADER_H + CHART_PAD + taskRow * ROW_H + ROW_H / 2
+              const mx = (x1 + x2) / 2
+              return (
+                <path key={`${depId}-${task.id}`}
+                  d={`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`}
+                  fill="none" stroke={C.muted} strokeWidth={1} strokeDasharray="3 2" opacity={0.5}
+                  markerEnd="url(#arrow)"
+                />
+              )
+            })
+          )}
+
+          {/* Arrow marker */}
+          <defs>
+            <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill={C.muted} opacity={0.5} />
+            </marker>
+          </defs>
+
+          {/* Task bars */}
+          {GANTT_TASKS.map((task, ri) => {
+            const scale = zoom === "week" ? (1/7) : 1
+            const x = LABEL_W + CHART_PAD + task.start * 18 * scale
+            const w = Math.max((task.end - task.start) * 18 * scale, 12)
+            const y = HEADER_H + CHART_PAD + ri * ROW_H + 5
+            const h = ROW_H - 10
+            const isHov = hovered === task.id
+
+            return (
+              <g key={task.id}
+                onMouseEnter={() => setHovered(task.id)}
+                onMouseLeave={() => setHovered(null)}
+                style={{ cursor: "pointer" }}
+              >
+                {/* Label */}
+                <text x={LABEL_W - 6} y={y + h / 2 + 4} textAnchor="end" fontSize={9.5} fill={C.text}
+                  opacity={isHov ? 1 : 0.65} fontWeight={isHov ? 700 : 400}>
+                  {task.label}
+                </text>
+
+                {/* Bar background */}
+                <rect x={x} y={y} width={w} height={h} rx={4}
+                  fill={task.color} fillOpacity={isHov ? 0.35 : 0.18}
+                  stroke={task.color} strokeWidth={isHov ? 1.5 : 1} strokeOpacity={0.6} />
+
+                {/* Progress fill */}
+                <rect x={x} y={y} width={w * task.progress / 100} height={h} rx={4}
+                  fill={task.color} fillOpacity={isHov ? 0.75 : 0.55} />
+
+                {/* Progress % label inside bar */}
+                {w > 28 && task.progress > 0 && (
+                  <text x={x + 5} y={y + h / 2 + 4} fontSize={8} fill={C.text} opacity={0.9} fontWeight={600}>
+                    {task.progress}%
+                  </text>
+                )}
+
+                {/* Today line */}
+                {task.start <= 15 && task.end >= 15 && (
+                  <line
+                    x1={LABEL_W + CHART_PAD + 15 * 18 * scale} y1={HEADER_H}
+                    x2={LABEL_W + CHART_PAD + 15 * 18 * scale} y2={totalH}
+                    stroke={C.quaternary} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.6}
+                  />
+                )}
+              </g>
+            )
+          })}
+
+          {/* Today label */}
+          {(() => {
+            const scale = zoom === "week" ? (1/7) : 1
+            const x = LABEL_W + CHART_PAD + 15 * 18 * scale
+            return (
+              <g>
+                <line x1={x} y1={HEADER_H} x2={x} y2={totalH} stroke={C.quaternary} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.5} />
+                <rect x={x - 12} y={4} width={24} height={14} rx={4} fill={C.quaternary} opacity={0.8} />
+                <text x={x} y={14} textAnchor="middle" fontSize={8} fill={C.bg} fontWeight={700}>Today</text>
+              </g>
+            )
+          })()}
+        </svg>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-3 px-1">
+        {groups.map((g, i) => {
+          const task = GANTT_TASKS.find(t => t.group === g)
+          return (
+            <div key={g} className="flex items-center gap-1.5">
+              <span className="size-2 rounded-sm" style={{ background: task?.color }} />
+              <span className="text-[10px] text-muted-foreground">{g}</span>
+            </div>
+          )
+        })}
+        <div className="flex items-center gap-1.5">
+          <span className="w-4 h-0.5 border-t-2 border-dashed" style={{ borderColor: C.quaternary }} />
+          <span className="text-[10px] text-muted-foreground">Today</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-4 h-0.5 border-t border-dashed opacity-40" style={{ borderColor: C.muted }} />
+          <span className="text-[10px] text-muted-foreground">Dependency</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 11. Timeline / Resource Gantt ─────────────────────────────────────────────
+const RESOURCE_DATA = [
+  { person: "Alice",  tasks: [{ label: "Research",  start: 0,  end: 5,  color: C.primary   }, { label: "Review",   start: 12, end: 16, color: C.tertiary  }] },
+  { person: "Bob",    tasks: [{ label: "Design",    start: 4,  end: 12, color: C.secondary  }, { label: "Handoff",  start: 14, end: 16, color: C.quinary   }] },
+  { person: "Carol",  tasks: [{ label: "API",       start: 6,  end: 14, color: C.tertiary   }] },
+  { person: "Dave",   tasks: [{ label: "Frontend",  start: 11, end: 18, color: C.primary    }] },
+  { person: "Eve",    tasks: [{ label: "QA",        start: 15, end: 20, color: C.quinary    }] },
+]
+const RES_TOTAL = 21
+
+function ResourceGanttDemo() {
+  const [hovered, setHovered] = useState<string | null>(null)
+  const ROW = 36, LW = 72, PAD = 8, CELL = 20
+  const H = RESOURCE_DATA.length * ROW + 32 + PAD * 2
+
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Resource Timeline</p>
+        <p className="text-xs text-muted-foreground">Team allocation across 3-week sprint</p>
+      </div>
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <svg width="100%" viewBox={`0 0 ${LW + RES_TOTAL * CELL + PAD * 2} ${H}`} className="block min-w-[420px]" role="img" aria-label="Resource Gantt">
+          <rect x={0} y={0} width="100%" height={32} fill={C.bg} opacity={0.6} />
+          {Array.from({ length: RES_TOTAL }).map((_, d) => (
+            <g key={d}>
+              <line x1={LW + PAD + d * CELL} y1={32} x2={LW + PAD + d * CELL} y2={H} stroke={C.border} strokeWidth={0.5} opacity={0.4} />
+              <text x={LW + PAD + d * CELL + CELL / 2} y={20} textAnchor="middle" fontSize={8} fill={C.text} opacity={0.4}>D{d+1}</text>
+            </g>
+          ))}
+          {RESOURCE_DATA.map((row, ri) => (
+            <g key={row.person}>
+              <rect x={0} y={32 + PAD + ri * ROW} width="100%" height={ROW} fill={ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"} />
+              <text x={LW - 8} y={32 + PAD + ri * ROW + ROW / 2 + 4} textAnchor="end" fontSize={10} fill={C.text} opacity={0.7} fontWeight={500}>{row.person}</text>
+              {row.tasks.map(task => {
+                const key = `${row.person}-${task.label}`
+                const x = LW + PAD + task.start * CELL
+                const w = (task.end - task.start) * CELL
+                const y = 32 + PAD + ri * ROW + 6
+                const isHov = hovered === key
+                return (
+                  <g key={key} onMouseEnter={() => setHovered(key)} onMouseLeave={() => setHovered(null)} style={{ cursor: "pointer" }}>
+                    <rect x={x} y={y} width={w} height={ROW - 12} rx={4}
+                      fill={task.color} fillOpacity={isHov ? 0.6 : 0.3}
+                      stroke={task.color} strokeWidth={isHov ? 1.5 : 1} strokeOpacity={0.7} />
+                    {w > 30 && (
+                      <text x={x + w / 2} y={y + (ROW - 12) / 2 + 4} textAnchor="middle" fontSize={9} fill={C.text} opacity={0.9} fontWeight={600}>{task.label}</text>
+                    )}
+                  </g>
+                )
+              })}
+            </g>
+          ))}
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+// ── 12. Composed Chart (Bar + Line) ──────────────────────────────────────────
+const COMPOSED_DATA = [
+  { month: "Jan", sales: 4200, target: 3800, growth: 10 },
+  { month: "Feb", sales: 5100, target: 4500, growth: 18 },
+  { month: "Mar", sales: 4700, target: 5000, growth: -6 },
+  { month: "Apr", sales: 6200, target: 5200, growth: 32 },
+  { month: "May", sales: 5800, target: 5500, growth: 5  },
+  { month: "Jun", sales: 7100, target: 6000, growth: 22 },
+]
+const composedConfig: ChartConfig = {
+  sales:  { label: "Sales",     color: C.primary   },
+  target: { label: "Target",    color: C.secondary  },
+  growth: { label: "Growth %",  color: C.tertiary   },
+}
+
+function ComposedChartDemo() {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="px-1">
+        <p className="text-sm font-semibold text-foreground">Sales vs Target + Growth</p>
+        <p className="text-xs text-muted-foreground">Bar (sales & target) + Line (growth %)</p>
+      </div>
+      <ChartContainer config={composedConfig} className="h-56 w-full">
+        <BarChart data={COMPOSED_DATA} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+          <XAxis dataKey="month" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} />
+          <YAxis yAxisId="left" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
+          <YAxis yAxisId="right" orientation="right" tick={{ fill: C.text, fontSize: 11, opacity: 0.5 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Bar yAxisId="left" dataKey="sales"  fill={C.primary}   radius={[4,4,0,0]} fillOpacity={0.8} />
+          <Bar yAxisId="left" dataKey="target" fill={C.secondary} radius={[4,4,0,0]} fillOpacity={0.5} />
+          <Line yAxisId="right" type="monotone" dataKey="growth" stroke={C.tertiary} strokeWidth={2} dot={{ fill: C.tertiary, r: 3 }} />
+          <ReferenceLine yAxisId="right" y={0} stroke={C.muted} strokeDasharray="3 3" />
+        </BarChart>
+      </ChartContainer>
+    </div>
+  )
+}
+
+// ─── Charts registry ──────────────────────────────────────────────────────────
+const CHARTS_REGISTRY: ComponentEntry[] = [
+  {
+    name: "Area Chart",
+    description: "Smooth area chart with gradient fills and a Normal/Stacked toggle. Shows multi-series revenue vs expenses data.",
+    category: "Charts",
+    tags: ["chart", "area", "stacked", "gradient", "recharts"],
+    fullWidth: true,
+    preview: <AreaChartDemo />,
+    code: `// AreaChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Bar Chart",
+    description: "Grouped and stacked bar chart with a vertical/horizontal orientation toggle. Three-series quarterly data with shadcn ChartContainer.",
+    category: "Charts",
+    tags: ["chart", "bar", "grouped", "stacked", "horizontal", "recharts"],
+    fullWidth: true,
+    preview: <BarChartDemo />,
+    code: `// BarChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Line Chart",
+    description: "Multi-line chart with three team traces, a reference target line, and no-dot style for clean readability.",
+    category: "Charts",
+    tags: ["chart", "line", "multi-line", "reference", "recharts"],
+    fullWidth: true,
+    preview: <LineChartDemo />,
+    code: `// LineChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Pie & Donut Chart",
+    description: "Interactive pie/donut toggle with hover highlighting, center-text total, and a custom side legend with percentages.",
+    category: "Charts",
+    tags: ["chart", "pie", "donut", "interactive", "recharts"],
+    fullWidth: true,
+    preview: <PieChartDemo />,
+    code: `// PieChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Radar Chart",
+    description: "Dual-trace radar chart comparing individual scores vs industry benchmarks across six skill dimensions.",
+    category: "Charts",
+    tags: ["chart", "radar", "spider", "skills", "recharts"],
+    fullWidth: true,
+    preview: <RadarChartDemo />,
+    code: `// RadarChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Radial Bar Chart",
+    description: "Circular progress rings for four system resources (Storage, Memory, CPU, Network) with a matching linear progress legend.",
+    category: "Charts",
+    tags: ["chart", "radial", "circular", "progress", "recharts"],
+    fullWidth: true,
+    preview: <RadialBarChartDemo />,
+    code: `// RadialBarChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Scatter Chart",
+    description: "Two-segment bubble scatter chart with semi-transparent fills and axis domains from 0–100.",
+    category: "Charts",
+    tags: ["chart", "scatter", "bubble", "recharts"],
+    fullWidth: true,
+    preview: <ScatterChartDemo />,
+    code: `// ScatterChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Treemap",
+    description: "Proportional treemap with custom SVG cell content, tinted fills per segment, and label overflow protection.",
+    category: "Charts",
+    tags: ["chart", "treemap", "hierarchy", "recharts"],
+    fullWidth: true,
+    preview: <TreemapChartDemo />,
+    code: `// TreemapChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Funnel Chart",
+    description: "Conversion funnel from Visitors through Retention with percentage drop-off labels and a step-by-step side legend.",
+    category: "Charts",
+    tags: ["chart", "funnel", "conversion", "recharts"],
+    fullWidth: true,
+    preview: <FunnelChartDemo />,
+    code: `// FunnelChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Gantt Chart",
+    description: "Full Gantt chart with 10 tasks across 5 groups, dependency arrows, progress fills, day/week zoom toggle, and a Today marker — rendered as scalable SVG.",
+    category: "Charts",
+    tags: ["chart", "gantt", "project", "timeline", "dependencies", "svg"],
+    fullWidth: true,
+    preview: <GanttChartDemo />,
+    code: `// GanttChartDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Resource Timeline",
+    description: "Resource/person-based Gantt (swim-lane view) showing five team members' tasks across a 3-week sprint with hover highlights.",
+    category: "Charts",
+    tags: ["chart", "gantt", "resource", "timeline", "swimlane", "svg"],
+    fullWidth: true,
+    preview: <ResourceGanttDemo />,
+    code: `// ResourceGanttDemo — see lib/components-registry.tsx`,
+  },
+  {
+    name: "Composed Chart",
+    description: "Combined bar + line chart on dual Y-axes — Sales/Target bars on the left axis, Growth % line on the right, with a zero reference line.",
+    category: "Charts",
+    tags: ["chart", "composed", "bar", "line", "dual-axis", "recharts"],
+    fullWidth: true,
+    preview: <ComposedChartDemo />,
+    code: `// ComposedChartDemo — see lib/components-registry.tsx`,
+  },
+]
+
+COMPONENTS.push(...CHARTS_REGISTRY)
 
