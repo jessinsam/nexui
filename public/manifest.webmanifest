@@ -1,0 +1,17 @@
+{
+  "name": "NexUI",
+  "short_name": "NexUI",
+  "description": "Beautifully designed React components. Copy-paste. Open source.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/favicon-source.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

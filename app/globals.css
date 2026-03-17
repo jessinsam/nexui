@@ -135,3 +135,13 @@
     background-color: oklch(0.62 0.21 250 / 0.3);
   }
 }
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes indeterminate {
+  0%   { transform: translateX(-100%) scaleX(0.3); }
+  50%  { transform: translateX(50%)   scaleX(0.8); }
+  100% { transform: translateX(300%)  scaleX(0.3); }
+}

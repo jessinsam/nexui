@@ -1,10 +1,10 @@
 export function Footer() {
   return (
-    <footer className="border-t border-border py-16 px-6">
+    <footer className="border-t border-border py-12 sm:py-16 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-[1fr_auto_auto_auto] gap-10 md:gap-16">
-          {/* Brand */}
-          <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-[1fr_auto_auto_auto] gap-8 sm:gap-10 md:gap-16">
+          {/* Brand — spans full width on mobile */}
+          <div className="col-span-2 sm:col-span-2 md:col-span-1 flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -34,10 +34,10 @@ export function Footer() {
                 </svg>
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/iamnexui"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="X / Twitter"
+                aria-label="X (formerly Twitter) — @iamnexui"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -50,9 +50,16 @@ export function Footer() {
           {/* Links — Components */}
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Components</p>
-            {["Button", "Badge", "Card", "Input", "Avatar", "Tabs"].map((l) => (
-              <a key={l} href="#components" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {l}
+            {[
+              { label: "Button",   href: "/components?category=Button"  },
+              { label: "Badge",    href: "/components?category=Badge"   },
+              { label: "Card",     href: "/components?category=Card"    },
+              { label: "Input",    href: "/components?category=Form"    },
+              { label: "Avatar",   href: "/components?category=Avatar"  },
+              { label: "Tabs",     href: "/components?category=Navigation" },
+            ].map((l) => (
+              <a key={l.label} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {l.label}
               </a>
             ))}
           </div>
@@ -60,9 +67,15 @@ export function Footer() {
           {/* Links — Docs */}
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-foreground">Documentation</p>
-            {["Getting started", "Installation", "Theming", "Accessibility", "Changelog"].map((l) => (
-              <a key={l} href="#installation" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {l}
+            {[
+              { label: "Introduction",  href: "/docs"              },
+              { label: "Installation",  href: "/docs/installation" },
+              { label: "CLI",           href: "/docs/cli"          },
+              { label: "Theming",       href: "/docs/theming"      },
+              { label: "Components",    href: "/components"        },
+            ].map((l) => (
+              <a key={l.label} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {l.label}
               </a>
             ))}
           </div>
