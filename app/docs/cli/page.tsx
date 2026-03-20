@@ -54,13 +54,12 @@ export default function CLIPage() {
 
       <hr className="border-border mb-10" />
 
-      {/* Status banner */}
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/8 px-4 py-3 mb-10">
-        <p className="text-xs text-amber-400/90 leading-relaxed">
-          <span className="text-amber-300 font-semibold">CLI status — </span>
-          The NexUI npm package is not yet published to the public registry. Until it is, use the{" "}
-          <Link href="/components" className="text-primary hover:underline">component library</Link>{" "}
-          to copy any component source directly from the website. The commands below show the intended CLI interface for when it ships.
+      {/* Live banner */}
+      <div className="rounded-lg border border-green-500/30 bg-green-500/8 px-4 py-3 mb-10">
+        <p className="text-xs text-green-400/90 leading-relaxed">
+          <span className="text-green-300 font-semibold">CLI is live — </span>
+          The <code className="font-mono text-green-300">nexui</code> package is published on npm. Run any command below and it will work immediately.
+          Components are fetched from <code className="font-mono text-green-300">nexui.dev/api/registry</code> and written directly into your project.
         </p>
       </div>
 

@@ -163,11 +163,9 @@ const steps = [
         <div className="rounded-lg border border-border bg-secondary/40 px-4 py-3">
           <p className="text-xs text-muted-foreground leading-relaxed">
           <span className="text-foreground font-medium">Tip — </span>
-          Once the CLI is published, you will be able to run{" "}
-          <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">npx nexui@latest add button</code>{" "}
-          to add components automatically. Until then, copy components directly from the{" "}
-          <Link href="/components" className="text-primary hover:underline">component library</Link>. See the{" "}
-          <Link href="/docs/cli" className="text-primary hover:underline">CLI docs</Link> for details.
+          Use the CLI to add components automatically:{" "}
+          <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">npx nexui@latest add button</code>.{" "}
+          See the <Link href="/docs/cli" className="text-primary hover:underline">CLI docs</Link> for all commands.
           </p>
         </div>
       </div>

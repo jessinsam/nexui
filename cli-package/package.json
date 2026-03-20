@@ -1,0 +1,22 @@
+{
+  "name": "nexui",
+  "version": "1.0.0",
+  "description": "Official CLI for NexUI — copy-paste UI components into your project. No runtime dependency.",
+  "keywords": ["nexui", "ui", "components", "cli", "react", "tailwind"],
+  "homepage": "https://www.nexui.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jessinsam/nexui"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "nexui": "./bin/nexui.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
