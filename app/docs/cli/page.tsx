@@ -58,7 +58,7 @@ export default function CLIPage() {
       <div className="rounded-lg border border-green-500/30 bg-green-500/8 px-4 py-3 mb-10">
         <p className="text-xs text-green-400/90 leading-relaxed">
           <span className="text-green-300 font-semibold">CLI is live — </span>
-          The <code className="font-mono text-green-300">nexui</code> package is published on npm. Run any command below and it will work immediately.
+          The <code className="font-mono text-green-300">@jessin/nexui</code> package is published on npm. Run any command below and it will work immediately.
           Components are fetched from <code className="font-mono text-green-300">nexui.dev/api/registry</code> and written directly into your project.
         </p>
       </div>
@@ -74,7 +74,7 @@ export default function CLIPage() {
           <div className="px-4 py-2 border-b border-border bg-[var(--code-bg)] text-xs text-muted-foreground">bash</div>
           <div className="px-4 py-3 bg-[var(--code-bg)]">
             <span className="text-muted-foreground">$ </span>
-            <span className="text-foreground">npx nexui@latest init</span>
+            <span className="text-foreground">npx @jessin/nexui@latest init</span>
           </div>
           <div className="px-4 pb-4 bg-[var(--code-bg)] flex flex-col gap-0.5">
             {[
@@ -100,7 +100,7 @@ export default function CLIPage() {
           <div className="px-4 py-2 border-b border-border bg-[var(--code-bg)] text-xs text-muted-foreground">bash</div>
           <div className="px-4 py-3 bg-[var(--code-bg)]">
             <span className="text-muted-foreground">$ </span>
-            <span className="text-foreground">npx nexui@latest add button</span>
+            <span className="text-foreground">npx @jessin/nexui@latest add button</span>
           </div>
           <div className="px-4 pb-4 bg-[var(--code-bg)] flex flex-col gap-0.5">
             {addOutput.map((line, i) => (
@@ -113,7 +113,7 @@ export default function CLIPage() {
           <div className="px-4 py-2 border-b border-border bg-[var(--code-bg)] text-xs text-muted-foreground">bash</div>
           <div className="px-4 py-3 bg-[var(--code-bg)]">
             <span className="text-muted-foreground">$ </span>
-            <span className="text-foreground">npx nexui@latest add button badge input card</span>
+            <span className="text-foreground">npx @jessin/nexui@latest add button badge input card</span>
           </div>
         </div>
       </section>
@@ -128,7 +128,7 @@ export default function CLIPage() {
           <div className="px-4 py-2 border-b border-border bg-[var(--code-bg)] text-xs text-muted-foreground">bash</div>
           <div className="px-4 py-3 bg-[var(--code-bg)]">
             <span className="text-muted-foreground">$ </span>
-            <span className="text-foreground">npx nexui@latest search calendar</span>
+            <span className="text-foreground">npx @jessin/nexui@latest search calendar</span>
           </div>
         </div>
       </section>
@@ -143,7 +143,7 @@ export default function CLIPage() {
           <div className="px-4 py-2 border-b border-border bg-[var(--code-bg)] text-xs text-muted-foreground">bash</div>
           <div className="px-4 py-3 bg-[var(--code-bg)]">
             <span className="text-muted-foreground">$ </span>
-            <span className="text-foreground">npx nexui@latest list</span>
+            <span className="text-foreground">npx @jessin/nexui@latest list</span>
           </div>
           <div className="px-4 pb-4 bg-[var(--code-bg)] flex flex-col gap-0.5">
             {listOutput.map((line, i) => (
@@ -176,10 +176,10 @@ export default function CLIPage() {
         <div className="rounded-lg border border-border overflow-hidden">
           <div className="grid grid-cols-[auto_1fr] divide-y divide-border text-sm font-mono">
             {[
-              { pm: "npm",  cmd: "npx nexui@latest add button" },
-              { pm: "pnpm", cmd: "pnpm dlx nexui@latest add button" },
-              { pm: "yarn", cmd: "yarn dlx nexui@latest add button" },
-              { pm: "bun",  cmd: "bunx nexui@latest add button" },
+              { pm: "npm",  cmd: "npx @jessin/nexui@latest add button" },
+              { pm: "pnpm", cmd: "pnpm dlx @jessin/nexui@latest add button" },
+              { pm: "yarn", cmd: "yarn dlx @jessin/nexui@latest add button" },
+              { pm: "bun",  cmd: "bunx @jessin/nexui@latest add button" },
             ].map(({ pm, cmd }) => (
               <div key={pm} className="contents">
                 <span className="px-4 py-3 text-muted-foreground text-xs border-r border-border">{pm}</span>

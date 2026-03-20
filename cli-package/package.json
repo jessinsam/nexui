@@ -1,5 +1,5 @@
 {
-  "name": "nexui",
+  "name": "@jessin/nexui",
   "version": "1.0.0",
   "description": "Official CLI for NexUI — copy-paste UI components into your project. No runtime dependency.",
   "keywords": ["nexui", "ui", "components", "cli", "react", "tailwind"],
@@ -18,5 +18,8 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

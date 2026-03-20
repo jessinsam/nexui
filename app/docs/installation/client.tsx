@@ -164,7 +164,7 @@ const steps = [
           <p className="text-xs text-muted-foreground leading-relaxed">
           <span className="text-foreground font-medium">Tip — </span>
           Use the CLI to add components automatically:{" "}
-          <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">npx nexui@latest add button</code>.{" "}
+          <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">npx @jessin/nexui@latest add button</code>.{" "}
           See the <Link href="/docs/cli" className="text-primary hover:underline">CLI docs</Link> for all commands.
           </p>
         </div>
