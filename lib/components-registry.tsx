@@ -2,7 +2,7 @@
 
 
 import React, { useState } from "react"
-import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign, Heart, Play, Pause, ArrowLeft, Quote, ExternalLink } from "@/components/nexui/icons"
+import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign, Heart, Play, Pause, ArrowLeft, Quote, ExternalLink, Share2, Trash, AlignLeft, AlignCenter, AlignRight, Pencil, Archive } from "@/components/nexui/icons"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { ChartLegend, AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialProgress } from "@/components/nexui/charts"
@@ -42,6 +42,122 @@ function AndroidButtonPreview() {
       </button>
       <button className="w-full h-12 rounded-full bg-transparent text-primary text-sm font-medium tracking-[0.1px] transition-all active:scale-[0.98]">
         Text
+      </button>
+    </div>
+  )
+}
+
+function HoverToolbarPreview() {
+  const [hovered, setHovered] = useState(false)
+  const tools = [
+    { icon: <Copy size={13} />, label: "Copy" },
+    { icon: <Star size={13} />, label: "Star" },
+    { icon: <Share2 size={13} />, label: "Share" },
+    { icon: <Trash size={13} />, label: "Delete" },
+  ]
+  return (
+    <div className="flex flex-col gap-6 items-center w-full">
+      {/* Floating toolbar on card hover */}
+      <div
+        className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5 cursor-pointer group"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <div className="flex flex-col gap-2">
+          <div className="h-2.5 rounded-full bg-secondary w-3/4" />
+          <div className="h-2.5 rounded-full bg-secondary w-full" />
+          <div className="h-2.5 rounded-full bg-secondary w-2/3" />
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2">Hover to reveal toolbar</p>
+        {/* Toolbar */}
+        <div className={cn(
+          "absolute -top-4 right-3 flex items-center gap-px bg-card border border-border rounded-lg shadow-lg px-1 py-1 transition-all duration-200",
+          hovered ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-1 pointer-events-none"
+        )}>
+          {tools.map((t) => (
+            <button key={t.label} aria-label={t.label}
+              className={cn(
+                "flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-150",
+                t.label === "Delete" && "hover:text-destructive hover:bg-destructive/10"
+              )}>
+              {t.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Inline hover button group */}
+      <div className="flex items-center gap-1 p-1 rounded-xl border border-border bg-card">
+        {[
+          { icon: <AlignLeft size={13} />, label: "Left" },
+          { icon: <AlignCenter size={13} />, label: "Center" },
+          { icon: <AlignRight size={13} />, label: "Right" },
+        ].map((item) => (
+          <button key={item.label} aria-label={item.label}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-150 group">
+            <span className="transition-transform duration-150 group-hover:scale-110">{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function HoverButtonGroupPreview() {
+  const [active, setActive] = useState<string | null>(null)
+  const actions = [
+    { label: "Edit", icon: <Pencil size={12} />, color: "hover:bg-primary/10 hover:text-primary hover:border-primary/30" },
+    { label: "Duplicate", icon: <Copy size={12} />, color: "hover:bg-secondary hover:text-foreground" },
+    { label: "Archive", icon: <Archive size={12} />, color: "hover:bg-amber-500/10 hover:text-amber-500 hover:border-amber-500/30" },
+    { label: "Delete", icon: <Trash size={12} />, color: "hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30" },
+  ]
+  return (
+    <div className="flex flex-col gap-4 items-center w-full max-w-sm">
+      {/* Pill button group */}
+      <div className="flex items-center rounded-full border border-border bg-card overflow-hidden divide-x divide-border">
+        {actions.slice(0, 3).map((a) => (
+          <button key={a.label} aria-label={a.label}
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2 text-[11px] font-medium text-muted-foreground border border-transparent transition-all duration-150",
+              a.color
+            )}>
+            <span>{a.icon}</span>
+            <span>{a.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Contextual action row */}
+      <div className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-card group">
+        <div className="flex flex-col gap-1">
+          <div className="h-2 rounded-full bg-secondary w-24" />
+          <div className="h-2 rounded-full bg-secondary w-16" />
+        </div>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {actions.map((a) => (
+            <button key={a.label} aria-label={a.label}
+              className={cn(
+                "flex items-center justify-center w-7 h-7 rounded-lg border border-transparent text-muted-foreground transition-all duration-150",
+                a.color
+              )}>
+              {a.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Morphing button */}
+      <button
+        onClick={() => setActive(active ? null : "saved")}
+        className={cn(
+          "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border transition-all duration-300",
+          active
+            ? "bg-primary/10 text-primary border-primary/30 scale-95"
+            : "bg-card text-muted-foreground border-border hover:bg-secondary hover:text-foreground hover:scale-105"
+        )}>
+        {active ? <Check size={14} /> : <Star size={14} />}
+        {active ? "Saved" : "Save"}
       </button>
     </div>
   )
@@ -3090,7 +3206,7 @@ export function DropdownWithIcons() {
   )
 }`,
   },
-  // ── Search Bar entries ───────────────────────────────────────────────────────
+  // ── Search Bar entries ───────────────────────────────��───────────────────────
   {
     name: "Search — Basic", description: "Clean animated search bar with a glowing ring focus state and animated clear button.", category: "Search", tags: ["search", "input", "focus", "animated"], fullWidth: true, preview: <SearchBarBasic />,
     code: `"use client"
@@ -3630,6 +3746,88 @@ export function AndroidButton({ variant = "filled", className, ...props }: Andro
 }`,
   },
   {
+    name: "Hover Toolbar", description: "Contextual action toolbar that appears on hover with smooth fade-and-slide transition. No dependencies.", category: "Display", tags: ["toolbar", "hover", "actions", "animated", "contextual"], preview: <HoverToolbarPreview />,
+    code: `"use client"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+
+const tools = [
+  { label: "Copy",   icon: "copy" },
+  { label: "Star",   icon: "star" },
+  { label: "Share",  icon: "share" },
+  { label: "Delete", icon: "trash" },
+]
+
+export function HoverToolbar({ children }: { children: React.ReactNode }) {
+  const [show, setShow] = useState(false)
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      {children}
+      <div className={cn(
+        "absolute -top-10 right-0 flex items-center gap-px bg-card border border-border rounded-lg shadow-lg px-1 py-1 transition-all duration-200",
+        show ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-1 pointer-events-none"
+      )}>
+        {tools.map((t) => (
+          <button key={t.label} aria-label={t.label}
+            className={cn(
+              "w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-150 text-xs",
+              t.label === "Delete" && "hover:text-destructive hover:bg-destructive/10"
+            )}>
+            {t.label[0]}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}`,
+  },
+  {
+    name: "Hover Button Group", description: "Animated button group with per-button hover states, morphing save button, and group-hover reveal pattern.", category: "Display", tags: ["button", "hover", "group", "animated", "actions", "morphing"], preview: <HoverButtonGroupPreview />,
+    code: `"use client"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+
+interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "default" | "danger" | "warning" | "primary"
+}
+
+export function ActionButton({ variant = "default", className, ...props }: ActionButtonProps) {
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-transparent text-[11px] font-medium text-muted-foreground transition-all duration-150",
+        variant === "default" && "hover:bg-secondary hover:text-foreground",
+        variant === "primary" && "hover:bg-primary/10 hover:text-primary hover:border-primary/30",
+        variant === "warning" && "hover:bg-amber-500/10 hover:text-amber-500 hover:border-amber-500/30",
+        variant === "danger" && "hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export function MorphButton({ saved, onToggle }: { saved: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border transition-all duration-300",
+        saved
+          ? "bg-primary/10 text-primary border-primary/30 scale-95"
+          : "bg-card text-muted-foreground border-border hover:bg-secondary hover:text-foreground hover:scale-105"
+      )}
+    >
+      {saved ? "Saved" : "Save"}
+    </button>
+  )
+}`,
+  },
+  {
     name: "Checkbox", description: "Multi-select control with accessible toggle states.", category: "Inputs", tags: ["checkbox", "toggle", "select", "form"], preview: <CheckboxPreview />,
     code: `"use client"
 import { useState } from "react"
@@ -4161,7 +4359,7 @@ function FeedbackForm() {
   )
 }
 
-// ── Survey Form (multi-step) ──────────────────────────────────────────────────
+// ── Survey Form (multi-step) ─────────────────────────────────────────���────────
 const SURVEY_STEPS = [
   { id: "role", title: "Your role" },
   { id: "usage", title: "How you use it" },
@@ -4315,7 +4513,7 @@ function SurveyForm() {
   )
 }
 
-// ── Newsletter Subscribe Form ─────────────────────────────────────────────────
+// ── Newsletter Subscribe Form ──────────────────────���──────────────────────────
 function NewsletterForm() {
   const [email, setEmail] = useState("")
   const [error, setError] = useState("")

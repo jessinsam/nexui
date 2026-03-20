@@ -138,7 +138,7 @@ export default function ComponentsClient() {
 
   const handleCategory = useCallback((cat: string) => {
     setActiveCategory(cat)
-    setTimeout(() => { gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }) }, 20)
+    window.scrollTo({ top: 0, behavior: "instant" })
   }, [])
 
   const counts = useMemo(() => {

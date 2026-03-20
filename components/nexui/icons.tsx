@@ -610,3 +610,62 @@ export const RotateCcw = icon(
     <path d="M3 3v5h5" />
   </>
 )
+
+export const Share2 = icon(
+  <>
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </>
+)
+
+export const Trash = icon(
+  <>
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+  </>
+)
+
+export const AlignLeft = icon(
+  <>
+    <line x1="21" y1="6" x2="3" y2="6" />
+    <line x1="15" y1="12" x2="3" y2="12" />
+    <line x1="17" y1="18" x2="3" y2="18" />
+  </>
+)
+
+export const AlignCenter = icon(
+  <>
+    <line x1="21" y1="6" x2="3" y2="6" />
+    <line x1="17" y1="12" x2="7" y2="12" />
+    <line x1="19" y1="18" x2="5" y2="18" />
+  </>
+)
+
+export const AlignRight = icon(
+  <>
+    <line x1="21" y1="6" x2="3" y2="6" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+    <line x1="21" y1="18" x2="7" y2="18" />
+  </>
+)
+
+export const Pencil = icon(
+  <>
+    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    <path d="m15 5 4 4" />
+  </>
+)
+
+export const Archive = icon(
+  <>
+    <rect width="20" height="5" x="2" y="3" rx="1" />
+    <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
+    <path d="M10 12h4" />
+  </>
+)
