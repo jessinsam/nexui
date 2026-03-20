@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"
-import { COMPONENTS } from "@/lib/components-registry"
 
-export const dynamic = "force-static"
-export const revalidate = 3600
+export const dynamic = "force-dynamic"
 
 function toSlug(name: string) {
   return name
@@ -11,8 +9,17 @@ function toSlug(name: string) {
     .replace(/^-+|-+$/g, "")
 }
 
-export function GET() {
-  const list = COMPONENTS.map((c) => ({
+export async function GET() {
+  // Dynamically import to avoid SSR issues with JSX preview nodes
+  const { COMPONENTS } = await import("@/lib/components-registry")
+
+  const list = (Array.isArray(COMPONENTS) ? COMPONENTS : []).map((c: {
+    name: string
+    description?: string
+    category: string
+    tags?: string[]
+    code?: string
+  }) => ({
     slug: toSlug(c.name),
     name: c.name,
     description: c.description ?? "",
