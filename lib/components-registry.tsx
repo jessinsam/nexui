@@ -1450,13 +1450,13 @@ function SwitchRow({ label, defaultOn }: { label: string; defaultOn: boolean }) 
         aria-checked={checked}
         aria-label={`Toggle ${label}`}
         className={cn(
-          "relative w-10 h-5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
+          "relative w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
           checked ? "bg-primary" : "bg-muted border border-border"
         )}
       >
         <span className={cn(
-          "absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform duration-200",
-          checked ? "translate-x-5" : "translate-x-0.5"
+          "absolute top-[3px] left-[3px] size-[18px] rounded-full bg-white shadow-sm transition-transform duration-200",
+          checked ? "translate-x-[20px]" : "translate-x-0"
         )} />
       </button>
     </div>
@@ -1481,8 +1481,8 @@ function TogglePill() {
           )}
         >
           <span className={cn(
-            "absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform duration-200",
-            on ? "translate-x-5" : "translate-x-0.5"
+            "absolute top-[3px] left-[3px] size-[18px] rounded-full bg-white shadow-sm transition-transform duration-200",
+            on ? "translate-x-[20px]" : "translate-x-0"
           )} />
         </button>
       </div>
@@ -3250,11 +3250,11 @@ function Switch({ label, defaultChecked = false }: { label: string; defaultCheck
   return (
     <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border">
       <span className="text-sm text-foreground">{label}</span>
-      <button onClick={() => setChecked(c => !c)} role="switch" aria-checked={checked} aria-label={\`Toggle \${label}\`}
-        className={cn("relative w-10 h-5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
+      <button onClick={() => setChecked(c => !c)} role="switch" aria-checked={checked} aria-label={`Toggle ${label}`}
+        className={cn("relative w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
           checked ? "bg-primary" : "bg-muted border border-border")}>
-        <span className={cn("absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform duration-200",
-          checked ? "translate-x-5" : "translate-x-0.5")} />
+        <span className={cn("absolute top-[3px] left-[3px] size-[18px] rounded-full bg-white shadow-sm transition-transform duration-200",
+          checked ? "translate-x-[20px]" : "translate-x-0")} />
       </button>
     </div>
   )
@@ -7816,7 +7816,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ──────────��──────────��──��────────────����───────────────────
+// ── 15. Bubble Chart ──────────��──────────��──��──────────���─����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
