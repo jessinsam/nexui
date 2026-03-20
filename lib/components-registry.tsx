@@ -46,6 +46,8 @@ function AndroidButtonPreview() {
     </div>
   )
 }
+
+function ButtonPreview() {
   return (
     <div className="flex flex-wrap gap-2 items-center">
       <button className="text-xs px-4 py-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">Default</button>
