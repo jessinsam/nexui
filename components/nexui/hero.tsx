@@ -60,7 +60,7 @@ export function Hero() {
         {/* Stats row — always 4 columns so MIT never orphans */}
         <div className="w-full grid grid-cols-4 gap-2 pt-4 max-w-sm sm:max-w-none sm:flex sm:justify-center sm:gap-8">
           {[
-            { value: "50+",  label: "Components" },
+            { value: "100+", label: "Components" },
             { value: "0 KB", label: "Bundle size" },
             { value: "100%", label: "Yours to edit" },
             { value: "MIT",  label: "License" },
