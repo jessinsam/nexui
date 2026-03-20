@@ -1005,7 +1005,7 @@ function DropdownBasic() {
   const [selected, setSelected] = useState("Next.js")
 
   return (
-    <div className="relative w-72">
+    <div style={{ minHeight: open ? 240 : 56 }} className="relative w-72 transition-all duration-200">
       {/* Trigger */}
       <button
         onClick={() => setOpen(o => !o)}
@@ -1062,7 +1062,7 @@ function DropdownSearch() {
   const filtered = options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
 
   return (
-    <div className="relative w-72">
+    <div style={{ minHeight: open ? 300 : 56 }} className="relative w-72 transition-all duration-200">
       <button
         onClick={() => { setOpen(o => !o); setQuery("") }}
         aria-haspopup="listbox"
@@ -1125,7 +1125,7 @@ function DropdownMulti() {
   }
 
   return (
-    <div className="relative w-72">
+    <div style={{ minHeight: open ? 320 : 56 }} className="relative w-72 transition-all duration-200">
       <div
         role="button"
         tabIndex={0}
@@ -1194,7 +1194,7 @@ function DropdownWithIcons() {
   const [selected, setSelected] = useState(FRAMEWORK_OPTIONS[0])
 
   return (
-    <div className="relative w-72">
+    <div style={{ minHeight: open ? 280 : 56 }} className="relative w-72 transition-all duration-200">
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox"
