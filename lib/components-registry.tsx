@@ -395,6 +395,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
           src="/auth-panel.jpg"
           alt="Auth panel illustration"
           fill
+          priority
           loading="eager"
           className="object-cover object-top"
           sizes="400px"
@@ -5990,7 +5991,7 @@ function DashboardSkeleton() {
   )
 }
 
-// ── 5. Product Card Grid Skeleton ─────────────────────────────────────────────
+// ── 5. Product Card Grid Skeleton ────────────���────────────────────────────────
 function ProductGridSkeleton() {
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col gap-5" role="status" aria-label="Loading products">
@@ -7157,7 +7158,7 @@ function BarChartDemo() {
   )
 }
 
-// ── 3. Line Chart (multi-line + reference) ───────────────────────────────────
+// ── 3. Line Chart (multi-line + reference) ─────��─────────────────────────────
 const LINE_DATA = [
   { week: "W1",  userA: 120, userB: 80,  userC: 60  },
   { week: "W2",  userA: 180, userB: 120, userC: 90  },

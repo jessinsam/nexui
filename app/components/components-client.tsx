@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, Suspense, useEffect, useRef, useCallback } from "react"
+import { useState, useMemo, Suspense, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, COMPONENTS } from "@/lib/components-registry"
@@ -134,7 +134,19 @@ export default function ComponentsClient() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const gridTopRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }) }, [])
+  // Disable scroll restoration and force top before first paint
+  useLayoutEffect(() => {
+    if (typeof window !== "undefined") {
+      history.scrollRestoration = "manual"
+      window.scrollTo(0, 0)
+    }
+    return () => { history.scrollRestoration = "auto" }
+  }, [])
+
+  useEffect(() => {
+    const id = setTimeout(() => window.scrollTo({ top: 0, behavior: "instant" }), 0)
+    return () => clearTimeout(id)
+  }, [])
 
   const handleCategory = useCallback((cat: string) => {
     setActiveCategory(cat)
