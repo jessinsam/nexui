@@ -9,7 +9,43 @@ import { ChartLegend, AreaChart, BarChart, LineChart, PieChart, RadarChart, Radi
 
 // ─── Compact previews (non-auth) ──────────────────────────────────────────────
 
-function ButtonPreview() {
+function IOSButtonPreview() {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-xs">
+      <button className="w-full h-[50px] rounded-[14px] bg-primary text-white text-[17px] font-semibold tracking-[-0.4px] transition-opacity active:opacity-70">
+        Continue
+      </button>
+      <button className="w-full h-[50px] rounded-[14px] bg-secondary text-foreground text-[17px] font-semibold tracking-[-0.4px] border border-border transition-opacity active:opacity-70">
+        Cancel
+      </button>
+      <button className="w-full h-[50px] rounded-[14px] bg-transparent text-primary text-[17px] font-semibold tracking-[-0.4px] transition-opacity active:opacity-70">
+        Learn more
+      </button>
+      <button className="w-full h-[50px] rounded-[14px] bg-destructive/15 text-destructive text-[17px] font-semibold tracking-[-0.4px] border border-destructive/20 transition-opacity active:opacity-70">
+        Delete
+      </button>
+    </div>
+  )
+}
+
+function AndroidButtonPreview() {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-xs">
+      <button className="w-full h-12 rounded-full bg-primary text-white text-sm font-medium tracking-[0.1px] shadow-sm transition-all active:shadow-none active:scale-[0.98]">
+        Filled
+      </button>
+      <button className="w-full h-12 rounded-full bg-secondary text-foreground text-sm font-medium tracking-[0.1px] border border-border transition-all active:scale-[0.98]">
+        Tonal
+      </button>
+      <button className="w-full h-12 rounded-full bg-transparent text-primary text-sm font-medium tracking-[0.1px] border border-primary/60 transition-all active:scale-[0.98]">
+        Outlined
+      </button>
+      <button className="w-full h-12 rounded-full bg-transparent text-primary text-sm font-medium tracking-[0.1px] transition-all active:scale-[0.98]">
+        Text
+      </button>
+    </div>
+  )
+}
   return (
     <div className="flex flex-wrap gap-2 items-center">
       <button className="text-xs px-4 py-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium">Default</button>
@@ -2204,7 +2240,7 @@ export type ComponentEntry = {
   code: string
 }
 
-export const CATEGORIES = ["All", "Auth", "Calendar", "Carousel", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation", "Charts"] as const
+export const CATEGORIES = ["All", "Auth", "Calendar", "Carousel", "Dropdown", "Search", "Toggle", "Palette", "Data Views", "Forms", "Chat", "Loading", "Inputs", "Display", "Feedback", "Navigation", "Charts", "Mobile"] as const
 
 export const COMPONENTS: ComponentEntry[] = [
   {
@@ -3531,6 +3567,59 @@ export function Button({ variant = "default", size = "md", className, ...props }
         variant === "secondary" && "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         variant === "outline" && "border border-border hover:bg-secondary",
         variant === "ghost" && "hover:bg-secondary text-muted-foreground hover:text-foreground",
+        className
+      )}
+      {...props}
+    />
+  )
+}`,
+  },
+  {
+    name: "iOS Button", description: "Native iOS-style buttons with SF-inspired typography, large tap targets, and system variants.", category: "Mobile", tags: ["ios", "mobile", "button", "apple", "native"], preview: <IOSButtonPreview />,
+    code: `import { cn } from "@/lib/utils"
+
+interface IOSButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "default" | "secondary" | "ghost" | "destructive"
+}
+
+export function IOSButton({ variant = "default", className, ...props }: IOSButtonProps) {
+  return (
+    <button
+      className={cn(
+        "w-full h-[50px] rounded-[14px] text-[17px] font-semibold tracking-[-0.4px] transition-opacity active:opacity-70 select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "disabled:pointer-events-none disabled:opacity-40",
+        variant === "default" && "bg-primary text-white",
+        variant === "secondary" && "bg-secondary text-foreground border border-border",
+        variant === "ghost" && "bg-transparent text-primary",
+        variant === "destructive" && "bg-destructive/15 text-destructive border border-destructive/20",
+        className
+      )}
+      {...props}
+    />
+  )
+}`,
+  },
+  {
+    name: "Android Button", description: "Material Design 3 buttons — filled, tonal, outlined, and text styles with pill shape and ripple-ready transitions.", category: "Mobile", tags: ["android", "mobile", "button", "material", "native"], preview: <AndroidButtonPreview />,
+    code: `import { cn } from "@/lib/utils"
+
+interface AndroidButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "filled" | "tonal" | "outlined" | "text"
+}
+
+export function AndroidButton({ variant = "filled", className, ...props }: AndroidButtonProps) {
+  return (
+    <button
+      className={cn(
+        "h-12 rounded-full px-6 text-sm font-medium tracking-[0.1px] transition-all select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "disabled:pointer-events-none disabled:opacity-40",
+        "active:scale-[0.98]",
+        variant === "filled" && "bg-primary text-white shadow-sm active:shadow-none",
+        variant === "tonal" && "bg-secondary text-foreground border border-border",
+        variant === "outlined" && "bg-transparent text-primary border border-primary/60",
+        variant === "text" && "bg-transparent text-primary",
         className
       )}
       {...props}
@@ -7816,7 +7905,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ──────────��───���──────��──��──────────���─����───────────────────
+// ── 15. Bubble Chart ──────────��─���─���──────��──��──────────���─����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
