@@ -182,9 +182,9 @@ function BadgePreview() {
     { label: "Destructive", cls: "bg-destructive/15 text-destructive border border-destructive/20" },
   ]
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 items-center">
       {badges.map((b) => (
-        <span key={b.label} className={cn("text-xs px-2.5 py-0.5 rounded-full font-medium", b.cls)}>{b.label}</span>
+        <span key={b.label} className={cn("inline-flex items-center text-xs px-2.5 py-0.5 rounded-full font-medium", b.cls)}>{b.label}</span>
       ))}
     </div>
   )
