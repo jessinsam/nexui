@@ -1448,7 +1448,7 @@ function SwitchRow({ label, defaultOn }: { label: string; defaultOn: boolean }) 
         onClick={() => setChecked(c => !c)}
         role="switch"
         aria-checked={checked}
-        aria-label={`Toggle ${label}`}
+        aria-label={"Toggle " + label}
         className={cn(
           "relative w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
           checked ? "bg-primary" : "bg-muted border border-border"
@@ -3250,7 +3250,7 @@ function Switch({ label, defaultChecked = false }: { label: string; defaultCheck
   return (
     <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-secondary border border-border">
       <span className="text-sm text-foreground">{label}</span>
-      <button onClick={() => setChecked(c => !c)} role="switch" aria-checked={checked} aria-label={`Toggle ${label}`}
+      <button onClick={() => setChecked(c => !c)} role="switch" aria-checked={checked} aria-label={"Toggle " + label}
         className={cn("relative w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
           checked ? "bg-primary" : "bg-muted border border-border")}>
         <span className={cn("absolute top-[3px] left-[3px] size-[18px] rounded-full bg-white shadow-sm transition-transform duration-200",
@@ -7637,7 +7637,7 @@ function ChartTip({ active, payload, label }: any) {
   )
 }
 
-// Custom Legend row ────────────────────────────────────────────────────────────
+// Custom Legend row ────────────────────────────────────────���───────────────────
 function ChartLegRow({ items }: { items: { color: string; label: string }[] }) {
   return (
     <div className="flex flex-wrap gap-3 justify-center pt-1">
@@ -7816,7 +7816,7 @@ function HeatmapChartDemo() {
   )
 }
 
-// ── 15. Bubble Chart ──────────��──────────��──��──────────���─����───────────────────
+// ── 15. Bubble Chart ──────────��───���──────��──��──────────���─����───────────────────
 const BUBBLE_DATA = [
   { x: 20, y: 65, z: 80,  name: "Product A", color: C.primary    },
   { x: 45, y: 40, z: 120, name: "Product B", color: C.secondary   },
@@ -8949,7 +8949,7 @@ function CarouselFilmstrip() {
   )
 }
 
-// ── 6. Stacked Cards Carousel ─────────────────────────────────────────────────
+// ── 6. Stacked Cards Carousel ─────────────────────────────────────────────���───
 const STACK_SLIDES = [
   { title: "Onboarding",  step: "01", desc: "Set up your workspace in minutes with our guided flow.",          color: "oklch(0.62 0.21 250)" },
   { title: "Invite Team", step: "02", desc: "Add teammates with role-based permissions and SSO support.",      color: "oklch(0.55 0.18 300)" },
