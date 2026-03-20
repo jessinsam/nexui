@@ -60,7 +60,7 @@ const STEPS = [
     title: "Initialize NexUI",
     description:
       "Run nexui init once. It writes a nexui.config.ts, adds the cn utility to lib/utils.ts, and injects the required CSS variables into your globals.css.",
-    code: "npx nexui@latest init",
+    code: "npx @jessin/nexui@latest init",
     language: "bash",
     usePackageManager: true,
     output: [
@@ -78,7 +78,7 @@ const STEPS = [
     title: "Add components",
     description:
       "Pick any component from the library and add it to your project. The file is copied directly into components/ui — it belongs to you from that moment on.",
-    code: "npx nexui@latest add button",
+    code: "npx @jessin/nexui@latest add button",
     language: "bash",
     usePackageManager: true,
     output: [
@@ -261,11 +261,11 @@ export function Installation() {
                 </div>
                 <div className="divide-y divide-border font-mono text-xs">
                   {[
-                    "npx nexui@latest add button",
-                    "npx nexui@latest add card badge input",
-                    "npx nexui@latest add dialog sheet",
-                    "npx nexui@latest add data-table",
-                    "npx nexui@latest add auth-panel",
+                    "npx @jessin/nexui@latest add button",
+                    "npx @jessin/nexui@latest add card badge input",
+                    "npx @jessin/nexui@latest add dialog sheet",
+                    "npx @jessin/nexui@latest add data-table",
+                    "npx @jessin/nexui@latest add auth-panel",
                   ].map((cmd) => (
                     <div key={cmd} className="flex items-center justify-between px-4 py-2.5 gap-4">
                       <span className="text-muted-foreground">{cmd}</span>

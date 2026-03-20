@@ -35,7 +35,7 @@ const COMMANDS = [
     title: "nexui init",
     description:
       "Scaffolds nexui.config.ts, writes the cn utility to lib/utils.ts, and injects CSS variables into globals.css. Run once per project.",
-    command: "npx nexui@latest init",
+    command: "npx @jessin/nexui@latest init",
     output: [
       "  Detecting project type...",
       "  Framework: Next.js (App Router)",
@@ -54,7 +54,7 @@ const COMMANDS = [
     title: "nexui add [component]",
     description:
       "Copies a single component file into your components/ui directory. The file is yours immediately — edit, rename, or delete it freely.",
-    command: "npx nexui@latest add button",
+    command: "npx @jessin/nexui@latest add button",
     output: [
       "  Resolving button...",
       "  Writing components/ui/button.tsx",
@@ -70,7 +70,7 @@ const COMMANDS = [
     title: "nexui add [...components]",
     description:
       "Add several components in one command by listing their names separated by spaces. Dependencies shared between components are written only once.",
-    command: "npx nexui@latest add button badge input card dialog",
+    command: "npx @jessin/nexui@latest add button badge input card dialog",
     output: [
       "  Resolving 5 components...",
       "  Writing components/ui/button.tsx",
@@ -89,9 +89,9 @@ const COMMANDS = [
     title: "nexui list",
     description:
       "Prints all available components with their categories so you know exactly what you can add to your project.",
-    command: "npx nexui@latest list",
+    command: "npx @jessin/nexui@latest list",
     output: [
-      "  Available components (nexui@latest):",
+      "  Available components (@jessin/nexui@latest):",
       "",
       "  Forms     button  input  select  checkbox  radio",
       "            slider  switch  textarea  combobox",
@@ -113,7 +113,7 @@ const COMMANDS = [
     title: "nexui.config.ts",
     description:
       "The config file controls where component files are written, which utility file to use, the default style variant, and TypeScript preference.",
-    command: "npx nexui@latest init --yes",
+    command: "npx @jessin/nexui@latest init --yes",
     output: [
       "  Using defaults:",
       "  outputDir  → components/ui",
@@ -260,7 +260,7 @@ export function CLI() {
                 <span className="text-foreground font-medium">Tip — </span>
                 Run{" "}
                 <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-xs">
-                  npx nexui@latest add
+                  npx @jessin/nexui@latest add
                 </code>{" "}
                 with no arguments to open an interactive component picker in your terminal.
               </p>
@@ -275,8 +275,8 @@ export function CLI() {
               </div>
               <div className="divide-y divide-border">
                 {[
-                  { label: "Add a component",   cli: "npx nexui add button",    manual: "Copy button.tsx from nexui.dev" },
-                  { label: "Init project",       cli: "npx nexui init",          manual: "Create utils + CSS vars manually" },
+                  { label: "Add a component",   cli: "npx @jessin/nexui@latest add button",    manual: "Copy button.tsx from nexui.dev" },
+                  { label: "Init project",       cli: "npx @jessin/nexui@latest init",          manual: "Create utils + CSS vars manually" },
                   { label: "Code ownership",     cli: "Full — file is yours",    manual: "Full — file is yours" },
                   { label: "Dependency install", cli: "Auto (peer deps only)",   manual: "Manual" },
                   { label: "Works offline",      cli: "After first fetch",       manual: "Always" },

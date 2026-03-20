@@ -87,14 +87,14 @@ export function Hero() {
             <code>
               <span className="text-muted-foreground">{"# 1. Initialize (once per project)\n"}</span>
               <span className="text-foreground">{"$ "}</span>
-              <span className="text-primary">{"pnpm dlx nexui@latest init\n"}</span>
+              <span className="text-primary">{"pnpm dlx @jessin/nexui@latest init\n"}</span>
               <span className="text-muted-foreground/60">{"  Writing nexui.config.ts\n"}</span>
               <span className="text-muted-foreground/60">{"  Writing lib/utils.ts\n"}</span>
               <span className="text-muted-foreground/60">{"  Updating globals.css\n\n"}</span>
 
               <span className="text-muted-foreground">{"# 2. Add any component\n"}</span>
               <span className="text-foreground">{"$ "}</span>
-              <span className="text-primary">{"pnpm dlx nexui@latest add button card badge\n"}</span>
+              <span className="text-primary">{"pnpm dlx @jessin/nexui@latest add button card badge\n"}</span>
               <span className="text-muted-foreground/60">{"  Writing components/ui/button.tsx\n"}</span>
               <span className="text-muted-foreground/60">{"  Writing components/ui/card.tsx\n"}</span>
               <span className="text-muted-foreground/60">{"  Writing components/ui/badge.tsx\n\n"}</span>

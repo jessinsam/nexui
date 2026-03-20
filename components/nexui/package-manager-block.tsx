@@ -9,11 +9,11 @@ type PackageManager = (typeof PACKAGE_MANAGERS)[number]
 
 /**
  * Given a canonical `npx` command, rewrite it for the chosen package manager.
- * e.g. "npx nexui@latest add button" →
- *   pnpm  "pnpm dlx nexui@latest add button"
- *   npm   "npx nexui@latest add button"
- *   yarn  "yarn dlx nexui@latest add button"
- *   bun   "bunx nexui@latest add button"
+ * e.g. "npx @jessin/nexui@latest add button" →
+ *   pnpm  "pnpm dlx @jessin/nexui@latest add button"
+ *   npm   "npx @jessin/nexui@latest add button"
+ *   yarn  "yarn dlx @jessin/nexui@latest add button"
+ *   bun   "bunx @jessin/nexui@latest add button"
  */
 function rewrite(command: string, pm: PackageManager): string {
   // Handle "npx create-next-app…" style commands too
