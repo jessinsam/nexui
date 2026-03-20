@@ -49,21 +49,21 @@ function AndroidButtonPreview() {
 
 function DOMAnimationPreview() {
   const [active, setActive] = useState<number | null>(null)
-  const W = 400, H = 220, NW = 52, NH = 18
+  const W = 440, H = 220, NW = 50, NH = 18
 
-  // All coordinates within W×H — node center points
+  // All coordinates within W×H — node center points, properly spaced
   const nodes = [
-    { id: 0,  tag: "html",   x: 200, y: 18,  color: "#2563eb" },
-    { id: 1,  tag: "head",   x: 100, y: 74,  color: "#7c3aed" },
-    { id: 2,  tag: "body",   x: 300, y: 74,  color: "#2563eb" },
-    { id: 3,  tag: "title",  x: 50,  y: 130, color: "#9333ea" },
-    { id: 4,  tag: "meta",   x: 150, y: 130, color: "#7c3aed" },
-    { id: 5,  tag: "nav",    x: 230, y: 130, color: "#2563eb" },
-    { id: 6,  tag: "main",   x: 300, y: 130, color: "#0ea5e9" },
-    { id: 7,  tag: "footer", x: 370, y: 130, color: "#06b6d4" },
-    { id: 8,  tag: "h1",     x: 255, y: 186, color: "#0ea5e9" },
-    { id: 9,  tag: "p",      x: 305, y: 186, color: "#2563eb" },
-    { id: 10, tag: "div",    x: 355, y: 186, color: "#06b6d4" },
+    { id: 0,  tag: "html",   x: 220, y: 18,  color: "#2563eb" },
+    { id: 1,  tag: "head",   x: 110, y: 74,  color: "#7c3aed" },
+    { id: 2,  tag: "body",   x: 330, y: 74,  color: "#2563eb" },
+    { id: 3,  tag: "title",  x: 55,  y: 130, color: "#9333ea" },
+    { id: 4,  tag: "meta",   x: 165, y: 130, color: "#7c3aed" },
+    { id: 5,  tag: "nav",    x: 250, y: 130, color: "#2563eb" },
+    { id: 6,  tag: "main",   x: 330, y: 130, color: "#0ea5e9" },
+    { id: 7,  tag: "footer", x: 410, y: 130, color: "#06b6d4" },
+    { id: 8,  tag: "h1",     x: 270, y: 186, color: "#0ea5e9" },
+    { id: 9,  tag: "p",      x: 330, y: 186, color: "#2563eb" },
+    { id: 10, tag: "div",    x: 390, y: 186, color: "#06b6d4" },
   ]
 
   const edges = [
