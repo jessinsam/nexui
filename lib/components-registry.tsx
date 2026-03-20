@@ -49,24 +49,21 @@ function AndroidButtonPreview() {
 
 function DOMAnimationPreview() {
   const [active, setActive] = useState<number | null>(null)
+  const W = 400, H = 220, NW = 52, NH = 18
 
-  // Properly centered within 360×220 viewBox with safe padding
-  // L0:  html  → x:180
-  // L1:  head  → x:100,  body  → x:260
-  // L2:  title → x:60,  meta  → x:140, nav → x:210, main → x:270, footer → x:330
-  // L3:  h1    → x:230,  p    → x:280,  div → x:330
+  // All coordinates within W×H — node center points
   const nodes = [
-    { id: 0,  tag: "html",   x: 180, y: 18,  color: "#2563eb" },
+    { id: 0,  tag: "html",   x: 200, y: 18,  color: "#2563eb" },
     { id: 1,  tag: "head",   x: 100, y: 74,  color: "#7c3aed" },
-    { id: 2,  tag: "body",   x: 260, y: 74,  color: "#2563eb" },
-    { id: 3,  tag: "title",  x: 60,  y: 130, color: "#9333ea" },
-    { id: 4,  tag: "meta",   x: 140, y: 130, color: "#7c3aed" },
-    { id: 5,  tag: "nav",    x: 210, y: 130, color: "#2563eb" },
-    { id: 6,  tag: "main",   x: 270, y: 130, color: "#0ea5e9" },
-    { id: 7,  tag: "footer", x: 336, y: 130, color: "#06b6d4" },
-    { id: 8,  tag: "h1",     x: 230, y: 186, color: "#0ea5e9" },
-    { id: 9,  tag: "p",      x: 278, y: 186, color: "#2563eb" },
-    { id: 10, tag: "div",    x: 326, y: 186, color: "#06b6d4" },
+    { id: 2,  tag: "body",   x: 300, y: 74,  color: "#2563eb" },
+    { id: 3,  tag: "title",  x: 50,  y: 130, color: "#9333ea" },
+    { id: 4,  tag: "meta",   x: 150, y: 130, color: "#7c3aed" },
+    { id: 5,  tag: "nav",    x: 230, y: 130, color: "#2563eb" },
+    { id: 6,  tag: "main",   x: 300, y: 130, color: "#0ea5e9" },
+    { id: 7,  tag: "footer", x: 370, y: 130, color: "#06b6d4" },
+    { id: 8,  tag: "h1",     x: 255, y: 186, color: "#0ea5e9" },
+    { id: 9,  tag: "p",      x: 305, y: 186, color: "#2563eb" },
+    { id: 10, tag: "div",    x: 355, y: 186, color: "#06b6d4" },
   ]
 
   const edges = [
@@ -83,60 +80,68 @@ function DOMAnimationPreview() {
   }, [])
 
   return (
-    <div className="relative w-full overflow-hidden rounded-xl border border-border bg-[#060610]" style={{ height: 228 }}>
+    <div className="relative w-full overflow-hidden rounded-xl border border-border bg-[#060610]"
+      style={{ height: H + 28 }}>
       {/* ambient glow */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(37,99,235,0.2) 0%, transparent 70%)" }} />
+        style={{ background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(37,99,235,0.22) 0%, transparent 70%)" }} />
 
-      {/* SVG edges — fills container, viewBox matches node coordinate space */}
+      {/* Single SVG — lines + foreignObject chips share one coordinate space */}
       <svg
-        className="absolute inset-0 pointer-events-none"
-        width="100%" height="100%"
-        viewBox="0 0 360 228"
+        width="100%" height={H}
+        viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="xMidYMid meet"
+        style={{ display: "block" }}
       >
+        {/* edges */}
         {edges.map(([a, b], i) => {
           const na = nodes[a], nb = nodes[b]
           const len = Math.hypot(nb.x - na.x, nb.y - na.y)
           return (
             <g key={i}>
-              <line x1={na.x} y1={na.y + 8} x2={nb.x} y2={nb.y - 1}
-                stroke="rgba(37,99,235,0.18)" strokeWidth="1" />
-              <line x1={na.x} y1={na.y + 8} x2={nb.x} y2={nb.y - 1}
+              <line x1={na.x} y1={na.y + NH / 2} x2={nb.x} y2={nb.y - NH / 2}
+                stroke="rgba(37,99,235,0.2)" strokeWidth="1" />
+              <line x1={na.x} y1={na.y + NH / 2} x2={nb.x} y2={nb.y - NH / 2}
                 stroke={na.color} strokeWidth="1.5"
                 strokeDasharray={len} strokeDashoffset={len}
                 style={{ animation: `dom-travel ${1.2 + i * 0.15}s ease-in-out ${i * 0.2}s infinite` }} />
             </g>
           )
         })}
+
+        {/* node chips via foreignObject — same coordinate space as lines */}
+        {nodes.map((n) => (
+          <foreignObject
+            key={n.id}
+            x={n.x - NW / 2} y={n.y - NH / 2}
+            width={NW} height={NH}
+            style={{ overflow: "visible" }}
+          >
+            <div
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: NW, height: NH,
+                borderRadius: 6,
+                background: active === n.id ? n.color : "rgba(255,255,255,0.06)",
+                color: active === n.id ? "#fff" : n.color,
+                border: `1px solid ${active === n.id ? n.color : n.color + "55"}`,
+                boxShadow: active === n.id ? `0 0 10px 2px ${n.color}55` : "none",
+                fontSize: 8, fontFamily: "monospace", fontWeight: 700,
+                whiteSpace: "nowrap", cursor: "pointer",
+                animation: `dom-pulse ${1.6 + n.id * 0.17}s ease-in-out ${n.id * 0.12}s infinite`,
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={() => setActive(n.id)}
+              onMouseLeave={() => setActive(null)}
+            >
+              {"<"}{n.tag}{">"}
+            </div>
+          </foreignObject>
+        ))}
       </svg>
 
-      {/* Node chips — absolutely positioned to match viewBox coordinates */}
-      {nodes.map((n) => (
-        <button
-          key={n.id}
-          className="absolute flex items-center justify-center"
-          style={{ left: `${(n.x / 360) * 100}%`, top: n.y, transform: "translateX(-50%)" }}
-          onMouseEnter={() => setActive(n.id)}
-          onMouseLeave={() => setActive(null)}
-        >
-          <span
-            className="text-[9px] font-mono font-bold rounded-md px-1.5 py-px whitespace-nowrap transition-all duration-200"
-            style={{
-              background: active === n.id ? n.color : "rgba(255,255,255,0.06)",
-              color: active === n.id ? "#fff" : n.color,
-              border: `1px solid ${active === n.id ? n.color : n.color + "55"}`,
-              boxShadow: active === n.id ? `0 0 10px 2px ${n.color}55` : "none",
-              animation: `dom-pulse ${1.6 + n.id * 0.17}s ease-in-out ${n.id * 0.12}s infinite`,
-            }}
-          >
-            {"<"}{n.tag}{">"}
-          </span>
-        </button>
-      ))}
-
       {/* status label */}
-      <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center pointer-events-none">
+      <div className="flex items-center justify-center h-7">
         <span className="text-[10px] font-mono text-blue-400/60 tracking-widest">
           {active !== null ? `traversing <${nodes[active].tag}>` : "DOM tree · hover to inspect"}
         </span>
@@ -7479,7 +7484,7 @@ function RadialBarChartDemo() {
   )
 }
 
-// ── 7. Scatter Chart ──────────────────────────────────────────────────────────
+// ── 7. Scatter Chart ────────────────────────���─────────────────────────────────
 function makeScatter(n: number, cx: number, cy: number, spread: number, color: string) {
   return Array.from({ length: n }, (_, i) => ({
     x: +(cx + (Math.sin(i*1.3)*spread + Math.cos(i*2.1)*spread*0.5)).toFixed(1),
