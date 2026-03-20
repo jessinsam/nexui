@@ -396,7 +396,6 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
           alt="Auth panel illustration"
           fill
           priority
-          loading="eager"
           className="object-cover object-top"
           sizes="400px"
         />
