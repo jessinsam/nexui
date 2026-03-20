@@ -127,7 +127,7 @@ const COMMANDS = [
 ]
 
 const CONFIG_EXAMPLE = `// nexui.config.ts
-import type { NexUIConfig } from "nexui"
+import type { NexUIConfig } from "@jessin/nexui"
 
 export default {
   // Directory where component files are written
