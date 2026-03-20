@@ -1,7 +1,7 @@
 "use client"
 
 
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Eye, EyeOff, Github, Check, ArrowRight, User, Building2, Code2, ChevronLeft, ChevronRight, Clock, CalendarDays, X, ChevronDown, Search, Globe, Layers, Zap, Server, Sun, Moon, SlidersHorizontal, Mic, Command, Filter, LayoutGrid, List, Columns, Table, GripVertical, ArrowUpDown, ArrowUp, ArrowDown, Tag, Star, MoreHorizontal, Circle, CheckCircle2, AlertCircle, PauseCircle, Kanban, Plus, TrendingUp, MessageSquare, Send, Smile, ThumbsUp, ThumbsDown, Upload, MapPin, Phone, Mail, AlertTriangle, Loader2, ChevronUp, Paperclip, FileText, ImageIcon, StopCircle, Volume2, Bot, Sparkles, RotateCcw, Copy, MicOff, Hash, AtSign, Heart, Play, Pause, ArrowLeft, Quote, ExternalLink, Share2, Trash, AlignLeft, AlignCenter, AlignRight, Pencil, Archive } from "@/components/nexui/icons"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
