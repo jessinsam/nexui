@@ -59,6 +59,7 @@ export function AuthPanel({
             alt="Model wearing black over-ear headphones and cat-eye sunglasses"
             fill
             priority
+            loading="eager"
             className="object-cover object-top"
             priority
           />
