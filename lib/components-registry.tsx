@@ -47,6 +47,99 @@ function AndroidButtonPreview() {
   )
 }
 
+function DOMAnimationPreview() {
+  const [active, setActive] = useState<number | null>(null)
+
+  const nodes = [
+    { id: 0, tag: "html",   x: 140, y: 16,  depth: 0, color: "#2563eb" },
+    { id: 1, tag: "head",   x: 60,  y: 72,  depth: 1, color: "#7c3aed" },
+    { id: 2, tag: "body",   x: 220, y: 72,  depth: 1, color: "#2563eb" },
+    { id: 3, tag: "title",  x: 20,  y: 128, depth: 2, color: "#9333ea" },
+    { id: 4, tag: "meta",   x: 100, y: 128, depth: 2, color: "#7c3aed" },
+    { id: 5, tag: "nav",    x: 160, y: 128, depth: 2, color: "#2563eb" },
+    { id: 6, tag: "main",   x: 240, y: 128, depth: 2, color: "#0ea5e9" },
+    { id: 7, tag: "footer", x: 310, y: 128, depth: 2, color: "#06b6d4" },
+    { id: 8, tag: "h1",     x: 140, y: 184, depth: 3, color: "#0ea5e9" },
+    { id: 9, tag: "p",      x: 210, y: 184, depth: 3, color: "#2563eb" },
+    { id: 10, tag: "div",   x: 280, y: 184, depth: 3, color: "#06b6d4" },
+  ]
+
+  const edges = [
+    [0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[2,7],[6,8],[6,9],[6,10]
+  ]
+
+  // animate traversal every 1.8s
+  useEffect(() => {
+    let i = 0
+    const t = setInterval(() => {
+      setActive(i % nodes.length)
+      i++
+    }, 320)
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-xl border border-border bg-[#060610] flex flex-col items-center"
+      style={{ height: 240 }}>
+      {/* ambient glow */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(37,99,235,0.18) 0%, transparent 70%)" }} />
+      {/* scan line */}
+      <div className="absolute left-0 right-0 h-px pointer-events-none"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(37,99,235,0.5), transparent)",
+          animation: "dom-scan 2.8s linear infinite", top: "30%" }} />
+
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 360 240">
+        {edges.map(([a, b], i) => {
+          const na = nodes[a], nb = nodes[b]
+          const len = Math.hypot(nb.x - na.x, nb.y - na.y)
+          return (
+            <g key={i}>
+              {/* static faint line */}
+              <line x1={na.x} y1={na.y + 6} x2={nb.x} y2={nb.y + 6}
+                stroke="rgba(37,99,235,0.15)" strokeWidth="1" />
+              {/* animated travel particle */}
+              <line x1={na.x} y1={na.y + 6} x2={nb.x} y2={nb.y + 6}
+                stroke={na.color} strokeWidth="1.5"
+                strokeDasharray={len} strokeDashoffset={len}
+                style={{
+                  animation: `dom-travel ${1.2 + i * 0.18}s ease-in-out ${i * 0.22}s infinite`,
+                }} />
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* nodes */}
+      {nodes.map((n) => (
+        <div key={n.id}
+          className="absolute flex items-center justify-center cursor-pointer select-none"
+          style={{ left: n.x - 20, top: n.y, width: 40, height: 22 }}
+          onMouseEnter={() => setActive(n.id)}
+          onMouseLeave={() => setActive(null)}>
+          <div className="relative flex items-center justify-center rounded-md px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-wide transition-all duration-200"
+            style={{
+              background: active === n.id ? n.color : "rgba(255,255,255,0.05)",
+              color: active === n.id ? "#fff" : n.color,
+              border: `1px solid ${active === n.id ? n.color : n.color + "55"}`,
+              boxShadow: active === n.id ? `0 0 12px 2px ${n.color}66` : "none",
+              animation: `dom-pulse ${1.6 + n.id * 0.17}s ease-in-out ${n.id * 0.13}s infinite`,
+            }}>
+            {"<"}{n.tag}{">"}
+          </div>
+        </div>
+      ))}
+
+      {/* active node label */}
+      <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center">
+        <span className="text-[10px] font-mono text-blue-400/70 tracking-widest">
+          {active !== null ? `traversing <${nodes[active].tag}>` : "DOM tree · hover to inspect"}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function HoverToolbarPreview() {
   const [hovered, setHovered] = useState(false)
   const tools = [
@@ -3744,6 +3837,78 @@ export function AndroidButton({ variant = "filled", className, ...props }: Andro
       )}
       {...props}
     />
+  )
+}`,
+  },
+  {
+    name: "DOM Animation", description: "Glowing animated DOM tree visualisation with live traversal particles, pulsing nodes, and ambient glow. Zero dependencies — pure CSS keyframes.", category: "Display", tags: ["dom", "animation", "tree", "visualisation", "glow", "nodes"], preview: <DOMAnimationPreview />,
+    code: `"use client"
+import { useState, useEffect } from "react"
+
+const NODES = [
+  { id: 0, tag: "html",   x: 140, y: 16,  color: "#2563eb" },
+  { id: 1, tag: "head",   x: 60,  y: 72,  color: "#7c3aed" },
+  { id: 2, tag: "body",   x: 220, y: 72,  color: "#2563eb" },
+  { id: 3, tag: "title",  x: 20,  y: 128, color: "#9333ea" },
+  { id: 4, tag: "meta",   x: 100, y: 128, color: "#7c3aed" },
+  { id: 5, tag: "nav",    x: 160, y: 128, color: "#2563eb" },
+  { id: 6, tag: "main",   x: 240, y: 128, color: "#0ea5e9" },
+  { id: 7, tag: "footer", x: 310, y: 128, color: "#06b6d4" },
+  { id: 8, tag: "h1",     x: 140, y: 184, color: "#0ea5e9" },
+  { id: 9, tag: "p",      x: 210, y: 184, color: "#2563eb" },
+  { id: 10, tag: "div",   x: 280, y: 184, color: "#06b6d4" },
+]
+const EDGES = [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[2,7],[6,8],[6,9],[6,10]]
+
+export function DOMTree() {
+  const [active, setActive] = useState<number | null>(null)
+  useEffect(() => {
+    let i = 0
+    const t = setInterval(() => { setActive(i % NODES.length); i++ }, 320)
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-xl border border-border bg-[#060610] flex flex-col items-center" style={{ height: 240 }}>
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(37,99,235,0.18) 0%, transparent 70%)" }} />
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 360 240">
+        {EDGES.map(([a, b], i) => {
+          const na = NODES[a], nb = NODES[b]
+          const len = Math.hypot(nb.x - na.x, nb.y - na.y)
+          return (
+            <g key={i}>
+              <line x1={na.x} y1={na.y + 6} x2={nb.x} y2={nb.y + 6} stroke="rgba(37,99,235,0.15)" strokeWidth="1" />
+              <line x1={na.x} y1={na.y + 6} x2={nb.x} y2={nb.y + 6}
+                stroke={na.color} strokeWidth="1.5"
+                strokeDasharray={len} strokeDashoffset={len}
+                style={{ animation: \`dom-travel \${1.2 + i * 0.18}s ease-in-out \${i * 0.22}s infinite\` }} />
+            </g>
+          )
+        })}
+      </svg>
+      {NODES.map((n) => (
+        <div key={n.id} className="absolute flex items-center justify-center cursor-pointer"
+          style={{ left: n.x - 20, top: n.y, width: 40, height: 22 }}
+          onMouseEnter={() => setActive(n.id)} onMouseLeave={() => setActive(null)}>
+          <div className="relative flex items-center justify-center rounded-md px-1.5 py-0.5 text-[9px] font-mono font-bold transition-all duration-200"
+            style={{
+              background: active === n.id ? n.color : "rgba(255,255,255,0.05)",
+              color: active === n.id ? "#fff" : n.color,
+              border: \`1px solid \${active === n.id ? n.color : n.color + "55"}\`,
+              boxShadow: active === n.id ? \`0 0 12px 2px \${n.color}66\` : "none",
+              animation: \`dom-pulse \${1.6 + n.id * 0.17}s ease-in-out \${n.id * 0.13}s infinite\`,
+            }}>
+            {"<"}{n.tag}{">"}
+          </div>
+        </div>
+      ))}
+      <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center">
+        <span className="text-[10px] font-mono text-blue-400/70 tracking-widest">
+          {active !== null ? \`traversing <\${NODES[active].tag}>\` : "DOM tree · hover to inspect"}
+        </span>
+      </div>
+    </div>
   )
 }`,
   },

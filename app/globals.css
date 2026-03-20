@@ -145,3 +145,36 @@
   50%  { transform: translateX(50%)   scaleX(0.8); }
   100% { transform: translateX(300%)  scaleX(0.3); }
 }
+
+@keyframes dom-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.25); }
+}
+
+@keyframes dom-travel {
+  0%   { stroke-dashoffset: 120; opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes dom-glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(37,99,235,0.25); }
+}
+
+@keyframes dom-node-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes dom-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+@keyframes dom-scan {
+  0%   { transform: translateY(-100%); opacity: 0.6; }
+  100% { transform: translateY(200%);  opacity: 0; }
+}
